@@ -9,9 +9,19 @@ import SwiftUI
 
 @main
 struct CoachCoachApp: App {
+  @StateObject private var appRouter = AppRouter()
+  @StateObject private var menuRouter = MenuRouter()
+  @StateObject private var inventoryRouter = InventoryRouter()
+  @StateObject private var settingsRouter = SettingsRouter()
+  
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainView()
+                .environment(\.colorScheme, .light)
+                .environmentObject(appRouter)
+                .environmentObject(menuRouter)
+                .environmentObject(inventoryRouter)
+                .environmentObject(settingsRouter)
         }
     }
 }
