@@ -7,6 +7,7 @@ extension Image {
   static let aiCoachIconActive = Image("AIcoachIconActive")
   static let caretDownIcon = Image("CaretDownpIcon")
   static let caretUpIcon = Image("CaretUpIcon")
+  static let cancelRoundedIcon = Image("CancelRoundedIcon")
   static let chevronDownOutlineIcon = Image("ChevronDownOutlineIcon")
   static let chevronLeftOutlineIcon = Image("ChevronLeftOutlineIcon")
   static let chevronRightOutlineIcon = Image("ChevronRightOutlineIcon")
@@ -24,4 +25,6 @@ extension Image {
   static let radioIcon = Image("Radio")
   static let searchIcon = Image("SearchIcon")
   static let slotIcon = Image("SlotIcon")
+  static let starIcon = Image("StarIcon")
+  static let pencleIcon = Image("PencleIcon")
 }
