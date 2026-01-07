@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 
 enum InventoryRoute: Hashable {
-    case detail
+    case detail(InventoryIngredientItem)
     case add
 }
 
@@ -19,8 +19,8 @@ final class InventoryRouter: ObservableObject {
 
     @Published var path: [InventoryRoute] = []
 
-    func pushDetail() {
-        path.append(.detail)
+    func pushDetail(item: InventoryIngredientItem) {
+        path.append(.detail(item))
     }
 
     func pushAdd() {

@@ -8,7 +8,7 @@ struct IngredientsView: View {
   var body: some View {
     NavigationStack(path: $inventoryRouter.path) {
       ZStack {
-        AppColor.grayscale100
+        AppColor.grayscale200
           .ignoresSafeArea()
         
         ScrollView {
@@ -21,6 +21,14 @@ struct IngredientsView: View {
           .padding(.horizontal, 20)
           .padding(.top, 12)
           .padding(.bottom, 24)
+        }
+      }
+      .navigationDestination(for: InventoryRoute.self) { route in
+        switch route {
+        case let .detail(item):
+          IngredientDetailView(item: item)
+        case .add:
+          EmptyView()
         }
       }
     }
@@ -36,7 +44,7 @@ struct IngredientsView: View {
       Button(action: {}) {
         HStack(spacing: 4) {
           Text("추가")
-            .font(.pretendardBody1)
+            .font(.pretendardBody2)
           Image.plusIcon
             .renderingMode(.template)
             .frame(width: 12, height: 12)
@@ -56,10 +64,10 @@ struct IngredientsView: View {
         "",
         text: $searchText,
         prompt: Text("재료명, 메뉴명으로 검색")
-          .font(.pretendardBody2)
+          .font(.pretendardCaption1)
           .foregroundColor(AppColor.grayscale500)
       )
-      .font(.pretendardBody2)
+      .font(.pretendardCaption1)
       .foregroundColor(AppColor.grayscale900)
       .textInputAutocapitalization(.never)
       .disableAutocorrection(true)
@@ -100,11 +108,12 @@ struct IngredientsView: View {
   }
   
   private var ingredientList: some View {
-    VStack(spacing: 0) {
+    VStack(spacing: 12) {
       ForEach(filteredIngredients) { ingredient in
-        IngredientRow(item: ingredient)
-        Divider()
-          .background(AppColor.grayscale200)
+        NavigationLink(value: InventoryRoute.detail(ingredient)) {
+          IngredientRow(item: ingredient)
+        }
+        .buttonStyle(.plain)
       }
     }
   }
@@ -142,18 +151,22 @@ private struct IngredientRow: View {
   var body: some View {
     HStack {
       Text(item.name)
-        .font(.pretendardBody1)
+        .font(.pretendardSubtitle1)
         .foregroundColor(AppColor.grayscale900)
       Spacer()
       Text("\(item.price)/\(item.amount)")
-        .font(.pretendardBody2)
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale700)
     }
-    .padding(.vertical, 10)
+    .padding(.horizontal, 20)
+    .padding(.vertical, 16)
+    .background(AppColor.grayscale100)
+    .clipShape(RoundedRectangle(cornerRadius: 8))
+    .shadow(.sm)
   }
 }
 
-private struct InventoryIngredientItem: Identifiable {
+struct InventoryIngredientItem: Identifiable, Hashable {
   let id = UUID()
   let name: String
   let amount: String
