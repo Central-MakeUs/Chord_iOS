@@ -28,12 +28,22 @@ extension Font {
   }
 }
 extension Font {
-    static var pretendardDisplay: Font { PretendardTextStyle.display.font }
-    static var pretendardTitle1: Font { PretendardTextStyle.title1.font }
-    static var pretendardTitle2: Font { PretendardTextStyle.title2.font }
-    static var pretendardSubTitle: Font { PretendardTextStyle.subTitle.font }
-    static var pretendardBody1: Font { PretendardTextStyle.body1.font }
-    static var pretendardBody2: Font { PretendardTextStyle.body2.font }
-    static var pretendardCaption: Font { PretendardTextStyle.caption.font }
-    static var pretendardCTA: Font { PretendardTextStyle.cta.font }
+  static var pretendardDisplay1: Font { PretendardTextStyle.display1.font }
+  static var pretendardDisplay2: Font { PretendardTextStyle.display2.font }
+  static var pretendardHeadline1: Font { PretendardTextStyle.headline1.font }
+  static var pretendardHeadline2: Font { PretendardTextStyle.headline2.font }
+  static var pretendardSubtitle1: Font { PretendardTextStyle.subtitle1.font }
+  static var pretendardSubtitle2: Font { PretendardTextStyle.subtitle2.font }
+  static var pretendardSubtitle3: Font { PretendardTextStyle.subtitle3.font }
+  static var pretendardBody1: Font { PretendardTextStyle.body1.font }
+  static var pretendardBody2: Font { PretendardTextStyle.body2.font }
+  static var pretendardCTA: Font { PretendardTextStyle.cta.font }
+  static var pretendardCaption1: Font { PretendardTextStyle.caption1.font }
+  static var pretendardCaption2: Font { PretendardTextStyle.caption2.font }
+
+  static var pretendardDisplay: Font { PretendardTextStyle.display1.font }
+  static var pretendardTitle1: Font { PretendardTextStyle.headline2.font }
+  static var pretendardTitle2: Font { PretendardTextStyle.subtitle1.font }
+  static var pretendardSubTitle: Font { PretendardTextStyle.subtitle3.font }
+  static var pretendardCaption: Font { PretendardTextStyle.caption2.font }
 }

@@ -1,44 +1,61 @@
 import SwiftUI
+import UIKit
 
 enum PretendardTextStyle {
-  case display
-  case title1
-  case title2
-  case subTitle
+  case display1
+  case display2
+  case headline1
+  case headline2
+  case subtitle1
+  case subtitle2
+  case subtitle3
   case body1
   case body2
-  case caption
   case cta
-  
+  case caption1
+  case caption2
+
   var size: CGFloat {
     switch self {
-    case .display:  return 36
-    case .title1:   return 22
-    case .title2:   return 20
-    case .subTitle: return 18
-    case .body1:    return 16
-    case .body2:    return 14
-    case .caption:  return 12
-    case .cta:      return 16
+    case .display1:  return 36
+    case .display2:  return 32
+    case .headline1: return 24
+    case .headline2: return 22
+    case .subtitle1: return 20
+    case .subtitle2: return 20
+    case .subtitle3: return 18
+    case .body1:     return 16
+    case .body2:     return 16
+    case .cta:       return 16
+    case .caption1:  return 14
+    case .caption2:  return 12
     }
   }
-  
-  var weight: Pretendard.Weight {
+
+  var fontName: String {
     switch self {
-    case .display:
-      return .bold          // 700
-    case .title1, .title2, .cta:
-      return .semiBold      // 600
-    case .subTitle:
-      return .medium        // 500
-    case .body1, .body2:
-      return .regular       // 400
-    case .caption:
-      return .medium
+    case .display1,
+         .display2,
+         .headline1,
+         .headline2,
+         .subtitle1,
+         .subtitle3,
+         .cta,
+         .caption1:
+      return "Pretendard-SemiBold"
+    case .subtitle2, .body2:
+      return "Pretendard-Medium"
+    case .body1:
+      return "Pretendard-Bold"
+    case .caption2:
+      return "Pretendard-Regular"
     }
   }
-  
+
   var font: Font {
-    .pretendard(size, weight: weight)
+    guard UIFont(name: fontName, size: size) != nil else {
+      fatalError("Pretendard font not registered: \(fontName)")
+    }
+    return .custom(fontName, size: size)
   }
 }
