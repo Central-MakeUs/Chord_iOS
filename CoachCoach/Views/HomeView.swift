@@ -38,12 +38,12 @@ struct HomeView: View {
     HStack {
       Text("코치코치")
         .font(.pretendardTitle1)
-        .foregroundStyle(AppColor.primaryBlue500)
+        .foregroundColor(AppColor.primaryBlue500)
       Spacer()
       NavigationLink(value: SettingsRoute.settings) {
         Image.menuRoundedIcon
           .renderingMode(.template)
-          .foregroundStyle(AppColor.grayscale700)
+          .foregroundColor(AppColor.grayscale700)
       }
     }
   }
@@ -51,13 +51,13 @@ struct HomeView: View {
   private var diagnosisBanner: some View {
     HStack {
       Text("진단이 필요한 메뉴")
-        .font(.pretendardBody2)
-        .foregroundStyle(AppColor.grayscale100)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale100)
       Spacer()
       HStack(spacing: 6) {
         Text("3 개")
           .font(.pretendardSubTitle)
-          .foregroundStyle(AppColor.grayscale100)
+          .foregroundColor(AppColor.grayscale100)
         Circle()
           .fill(AppColor.grayscale100)
           .frame(width: 6, height: 6)
@@ -80,7 +80,7 @@ struct HomeView: View {
     VStack(alignment: .leading, spacing: 12) {
       Text("수익 진단")
         .font(.pretendardSubTitle)
-        .foregroundStyle(AppColor.grayscale900)
+        .foregroundColor(AppColor.grayscale900)
       HStack(spacing: 12) {
         ProfitSummaryCard(
           title: "평균 원가율",
@@ -106,7 +106,7 @@ private struct SectionHeader: View {
     HStack {
       Text(title)
         .font(.pretendardSubTitle)
-        .foregroundStyle(AppColor.grayscale900)
+        .foregroundColor(AppColor.grayscale900)
       Spacer()
       NavigationLink(value: route) {
         HStack(spacing: 0) {
@@ -115,7 +115,7 @@ private struct SectionHeader: View {
           Image.chevronRightOutlineIcon
         }
         .font(.pretendardCaption)
-        .foregroundStyle(AppColor.grayscale700)
+        .foregroundColor(AppColor.grayscale700)
       }
     }
   }
@@ -158,14 +158,14 @@ private struct StrategyGuideRow: View {
       VStack(alignment: .leading, spacing: 6) {
         Text(summary)
           .font(.pretendardCaption)
-          .foregroundStyle(AppColor.grayscale700)
+          .foregroundColor(AppColor.grayscale700)
         HStack(spacing: 6) {
           Text(title)
             .font(.pretendardCTA)
-            .foregroundStyle(AppColor.grayscale900)
+            .foregroundColor(AppColor.grayscale900)
           Text(action)
             .font(.pretendardCTA)
-            .foregroundStyle(AppColor.primaryBlue500)
+            .foregroundColor(AppColor.primaryBlue500)
         }
       }
       Spacer()
@@ -183,16 +183,16 @@ private struct ProfitSummaryCard: View {
     VStack(alignment: .leading, spacing: 8) {
       Text(title)
         .font(.pretendardCaption)
-        .foregroundStyle(AppColor.primaryBlue500)
+        .foregroundColor(AppColor.primaryBlue500)
         .padding(6)
         .background(.primaryBlue100)
         .clipShape(RoundedRectangle(cornerRadius: 6))
       Text(value)
         .font(.pretendardTitle1)
-        .foregroundStyle(AppColor.grayscale900)
+        .foregroundColor(AppColor.grayscale900)
       Text(description)
-        .font(.pretendardBody2)
-        .foregroundStyle(AppColor.grayscale700)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale700)
       Spacer()
         .frame(height: 20)
     }

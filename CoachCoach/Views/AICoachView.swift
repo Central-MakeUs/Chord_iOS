@@ -46,7 +46,7 @@ struct AICoachView: View {
   
   private var heroSection: some View {
     Text("내 매장에 전략을 더하고\n더 똑똑하게 관리해보세요")
-      .font(.pretendardBody2)
+      .font(.pretendardCaption1)
       .foregroundColor(AppColor.grayscale900)
       .multilineTextAlignment(.center)
       .lineSpacing(4)
@@ -57,7 +57,7 @@ struct AICoachView: View {
   private var strategySection: some View {
     VStack(alignment: .leading, spacing: 12) {
       Text("오늘의 우리 매장 전략")
-        .font(.pretendardBody1)
+        .font(.pretendardBody2)
         .foregroundColor(AppColor.grayscale900)
       
       ScrollView(.horizontal, showsIndicators: false) {
@@ -84,10 +84,10 @@ private struct AICoachStrategyCard: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
       Text(model.title)
-        .font(.pretendardBody2)
+        .font(.pretendardCaption1)
         .foregroundColor(AppColor.primaryBlue500)
       Text(model.subtitle)
-        .font(.pretendardBody2)
+        .font(.pretendardCaption1)
         .foregroundColor(AppColor.primaryBlue500)
     }
     .padding(12)

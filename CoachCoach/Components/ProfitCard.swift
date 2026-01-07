@@ -30,14 +30,14 @@ private struct ProfitCell: View {
       Text(title)
         .font(.pretendardCaption)
         .multilineTextAlignment(.center)
-        .foregroundStyle(AppColor.grayscale700)
+        .foregroundColor(AppColor.grayscale700)
       Text(value)
         .font(.pretendardTitle1)
-        .foregroundStyle(valueColor)
+        .foregroundColor(valueColor)
       if let subtitle {
         Text(subtitle)
           .font(.pretendardCaption)
-          .foregroundStyle(AppColor.grayscale700)
+          .foregroundColor(AppColor.grayscale700)
       }
     }
     .frame(maxWidth: .infinity)
