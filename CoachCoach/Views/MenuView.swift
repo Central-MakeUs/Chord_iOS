@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MenuView: View {
   @State private var selectedCategory: MenuCategory = .all
+  @State private var isMenuManagePresented = false
   @EnvironmentObject private var menuRouter: MenuRouter
   
   var body: some View {
@@ -30,11 +31,17 @@ struct MenuView: View {
         case .add:
           BlankMenuView(title: "메뉴 추가")
         case let .edit(item):
-          MenuDetailView(item: item)
+          MenuEditView(item: item)
         }
       }
     }
     .toolbar(.hidden, for: .navigationBar)
+    .sheet(isPresented: $isMenuManagePresented) {
+      MenuManageSheetView()
+        .presentationDetents([.height(357)])
+        .presentationDragIndicator(.hidden)
+        .modifier(SheetCornerRadiusModifier(radius: 24))
+    }
   }
   
   
@@ -126,17 +133,17 @@ struct MenuView: View {
       HStack(spacing: 6) {
         Text("메뉴")
           .font(.pretendardTitle1)
-          .foregroundStyle(AppColor.grayscale900)
+          .foregroundColor(AppColor.grayscale900)
         Text("\(filteredMenuItems.count)")
           .font(.pretendardTitle1)
-          .foregroundStyle(AppColor.primaryBlue500)
+          .foregroundColor(AppColor.primaryBlue500)
       }
       
       Spacer()
-      Button(action: {}) {
+      Button(action: { isMenuManagePresented = true }) {
         Text("관리")
           .font(.pretendardCTA)
-          .foregroundStyle(AppColor.grayscale700)
+          .foregroundColor(AppColor.grayscale700)
       }
     }
   }
@@ -224,7 +231,7 @@ private struct MenuTabs: View {
         Button(action: { onSelect(category) }) {
           Text(category.title)
             .font(.pretendardCTA)
-            .foregroundStyle(selected == category ? AppColor.grayscale100 : AppColor.grayscale700)
+            .foregroundColor(selected == category ? AppColor.grayscale100 : AppColor.grayscale700)
             .padding(.horizontal, 14)
             .padding(.vertical, 6)
             .background(
@@ -247,7 +254,7 @@ private struct BlankMenuView: View {
         .ignoresSafeArea()
       Text(title)
         .font(.pretendardTitle1)
-        .foregroundStyle(AppColor.grayscale900)
+        .foregroundColor(AppColor.grayscale900)
     }
   }
 }
@@ -258,7 +265,7 @@ struct MenuBadge: View {
   var body: some View {
     Text(status.text)
       .font(.pretendardCaption)
-      .foregroundStyle(status.badgeTextColor)
+      .foregroundColor(status.badgeTextColor)
       .padding(.horizontal, 6)
       .padding(.vertical, 4)
       .background(
@@ -276,23 +283,23 @@ private struct MenuItemRow: View {
       VStack(alignment: .leading, spacing: 6) {
         Text(item.name)
           .font(.pretendardSubTitle)
-          .foregroundStyle(AppColor.grayscale900)
+          .foregroundColor(AppColor.grayscale900)
         HStack(spacing: 6) {
           Text(item.price)
-            .foregroundStyle(AppColor.grayscale900)
+            .foregroundColor(AppColor.grayscale900)
 
           Text("원가율 \(item.costRate)")
-            .foregroundStyle(AppColor.grayscale700)
+            .foregroundColor(AppColor.grayscale700)
 
         }
-        .font(.pretendardBody1)
+        .font(.pretendardBody2)
       }
       Spacer()
       VStack(alignment: .trailing, spacing: 6) {
         MenuBadge(status: item.status)
         Text(item.marginRate)
           .font(.pretendardSubTitle)
-          .foregroundStyle(item.status.color)
+          .foregroundColor(item.status.color)
       }
     }
     .padding(.horizontal, 12)
@@ -307,4 +314,17 @@ private struct MenuItemRow: View {
   MenuView()
     .environmentObject(MenuRouter())
     .environment(\.colorScheme, .light)
+}
+
+private struct SheetCornerRadiusModifier: ViewModifier {
+  let radius: CGFloat
+
+  @ViewBuilder
+  func body(content: Content) -> some View {
+    if #available(iOS 16.4, *) {
+      content.presentationCornerRadius(radius)
+    } else {
+      content
+    }
+  }
 }

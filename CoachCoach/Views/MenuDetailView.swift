@@ -3,6 +3,7 @@ import SwiftUI
 struct MenuDetailView: View {
   let item: MenuItem
   @Environment(\.dismiss) private var dismiss
+  @EnvironmentObject private var menuRouter: MenuRouter
 
   private let recommendedPrice = "6,000원"
   private let recommendedMessage = "원가율이 높아요 가격을 조정해보세요"
@@ -34,15 +35,15 @@ struct MenuDetailView: View {
         Button(action: { dismiss() }) {
           Image.arrowLeftIcon
             .renderingMode(.template)
-            .foregroundStyle(AppColor.grayscale900)
+            .foregroundColor(AppColor.grayscale900)
             .frame(width: 20, height: 20)
         }
       }
       ToolbarItem(placement: .navigationBarTrailing) {
-        Button(action: {}) {
+        Button(action: { menuRouter.pushEdit(item: item) }) {
           Text("관리")
-            .font(.pretendardBody1)
-            .foregroundStyle(AppColor.grayscale700)
+            .font(.pretendardCTA)
+            .foregroundColor(AppColor.grayscale700)
         }
       }
     }
@@ -52,10 +53,10 @@ struct MenuDetailView: View {
     VStack(alignment: .leading, spacing: 6) {
       Text(item.name)
         .font(.pretendardSubTitle)
-        .foregroundStyle(AppColor.grayscale900)
+        .foregroundColor(AppColor.grayscale900)
       Text(item.price)
         .font(.pretendardTitle1)
-        .foregroundStyle(AppColor.grayscale900)
+        .foregroundColor(AppColor.grayscale900)
     }
   }
   
@@ -70,11 +71,11 @@ struct MenuDetailView: View {
           Image.infoFilledIcon
             .renderingMode(.template)
         }
-        .foregroundStyle(AppColor.grayscale700)
+        .foregroundColor(AppColor.grayscale700)
         Spacer()
         Text(item.contribution)
-          .font(.pretendardBody2)
-          .foregroundStyle(AppColor.grayscale900)
+          .font(.pretendardCaption1)
+          .foregroundColor(AppColor.grayscale900)
       }
     }
     .padding(16)
@@ -85,12 +86,12 @@ struct MenuDetailView: View {
   private func summaryRow(label: String, value: String) -> some View {
     HStack {
       Text(label)
-        .font(.pretendardBody2)
-        .foregroundStyle(AppColor.grayscale700)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale700)
       Spacer()
       Text(value)
-        .font(.pretendardBody2)
-        .foregroundStyle(AppColor.grayscale900)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
     }
   }
   
@@ -98,7 +99,7 @@ struct MenuDetailView: View {
     HStack(spacing: 6) {
       Text("마진등급")
         .font(.pretendardCTA)
-        .foregroundStyle(AppColor.grayscale700)
+        .foregroundColor(AppColor.grayscale700)
       MenuBadge(status: item.status)
     }
     .frame(maxWidth: .infinity)
@@ -111,14 +112,14 @@ struct MenuDetailView: View {
     VStack(alignment: .leading, spacing: 8) {
       Text("권장가격")
         .font(.pretendardSubTitle)
-        .foregroundStyle(AppColor.grayscale900)
+        .foregroundColor(AppColor.grayscale900)
       VStack(spacing: 6) {
         Text(recommendedPrice)
           .font(.pretendardTitle1)
-          .foregroundStyle(AppColor.primaryBlue500)
+          .foregroundColor(AppColor.primaryBlue500)
         Text(recommendedMessage)
           .font(.pretendardCaption)
-          .foregroundStyle(AppColor.grayscale700)
+          .foregroundColor(AppColor.grayscale700)
       }
       .frame(maxWidth: .infinity)
     }
@@ -129,13 +130,13 @@ struct MenuDetailView: View {
       HStack(spacing: 4) {
         Text("재료")
           .font(.pretendardSubTitle)
-          .foregroundStyle(AppColor.grayscale900)
+          .foregroundColor(AppColor.grayscale900)
         Text("\(item.ingredients.count)")
           .font(.pretendardSubTitle)
-          .foregroundStyle(AppColor.primaryBlue500)
+          .foregroundColor(AppColor.primaryBlue500)
         Image.chevronRightOutlineIcon
           .renderingMode(.template)
-          .foregroundStyle(AppColor.grayscale600)
+          .foregroundColor(AppColor.grayscale600)
         Spacer()
       }
       
@@ -146,8 +147,8 @@ struct MenuDetailView: View {
             Spacer()
             Text(ingredient.price)
           }
-          .font(.pretendardBody2)
-          .foregroundStyle(AppColor.grayscale700)
+          .font(.pretendardCaption1)
+          .foregroundColor(AppColor.grayscale700)
         }
       }
       
@@ -158,10 +159,10 @@ struct MenuDetailView: View {
         Spacer()
         Text("총")
           .font(.pretendardSubTitle)
-          .foregroundStyle(AppColor.grayscale700)
+          .foregroundColor(AppColor.grayscale700)
         Text(item.totalIngredientCost)
           .font(.pretendardSubTitle)
-          .foregroundStyle(AppColor.grayscale900)
+          .foregroundColor(AppColor.grayscale900)
       }
       
       BottomButton(title: "재료 추가", style: .tertiary) {}
@@ -190,5 +191,6 @@ struct MenuDetailView: View {
     totalIngredientCost: "1,450원"
   )
   MenuDetailView(item: item)
+    .environmentObject(MenuRouter())
     .environment(\.colorScheme, .light)
 }

@@ -1,11 +1,10 @@
 import SwiftUI
 
-struct TagInputField: View {
+struct PriceInputField: View {
   @Binding var text: String
   let placeholder: String
   let height: CGFloat
   let backgroundColor: Color
-  let onTapAdd: (() -> Void)?
 
   @FocusState private var isFocused: Bool
 
@@ -13,18 +12,16 @@ struct TagInputField: View {
     text: Binding<String>,
     placeholder: String,
     height: CGFloat = 52,
-    backgroundColor: Color = AppColor.grayscale100,
-    onTapAdd: (() -> Void)? = nil
+    backgroundColor: Color = .clear
   ) {
     _text = text
     self.placeholder = placeholder
     self.height = height
     self.backgroundColor = backgroundColor
-    self.onTapAdd = onTapAdd
   }
 
   var body: some View {
-    HStack(spacing: 12) {
+    HStack(spacing: 8) {
       TextField(
         "",
         text: $text,
@@ -34,18 +31,32 @@ struct TagInputField: View {
       )
       .font(.pretendardBody2)
       .foregroundColor(textColor)
+      .keyboardType(.numberPad)
       .focused($isFocused)
       .textInputAutocapitalization(.never)
       .disableAutocorrection(true)
-
-      Button(action: { onTapAdd?() }) {
-        Image.plusIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale700)
-          .frame(width: 16, height: 16)
+      .onChange(of: text) { newValue in
+        let filtered = newValue.filter { $0.isNumber || $0 == "," }
+        if filtered != newValue {
+          text = filtered
+        }
       }
-      .buttonStyle(.plain)
-      .disabled(onTapAdd == nil)
+
+      Text("원")
+        .font(.pretendardCTA)
+        .foregroundColor(AppColor.grayscale500)
+
+      if !text.isEmpty {
+        Button(action: { text = "" }) {
+          Image.cancelRoundedIcon
+            .resizable()
+            .renderingMode(.template)
+            .foregroundColor(AppColor.grayscale500)
+            .scaledToFit()
+            .frame(width: 18, height: 18)
+        }
+        .buttonStyle(.plain)
+      }
     }
     .padding(.horizontal, 16)
     .frame(height: height)
@@ -76,9 +87,9 @@ struct TagInputField: View {
 
 #Preview {
   VStack(spacing: 12) {
-    TagInputField(text: .constant(""), placeholder: "메뉴 태그 직접 작성하기")
-    TagInputField(text: .constant("입력 완료했을 경우"), placeholder: "메뉴 태그 직접 작성하기")
+    PriceInputField(text: .constant("5,600"), placeholder: "가격 입력", height: 47)
+    PriceInputField(text: .constant(""), placeholder: "가격 입력", height: 47)
   }
   .padding()
-  .background(AppColor.grayscale200)
+  .background(AppColor.grayscale100)
 }
