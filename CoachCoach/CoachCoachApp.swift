@@ -16,12 +16,12 @@ struct CoachCoachApp: App {
   
     var body: some Scene {
         WindowGroup {
-            MainView()
-                .environment(\.colorScheme, .light)
-                .environmentObject(appRouter)
-                .environmentObject(menuRouter)
-                .environmentObject(inventoryRouter)
-                .environmentObject(settingsRouter)
+            AppEntryView()
+            .environment(\.colorScheme, .light)
+            .environmentObject(appRouter)
+            .environmentObject(menuRouter)
+            .environmentObject(inventoryRouter)
+            .environmentObject(settingsRouter)
         }
     }
 }
