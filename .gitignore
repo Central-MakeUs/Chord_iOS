@@ -24,3 +24,11 @@ xcuserdata/
 # SwiftPM
 .build/
 Package.resolved
+.package.resolved
+Derived/
+
+# Tuist
+Tuist/.build/
+Tuist/.cache/
+Tuist/Dependencies/
+.tuist/
