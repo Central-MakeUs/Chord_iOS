@@ -1,0 +1,85 @@
+import ComposableArchitecture
+import CoreModels
+import DataLayer
+
+@Reducer
+public struct MenuFeature {
+  public struct State: Equatable {
+    var selectedCategory: MenuCategory = .all
+    var isMenuManagePresented = false
+    var path: [MenuRoute] = []
+    var menuItems: [MenuItem] = []
+    var isLoading = false
+    var error: String?
+
+    public init() {}
+    
+    public var filteredMenuItems: [MenuItem] {
+      if selectedCategory == .all {
+        return menuItems
+      }
+      return menuItems.filter { $0.category == selectedCategory }
+    }
+  }
+
+  public enum Action: Equatable {
+    case onAppear
+    case selectedCategoryChanged(MenuCategory)
+    case isMenuManagePresentedChanged(Bool)
+    case pathChanged([MenuRoute])
+    case menuItemsLoaded(Result<[MenuItem], Error>)
+    
+    public static func == (lhs: Action, rhs: Action) -> Bool {
+      switch (lhs, rhs) {
+      case (.onAppear, .onAppear): return true
+      case let (.selectedCategoryChanged(l), .selectedCategoryChanged(r)): return l == r
+      case let (.isMenuManagePresentedChanged(l), .isMenuManagePresentedChanged(r)): return l == r
+      case let (.pathChanged(l), .pathChanged(r)): return l == r
+      case (.menuItemsLoaded(.success(let l)), .menuItemsLoaded(.success(let r))): return l == r
+      case (.menuItemsLoaded(.failure), .menuItemsLoaded(.failure)): return true
+      default: return false
+      }
+    }
+  }
+
+  public init() {}
+  
+  @Dependency(\.menuRepository) var menuRepository
+
+  public var body: some ReducerOf<Self> {
+    Reduce { state, action in
+      switch action {
+      case .onAppear:
+        guard state.menuItems.isEmpty && !state.isLoading else { return .none }
+        state.isLoading = true
+        return .run { send in
+          let result = await Result { try await menuRepository.fetchMenuItems() }
+          await send(.menuItemsLoaded(result))
+        }
+        
+      case let .menuItemsLoaded(.success(items)):
+        state.menuItems = items
+        state.isLoading = false
+        state.error = nil
+        return .none
+        
+      case let .menuItemsLoaded(.failure(error)):
+        state.isLoading = false
+        state.error = error.localizedDescription
+        return .none
+        
+      case let .selectedCategoryChanged(category):
+        state.selectedCategory = category
+        return .none
+        
+      case let .isMenuManagePresentedChanged(isPresented):
+        state.isMenuManagePresented = isPresented
+        return .none
+        
+      case let .pathChanged(path):
+        state.path = path
+        return .none
+      }
+    }
+  }
+}
