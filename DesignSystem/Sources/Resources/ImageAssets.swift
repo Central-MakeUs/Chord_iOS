@@ -1,0 +1,32 @@
+import SwiftUI
+
+private let designSystemBundle = Bundle(identifier: "com.seungwan.CoachCoach.DesignSystem") ?? Bundle.main
+
+public extension Image {
+  static let arrowLeftIcon = Image("ArrowLeftIcon", bundle: designSystemBundle)
+  static let arrowRightIcon = Image("ArrowRightIcon", bundle: designSystemBundle)
+  static let aiCoachIcon = Image("AIcoachIcon", bundle: designSystemBundle)
+  static let aiCoachIconActive = Image("AIcoachIconActive", bundle: designSystemBundle)
+  static let caretDownIcon = Image("CaretDownpIcon", bundle: designSystemBundle)
+  static let caretUpIcon = Image("CaretUpIcon", bundle: designSystemBundle)
+  static let cancelRoundedIcon = Image("CancelRoundedIcon", bundle: designSystemBundle)
+  static let chevronDownOutlineIcon = Image("ChevronDownOutlineIcon", bundle: designSystemBundle)
+  static let chevronLeftOutlineIcon = Image("ChevronLeftOutlineIcon", bundle: designSystemBundle)
+  static let chevronRightOutlineIcon = Image("ChevronRightOutlineIcon", bundle: designSystemBundle)
+  static let chevronUpOutlineIcon = Image("ChevronUpOutlineIcon", bundle: designSystemBundle)
+  static let homeIcon = Image("HomeIcon", bundle: designSystemBundle)
+  static let homeIconActive = Image("HomeIconActive", bundle: designSystemBundle)
+  static let infoFilledIcon = Image("InfoFilledIcon", bundle: designSystemBundle)
+  static let infoOutlinedIcon = Image("InfoFOutlinedIcon", bundle: designSystemBundle)
+  static let menuRoundedIcon = Image("MenuRoundedIcon", bundle: designSystemBundle)
+  static let menuIcon = Image("MenuIcon", bundle: designSystemBundle)
+  static let menuIconActive = Image("MenuIconActive", bundle: designSystemBundle)
+  static let meterialIcon = Image("MeterialIcon", bundle: designSystemBundle)
+  static let meterialIconActive = Image("MeterialIconActive", bundle: designSystemBundle)
+  static let plusIcon = Image("PlusIcon", bundle: designSystemBundle)
+  static let radioIcon = Image("Radio", bundle: designSystemBundle)
+  static let searchIcon = Image("SearchIcon", bundle: designSystemBundle)
+  static let slotIcon = Image("SlotIcon", bundle: designSystemBundle)
+  static let starIcon = Image("StarIcon", bundle: designSystemBundle)
+  static let pencleIcon = Image("PencleIcon", bundle: designSystemBundle)
+}
