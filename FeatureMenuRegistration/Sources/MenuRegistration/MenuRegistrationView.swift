@@ -27,7 +27,7 @@ public struct MenuRegistrationView: View {
                 ),
                 title: "메뉴명",
                 placeholder: "메뉴의 이름을 입력해주세요",
-                titleColor: AppColor.primaryBlue500,
+                titleColor: AppColor.grayscale900,
                 trailingIcon: Image.searchIcon
               )
 
@@ -85,9 +85,6 @@ public struct MenuRegistrationView: View {
         Spacer()
       }
 
-      Text("메뉴등록")
-        .font(.pretendardSubTitle)
-        .foregroundColor(AppColor.grayscale900)
     }
   }
 

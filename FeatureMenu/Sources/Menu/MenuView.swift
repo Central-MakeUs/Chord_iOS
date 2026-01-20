@@ -59,6 +59,8 @@ public struct MenuView: View {
                 MenuEditFeature()
               }
             )
+          case let .ingredients(menuName, ingredients):
+            MenuIngredientsView(menuName: menuName, ingredients: ingredients)
           }
         }
       }
@@ -101,22 +103,18 @@ public struct MenuView: View {
     HStack {
       HStack(spacing: 6) {
         Text("메뉴")
-          .font(.pretendardTitle1)
+          .font(.pretendardHeadline2)
           .foregroundColor(AppColor.grayscale900)
         Text("\(count)")
-          .font(.pretendardTitle1)
+          .font(.pretendardHeadline2)
           .foregroundColor(AppColor.primaryBlue500)
       }
       
       Spacer()
+      
       Button(action: onManage) {
-        HStack(spacing: 0) {
-          Text("추가")
-            .font(.pretendardCTA)
-          Image.plusIcon
-        }
-        .foregroundColor(AppColor.grayscale700)
-     
+        Image.meatballIcon
+          .frame(width: 24, height: 24)
       }
     }
   }
@@ -167,8 +165,8 @@ private struct MenuTabs: View {
             .padding(.horizontal, 14)
             .padding(.vertical, 6)
             .background(
-              Capsule()
-                .fill(selected == category ? AppColor.primaryBlue500 : AppColor.grayscale100.opacity(0))
+              RoundedRectangle(cornerRadius: 12)
+                .fill(selected == category ? AppColor.grayscale700 : AppColor.grayscale100.opacity(0))
             )
         }
         .buttonStyle(.plain)
@@ -243,12 +241,77 @@ private struct MenuItemRow: View {
 }
 
 #Preview {
-  MenuView(
-    store: Store(initialState: MenuFeature.State()) {
-      MenuFeature()
-    }
-  )
-  .environment(\.colorScheme, .light)
+//  MenuView(
+//    store: Store(
+//      initialState: MenuFeature.State(
+//        menuItems: [
+//          MenuItem(
+//            name: "아메리카노",
+//            price: "4,500원",
+//            category: .beverage,
+//            status: .safe,
+//            costRate: "22.2%",
+//            marginRate: "30.5%",
+//            costAmount: "1,000원",
+//            contribution: "3,500원",
+//            ingredients: [],
+//            totalIngredientCost: "1,000원"
+//          ),
+//          MenuItem(
+//            name: "카페라떼",
+//            price: "5,000원",
+//            category: .beverage,
+//            status: .warning,
+//            costRate: "30.0%",
+//            marginRate: "25.0%",
+//            costAmount: "1,500원",
+//            contribution: "3,500원",
+//            ingredients: [],
+//            totalIngredientCost: "1,500원"
+//          ),
+//          MenuItem(
+//            name: "카푸치노",
+//            price: "5,500원",
+//            category: .beverage,
+//            status: .danger,
+//            costRate: "35.5%",
+//            marginRate: "20.0%",
+//            costAmount: "1,950원",
+//            contribution: "3,550원",
+//            ingredients: [],
+//            totalIngredientCost: "1,950원"
+//          ),
+//          MenuItem(
+//            name: "초콜릿 케이크",
+//            price: "6,000원",
+//            category: .dessert,
+//            status: .safe,
+//            costRate: "25.0%",
+//            marginRate: "28.0%",
+//            costAmount: "1,500원",
+//            contribution: "4,500원",
+//            ingredients: [],
+//            totalIngredientCost: "1,500원"
+//          ),
+//          MenuItem(
+//            name: "치즈케이크",
+//            price: "6,500원",
+//            category: .dessert,
+//            status: .warning,
+//            costRate: "32.0%",
+//            marginRate: "22.0%",
+//            costAmount: "2,080원",
+//            contribution: "4,420원",
+//            ingredients: [],
+//            totalIngredientCost: "2,080원"
+//          )
+//        ]
+//      )
+//    ) {
+//      MenuFeature()
+//    }
+//  )
+//  .environment(\.colorScheme, .light)
 }
 
 private struct SheetCornerRadiusModifier: ViewModifier {

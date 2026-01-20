@@ -6,12 +6,15 @@ enum PretendardTextStyle {
   case display2
   case headline1
   case headline2
+  case title1
+  case title2
   case subtitle1
   case subtitle2
   case subtitle3
   case body1
   case body2
   case cta
+  case caption
   case caption1
   case caption2
 
@@ -21,12 +24,15 @@ enum PretendardTextStyle {
     case .display2:  return 32
     case .headline1: return 24
     case .headline2: return 22
+    case .title1:    return 28
+    case .title2:    return 24
     case .subtitle1: return 20
     case .subtitle2: return 20
     case .subtitle3: return 18
     case .body1:     return 16
     case .body2:     return 16
     case .cta:       return 16
+    case .caption:   return 14
     case .caption1:  return 14
     case .caption2:  return 12
     }
@@ -38,12 +44,14 @@ enum PretendardTextStyle {
          .display2,
          .headline1,
          .headline2,
+         .title1,
          .subtitle1,
          .subtitle3,
          .cta,
+         .caption,
          .caption1:
       return "Pretendard-SemiBold"
-    case .subtitle2, .body2:
+    case .title2, .subtitle2, .body2:
       return "Pretendard-Medium"
     case .body1:
       return "Pretendard-Bold"

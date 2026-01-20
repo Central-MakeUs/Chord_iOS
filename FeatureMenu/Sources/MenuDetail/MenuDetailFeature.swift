@@ -13,13 +13,23 @@ public struct MenuDetailFeature {
 
   public enum Action: Equatable {
     case manageTapped
+    case ingredientsTapped
   }
 
   public init() {}
+  
+  @Dependency(\.menuRouter) var menuRouter
 
   public var body: some ReducerOf<Self> {
-    Reduce { _, _ in
-      .none
+    Reduce { state, action in
+      switch action {
+      case .manageTapped:
+        return .none
+        
+      case .ingredientsTapped:
+        menuRouter.push(.ingredients(menuName: state.item.name, ingredients: state.item.ingredients))
+        return .none
+      }
     }
   }
 }

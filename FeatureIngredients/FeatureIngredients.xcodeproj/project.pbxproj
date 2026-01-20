@@ -13,6 +13,7 @@
 		0D4A79237285A674701C0F44 /* IngredientSupplierSheetFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675A8C0FAC25803800D763F9 /* IngredientSupplierSheetFeature.swift */; };
 		0D710EAC4D771135894DF41D /* SwiftUINavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 147B93A81D53873DA3269D29 /* SwiftUINavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		15855E62807E14A8B144A8F7 /* Pretendard-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2523C90CE890976FF576C200 /* Pretendard-SemiBold.otf */; };
+		158ECD38BFE9CBC43022A155 /* IngredientSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3782E75F1B7BD22422F0D19 /* IngredientSearchView.swift */; };
 		16D09078F30B49563660758D /* IngredientEditSheetFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433404FC19AB17B8B3059D47 /* IngredientEditSheetFeature.swift */; };
 		17FBCAA40DD2E9B592EBE4FE /* ComposableArchitecture.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 782ECD506F16B00CEBAA7F7A /* ComposableArchitecture.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1D3F355CEEE232592EA24973 /* Clocks.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9AB52C51CC0C3DB90B2E377F /* Clocks.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -180,6 +181,7 @@
 		E56DA2D80864A49F803CC0C8 /* Pretendard-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Regular.otf"; sourceTree = "<group>"; };
 		E9845E1F30936EE1D358B2AD /* FeatureIngredientsDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FeatureIngredientsDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFECC310C7422CB8FAF13D32 /* UIKitNavigationShim.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = UIKitNavigationShim.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F3782E75F1B7BD22422F0D19 /* IngredientSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientSearchView.swift; sourceTree = "<group>"; };
 		F45FE55FD28901EAEC097E65 /* CustomDump.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CustomDump.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7661DAAAA4ADFB0875738C6 /* Pretendard-ExtraBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraBold.otf"; sourceTree = "<group>"; };
 		F8B795ED5B5FE138CE294B0D /* FeatureIngredientsDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureIngredientsDemoApp.swift; sourceTree = "<group>"; };
@@ -376,6 +378,7 @@
 		E811DBC8CBDE5C76FDDF963A /* Ingredients */ = {
 			isa = PBXGroup;
 			children = (
+				F3782E75F1B7BD22422F0D19 /* IngredientSearchView.swift */,
 				6DF58BA95042FD98500372F4 /* IngredientsFeature.swift */,
 				6BD49AA2AF37DE3F1228D215 /* IngredientsView.swift */,
 			);
@@ -516,6 +519,7 @@
 				BB1562DAACE4083AAE4514F7 /* IngredientEditSheetView.swift in Sources */,
 				0D4A79237285A674701C0F44 /* IngredientSupplierSheetFeature.swift in Sources */,
 				CDF9F36D15A3CFD6CB28A185 /* IngredientSupplierSheetView.swift in Sources */,
+				158ECD38BFE9CBC43022A155 /* IngredientSearchView.swift in Sources */,
 				0035E609D71F0822CC97EC36 /* IngredientsFeature.swift in Sources */,
 				A50E0E8DF9BC01EF018D6CCA /* IngredientsView.swift in Sources */,
 				AD860D519B9B4C3B8B159D20 /* IngredientsRoute.swift in Sources */,

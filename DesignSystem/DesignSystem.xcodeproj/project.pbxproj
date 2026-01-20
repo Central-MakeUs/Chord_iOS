@@ -18,8 +18,10 @@
 		563B16CE3C5A47480DE48741 /* Pretendard-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9BB12E1885F4BC0BCD87D717 /* Pretendard-Light.otf */; };
 		730881517CA5CC87CED4C4BB /* PriceInputField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3548D0314654BD3DA843750B /* PriceInputField.swift */; };
 		814C982F89905ECD46C840D2 /* PretendardTypography.swift in Sources */ = {isa = PBXBuildFile; fileRef = B7731C279812288719C5A86B /* PretendardTypography.swift */; };
+		85396D3C6A49F8BCFA0EF268 /* Color+Hex.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3594D33339AAB19200F723CC /* Color+Hex.swift */; };
 		93A787663B8F6A60A337F7F4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 5026FC56B4BA614BD881F263 /* Assets.xcassets */; };
 		949E89E51F0C1F055ECA426C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 4CD29DEBBAD9852D6A56D9D8 /* Assets.xcassets */; };
+		A1C2FF50B5B84F59A0248D2B /* NavigationTopBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 08BD8907F0DFEEAE011076DE /* NavigationTopBar.swift */; };
 		ABB14811E13F7B1ECCF8B086 /* TuistAssets+DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5263BC75B281154AC0B5A7B /* TuistAssets+DesignSystem.swift */; };
 		B2A503EC4C2285BD82794978 /* Pretendard-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 7899D0E68F7416CB347E9489 /* Pretendard-ExtraBold.otf */; };
 		BA6115E61FC1C072A942FE86 /* Pretendard-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = F2C104C11A492C046DA02418 /* Pretendard-Regular.otf */; };
@@ -50,12 +52,14 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		08BD8907F0DFEEAE011076DE /* NavigationTopBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NavigationTopBar.swift; sourceTree = "<group>"; };
 		1489E7809DA4DADA471C2CDC /* TuistFonts+DesignSystem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistFonts+DesignSystem.swift"; sourceTree = "<group>"; };
 		1D05E89E8143725FD2CEBFED /* ProfitCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfitCard.swift; sourceTree = "<group>"; };
 		25FC97589DD9BA5A0EDE419D /* Pretendard-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Black.otf"; sourceTree = "<group>"; };
 		2B24B7FD9EEC3836BD78AA89 /* ClearableInputField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClearableInputField.swift; sourceTree = "<group>"; };
 		3417CA3CAF9FDE5F91CEA38D /* TopRoundedShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopRoundedShape.swift; sourceTree = "<group>"; };
 		3548D0314654BD3DA843750B /* PriceInputField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PriceInputField.swift; sourceTree = "<group>"; };
+		3594D33339AAB19200F723CC /* Color+Hex.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Color+Hex.swift"; sourceTree = "<group>"; };
 		3D158AA18CA1EBCF4BFDF722 /* BottomButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomButton.swift; sourceTree = "<group>"; };
 		4CD29DEBBAD9852D6A56D9D8 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5001B646352F2E9715FCD647 /* UnderlinedTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnderlinedTextField.swift; sourceTree = "<group>"; };
@@ -96,6 +100,7 @@
 			isa = PBXGroup;
 			children = (
 				E2B28E1D2C49DA21B26C5CAC /* Components */,
+				6E8811CAF322979EB7C42E15 /* Extensions */,
 				E6CE0C6A4F584FADB069B19D /* Resources */,
 			);
 			path = Sources;
@@ -109,6 +114,14 @@
 				0E1288659896D0CFF98DA5AA /* Sources */,
 			);
 			name = Project;
+			sourceTree = "<group>";
+		};
+		6E8811CAF322979EB7C42E15 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				3594D33339AAB19200F723CC /* Color+Hex.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 		710A06A6A945DB90E7CC7E06 /* CoachCoach */ = {
@@ -179,6 +192,7 @@
 			children = (
 				3D158AA18CA1EBCF4BFDF722 /* BottomButton.swift */,
 				2B24B7FD9EEC3836BD78AA89 /* ClearableInputField.swift */,
+				08BD8907F0DFEEAE011076DE /* NavigationTopBar.swift */,
 				3548D0314654BD3DA843750B /* PriceInputField.swift */,
 				1D05E89E8143725FD2CEBFED /* ProfitCard.swift */,
 				70377F96CF316325DDCAA5CC /* TagInputField.swift */,
@@ -300,11 +314,13 @@
 				2C2A6F1B0843699ACFE53D23 /* TuistFonts+DesignSystem.swift in Sources */,
 				BEA9083DD77691F3BD87A524 /* BottomButton.swift in Sources */,
 				414C4334CDDE3E755DE1A70E /* ClearableInputField.swift in Sources */,
+				A1C2FF50B5B84F59A0248D2B /* NavigationTopBar.swift in Sources */,
 				730881517CA5CC87CED4C4BB /* PriceInputField.swift in Sources */,
 				CCAE83F708D699EFD78DBB61 /* ProfitCard.swift in Sources */,
 				FBFB25741467AE30F0CF3D71 /* TagInputField.swift in Sources */,
 				476E9147358A0C7D15516BF1 /* TopRoundedShape.swift in Sources */,
 				E520B15ED54D2D978231B0E0 /* UnderlinedTextField.swift in Sources */,
+				85396D3C6A49F8BCFA0EF268 /* Color+Hex.swift in Sources */,
 				F764014C48ADC6BE2752CBBB /* AppShadow.swift in Sources */,
 				4A559EDA4BD4AE6B2BBFB81F /* ImageAssets.swift in Sources */,
 				497A69F2AF324DFBBAB51895 /* Pretendard.swift in Sources */,

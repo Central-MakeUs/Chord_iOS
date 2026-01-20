@@ -12,7 +12,9 @@ public struct MenuFeature {
     var isLoading = false
     var error: String?
 
-    public init() {}
+    public init(menuItems: [MenuItem] = []) {
+      self.menuItems = menuItems
+    }
     
     public var filteredMenuItems: [MenuItem] {
       if selectedCategory == .all {
@@ -28,6 +30,7 @@ public struct MenuFeature {
     case isMenuManagePresentedChanged(Bool)
     case pathChanged([MenuRoute])
     case menuItemsLoaded(Result<[MenuItem], Error>)
+    case navigateTo(MenuRoute)
     
     public static func == (lhs: Action, rhs: Action) -> Bool {
       switch (lhs, rhs) {
@@ -37,6 +40,7 @@ public struct MenuFeature {
       case let (.pathChanged(l), .pathChanged(r)): return l == r
       case (.menuItemsLoaded(.success(let l)), .menuItemsLoaded(.success(let r))): return l == r
       case (.menuItemsLoaded(.failure), .menuItemsLoaded(.failure)): return true
+      case let (.navigateTo(l), .navigateTo(r)): return l == r
       default: return false
       }
     }
@@ -45,18 +49,36 @@ public struct MenuFeature {
   public init() {}
   
   @Dependency(\.menuRepository) var menuRepository
+  @Dependency(\.menuRouter) var menuRouter
+
+  private enum CancelID { case router }
 
   public var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
       case .onAppear:
-        guard state.menuItems.isEmpty && !state.isLoading else { return .none }
-        state.isLoading = true
-        return .run { send in
-          let result = await Result { try await menuRepository.fetchMenuItems() }
-          await send(.menuItemsLoaded(result))
+        let routerEffect: Effect<Action> = .run { send in
+          for await route in menuRouter.routePublisher.values {
+            await send(.navigateTo(route))
+          }
         }
+        .cancellable(id: CancelID.router)
         
+        guard state.menuItems.isEmpty && !state.isLoading else { return routerEffect }
+        
+        state.isLoading = true
+        return .merge(
+          routerEffect,
+          .run { send in
+            let result = await Result { try await menuRepository.fetchMenuItems() }
+            await send(.menuItemsLoaded(result))
+          }
+        )
+        
+      case let .navigateTo(route):
+        state.path.append(route)
+        return .none
+
       case let .menuItemsLoaded(.success(items)):
         state.menuItems = items
         state.isLoading = false

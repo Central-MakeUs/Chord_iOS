@@ -17,7 +17,8 @@ public struct MenuRegistrationStep2View: View {
   
   public var body: some View {
     VStack(spacing: 0) {
-      topBar
+      NavigationTopBar(onBackTap: { dismiss() })
+      
       HStack {
         stepIndicator
         Spacer()
@@ -44,37 +45,14 @@ public struct MenuRegistrationStep2View: View {
     }
     .background(Color.white.ignoresSafeArea())
       .sheet(isPresented: $showDetailSheet) {
-        IngredientDetailSheet(
-          ingredientName: selectedIngredientName,
-          onAdd: {
-            showDetailSheet = false
-            addedIngredients.append(Ingredient(name: selectedIngredientName, amount: "200g", price: "5000원"))
-          },
-          onCancel: {
-            showDetailSheet = false
-          }
-        )
-        .presentationDetents([.height(420)])
+        IngredientDetailSheet()
+          .presentationDetents([.large])
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
     }
   
-  
-  private var topBar: some View {
-    HStack {
-      Button(action: { dismiss() }) {
-        Image.arrowLeftIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale900)
-      }
-      Spacer()
-    }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 12)
-  }
-  
-  private var stepIndicator: some View {
+  var stepIndicator: some View {
     HStack(spacing: 2) {
       Circle()
         .fill(AppColor.grayscale300)

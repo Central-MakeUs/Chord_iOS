@@ -182,16 +182,11 @@ public struct IngredientDetailView: View {
   private var usageSection: some View {
     VStack(alignment: .leading, spacing: 4) {
       HStack(spacing: 0) {
-        Text("메뉴 ")
+        Text("사용중인 메뉴 ")
           .foregroundColor(AppColor.grayscale900)
         Text("\(usedMenus.count)")
           .foregroundColor(AppColor.primaryBlue500)
-        Text("개에")
-          .foregroundColor(AppColor.grayscale900)
       }
-      Text("사용되고 있어요")
-        .foregroundColor(AppColor.grayscale900)
-
       HStack(spacing: 6) {
         ForEach(usedMenus, id: \.self) { menu in
           UsageTag(title: menu)
