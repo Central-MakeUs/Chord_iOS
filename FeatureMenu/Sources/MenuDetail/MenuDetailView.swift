@@ -15,7 +15,10 @@ public struct MenuDetailView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        topBar
+        NavigationTopBar(
+          onBackTap: { dismiss() },
+          trailing: .text("관리", action: { store.send(.manageTapped) })
+        )
         
         ScrollView {
           VStack(spacing: 0) {
@@ -45,25 +48,6 @@ public struct MenuDetailView: View {
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
     }
-  }
-  
-  private var topBar: some View {
-    HStack {
-      Button(action: { dismiss() }) {
-        Image.arrowLeftIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale900)
-      }
-      Spacer()
-      Button(action: { store.send(.manageTapped) }) {
-        Text("관리")
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale900)
-      }
-    }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 12)
-    .background(Color.white)
   }
   
   private func menuInfoCard(item: MenuItem) -> some View {

@@ -20,16 +20,18 @@ public struct IngredientDetailView: View {
 
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
-      ZStack {
-        AppColor.grayscale100
-          .ignoresSafeArea()
-
+      VStack(spacing: 0) {
+        NavigationTopBar(
+          onBackTap: {
+            viewStore.send(.backTapped)
+            dismiss()
+          },
+          title: "재료",
+          trailing: .icon(Image.starIcon, action: {})
+        )
+        
         ScrollView {
           VStack(alignment: .leading, spacing: 16) {
-            topBar(onBack: {
-              viewStore.send(.backTapped)
-              dismiss()
-            })
             titleSection(
               name: viewStore.item.name,
               priceText: viewStore.priceText,
@@ -53,6 +55,7 @@ public struct IngredientDetailView: View {
           .padding(.top, 12)
           .padding(.bottom, 24)
         }
+        .background(AppColor.grayscale100)
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
@@ -100,31 +103,6 @@ public struct IngredientDetailView: View {
         .presentationDragIndicator(.hidden)
         .modifier(SheetCornerRadiusModifier(radius: 24))
       }
-    }
-  }
-
-  private func topBar(onBack: @escaping () -> Void) -> some View {
-    HStack {
-      Button(action: onBack) {
-        Image.arrowLeftIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale900)
-          .frame(width: 20, height: 20)
-      }
-      .buttonStyle(.plain)
-
-      Spacer()
-
-      Text("재료")
-        .font(.pretendardSubtitle1)
-        .foregroundColor(AppColor.grayscale900)
-
-      Spacer()
-
-      Image.starIcon
-        .renderingMode(.template)
-        .foregroundColor(AppColor.grayscale600)
-        .frame(width: 20, height: 20)
     }
   }
 
@@ -180,21 +158,22 @@ public struct IngredientDetailView: View {
   }
 
   private var usageSection: some View {
-    VStack(alignment: .leading, spacing: 4) {
+    VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 0) {
         Text("사용중인 메뉴 ")
+          .font(.pretendardSubtitle3)
           .foregroundColor(AppColor.grayscale900)
         Text("\(usedMenus.count)")
+          .font(.pretendardSubtitle3)
           .foregroundColor(AppColor.primaryBlue500)
       }
-      HStack(spacing: 6) {
-        ForEach(usedMenus, id: \.self) { menu in
-          UsageTag(title: menu)
+      
+      HStack(spacing: 8) {
+        ForEach(usedMenus.prefix(3), id: \.self) { menu in
+          UsageMenuCard(menuName: menu, amount: "100g")
         }
       }
-      .padding(.top, 8)
     }
-    .font(.pretendardSubtitle3)
   }
 
   private var historySection: some View {
@@ -216,19 +195,27 @@ public struct IngredientDetailView: View {
   }
 }
 
-private struct UsageTag: View {
-  let title: String
+private struct UsageMenuCard: View {
+  let menuName: String
+  let amount: String
 
   var body: some View {
-    Text(title)
-      .font(.pretendardCaption1)
-      .foregroundColor(AppColor.grayscale700)
-      .padding(.horizontal, 6)
-      .padding(.vertical, 6)
-      .background(
-        RoundedRectangle(cornerRadius: 6)
-          .strokeBorder(AppColor.grayscale500, lineWidth: 1)
-      )
+    VStack(alignment: .leading, spacing: 4) {
+      Text(menuName)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
+        .lineLimit(2)
+        .multilineTextAlignment(.leading)
+      
+      Text(amount)
+        .font(.pretendardCaption2)
+        .foregroundColor(AppColor.grayscale600)
+    }
+    .padding(.horizontal, 12)
+    .padding(.vertical, 12)
+    .frame(width: 100)
+    .background(Color.white)
+    .cornerRadius(8)
   }
 }
 

@@ -23,7 +23,30 @@ public struct MenuIngredientsView: View {
   
   public var body: some View {
     VStack(spacing: 0) {
-      topBar
+      NavigationTopBar(
+        leading: {
+          HStack(spacing: 4) {
+            Text("재료")
+              .font(.pretendardTitle1)
+              .foregroundColor(AppColor.grayscale900)
+            Text("\(ingredients.count)")
+              .font(.pretendardTitle1)
+              .foregroundColor(AppColor.primaryBlue500)
+          }
+        },
+        trailing: {
+          HStack(spacing: 16) {
+            Button(action: {}) {
+              Image.searchIcon
+                .frame(width: 24, height: 24)
+            }
+            Button(action: {}) {
+              Image.meatballIcon
+                .frame(width: 24, height: 24)
+            }
+          }
+        }
+      )
       
       HStack(spacing: 8) {
         ForEach(IngredientTab.allCases, id: \.self) { tab in
@@ -69,33 +92,6 @@ public struct MenuIngredientsView: View {
       }
       .presentationDetents([.height(600)])
     }
-  }
-  
-  private var topBar: some View {
-    HStack(spacing: 16) {
-      HStack(spacing: 4) {
-        Text("재료")
-          .font(.pretendardTitle1)
-          .foregroundColor(AppColor.grayscale900)
-        Text("\(ingredients.count)")
-          .font(.pretendardTitle1)
-          .foregroundColor(AppColor.primaryBlue500)
-      }
-      
-      Spacer()
-      
-      Button(action: {}) {
-        Image.searchIcon
-          .frame(width: 24, height: 24)
-      }
-      
-      Button(action: {}) {
-        Image.meatballIcon
-          .frame(width: 24, height: 24)
-      }
-    }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 12)
   }
   
   private func ingredientRow(ingredient: IngredientItem) -> some View {

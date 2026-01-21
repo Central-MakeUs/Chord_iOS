@@ -16,13 +16,11 @@ public struct AICoachView: View {
 
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
-      ZStack {
-        AppColor.primaryBlue100
-          .ignoresSafeArea()
-
+      VStack(spacing: 0) {
+        NavigationTopBar(onBackTap: { viewStore.send(.backTapped) })
+        
         ScrollView {
           VStack(alignment: .leading, spacing: 20) {
-            topBar(onBack: { viewStore.send(.backTapped) })
             heroSection
             BottomButton(title: "전략 카드 생성하기", height: 44, style: .primary) {}
             strategySection
@@ -37,20 +35,6 @@ public struct AICoachView: View {
         }
       }
     }
-  }
-  
-  private func topBar(onBack: @escaping () -> Void) -> some View {
-    HStack {
-      Button(action: onBack) {
-        Image.arrowLeftIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale900)
-          .frame(width: 20, height: 20)
-      }
-      .buttonStyle(.plain)
-      Spacer()
-    }
-    .padding(.bottom, 8)
   }
   
   private var heroSection: some View {

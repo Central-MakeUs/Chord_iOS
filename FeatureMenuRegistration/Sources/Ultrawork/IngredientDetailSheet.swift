@@ -9,7 +9,10 @@ public struct IngredientDetailSheet: View {
   
   public var body: some View {
     VStack(spacing: 0) {
-      topBar
+      NavigationTopBar(
+        onBackTap: { dismiss() },
+        trailing: .text("관리", action: {})
+      )
       
       ScrollView {
         VStack(spacing: 12) {
@@ -22,24 +25,6 @@ public struct IngredientDetailSheet: View {
       }
     }
     .background(AppColor.grayscale200.ignoresSafeArea())
-  }
-  
-  private var topBar: some View {
-    HStack {
-      Button(action: { dismiss() }) {
-        Image.arrowLeftIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale900)
-      }
-      Spacer()
-      Button(action: {}) {
-        Text("관리")
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale900)
-      }
-    }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 12)
   }
   
   private var menuInfoCard: some View {

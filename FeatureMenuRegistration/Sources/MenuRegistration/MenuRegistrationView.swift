@@ -16,9 +16,13 @@ public struct MenuRegistrationView: View {
           .ignoresSafeArea()
 
         VStack(spacing: 0) {
+          NavigationTopBar(
+            onBackTap: { viewStore.send(.backTapped) },
+            title: "메뉴 등록"
+          )
+          
           ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-              topBar(onBack: { viewStore.send(.backTapped) })
 
               UnderlinedTextField(
                 text: viewStore.binding(
@@ -69,22 +73,6 @@ public struct MenuRegistrationView: View {
           .padding(.bottom, 24)
         }
       }
-    }
-  }
-
-  private func topBar(onBack: @escaping () -> Void) -> some View {
-    ZStack {
-      HStack {
-        Button(action: onBack) {
-          Image.arrowLeftIcon
-            .renderingMode(.template)
-            .foregroundColor(AppColor.grayscale900)
-            .frame(width: 20, height: 20)
-        }
-        .buttonStyle(.plain)
-        Spacer()
-      }
-
     }
   }
 

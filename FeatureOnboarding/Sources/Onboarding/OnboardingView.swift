@@ -15,8 +15,10 @@ public struct OnboardingView: View {
         AppColor.grayscale100
           .ignoresSafeArea()
 
-        VStack(alignment: .leading, spacing: 24) {
-          topBar(onBack: { viewStore.send(.backTapped) })
+        VStack(spacing: 0) {
+          NavigationTopBar(onBackTap: { viewStore.send(.backTapped) })
+          
+          VStack(alignment: .leading, spacing: 24) {
 
           Text("매장 정보를 알려주세요")
             .font(.pretendardHeadline1)
@@ -33,10 +35,11 @@ public struct OnboardingView: View {
             viewStore.send(.primaryTapped)
           }
           .disabled(!isPrimaryEnabled(step: viewStore.step, storeName: viewStore.storeName, address: viewStore.address))
+          }
+          .padding(.horizontal, 20)
+          .padding(.top, 12)
+          .padding(.bottom, 24)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 12)
-        .padding(.bottom, 24)
       }
       .sheet(
         isPresented: viewStore.binding(
@@ -82,20 +85,6 @@ public struct OnboardingView: View {
         .presentationDragIndicator(.hidden)
         .modifier(SheetCornerRadiusModifier(radius: 24))
       }
-    }
-  }
-
-  private func topBar(onBack: @escaping () -> Void) -> some View {
-    HStack {
-      Button(action: onBack) {
-        Image.arrowLeftIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale900)
-          .frame(width: 20, height: 20)
-      }
-      .buttonStyle(.plain)
-
-      Spacer()
     }
   }
 

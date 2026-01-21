@@ -19,11 +19,16 @@ public struct MenuEditView: View {
         AppColor.grayscale100
           .ignoresSafeArea()
 
-        VStack(alignment: .leading, spacing: 16) {
-          topBar(onBack: {
-            viewStore.send(.backTapped)
-            dismiss()
-          })
+        VStack(spacing: 0) {
+          NavigationTopBar(
+            onBackTap: {
+              viewStore.send(.backTapped)
+              dismiss()
+            },
+            title: "관리"
+          )
+          
+          VStack(alignment: .leading, spacing: 16) {
           
           menuNameRow(name: viewStore.menuName) {
             viewStore.send(.nameEditPresented(true))
@@ -51,10 +56,11 @@ public struct MenuEditView: View {
           BottomButton(title: "메뉴 삭제", style: .tertiary) {
             viewStore.send(.deleteTapped)
           }
+          }
+          .padding(.horizontal, 20)
+          .padding(.top, 12)
+          .padding(.bottom, 24)
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 12)
-        .padding(.bottom, 24)
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
@@ -94,24 +100,6 @@ public struct MenuEditView: View {
         .presentationDragIndicator(.hidden)
         .modifier(SheetCornerRadiusModifier(radius: 24))
       }
-    }
-  }
-
-  private func topBar(onBack: @escaping () -> Void) -> some View {
-    HStack(spacing: 8) {
-      Button(action: onBack) {
-        Image.arrowLeftIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale900)
-          .frame(width: 20, height: 20)
-      }
-      .buttonStyle(.plain)
-
-      Text("관리")
-        .font(.pretendardCTA)
-        .foregroundColor(AppColor.grayscale900)
-
-      Spacer()
     }
   }
 
