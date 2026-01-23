@@ -25,10 +25,10 @@ public struct MenuEditView: View {
               viewStore.send(.backTapped)
               dismiss()
             },
-            title: "관리"
+            title: ""
           )
           
-          VStack(alignment: .leading, spacing: 16) {
+          VStack(alignment: .leading, spacing: 24) {
           
           menuNameRow(name: viewStore.menuName) {
             viewStore.send(.nameEditPresented(true))
@@ -119,9 +119,10 @@ public struct MenuEditView: View {
   }
 
   private func priceSection(price: String, onTap: @escaping () -> Void) -> some View {
-    VStack(alignment: .leading, spacing: 14) {
+    VStack(alignment: .leading, spacing: 4) {
       Text("가격")
-        .font(.pretendardSubtitle3)
+        .frame(height: 23)
+        .font(.pretendardBody3)
         .foregroundColor(AppColor.grayscale700)
 
       valueRow(value: "\(price)원", onTap: onTap)
@@ -130,8 +131,9 @@ public struct MenuEditView: View {
   }
 
   private func prepareTimeSection(time: String, onTap: @escaping () -> Void) -> some View {
-    VStack(alignment: .leading, spacing: 14) {
+    VStack(alignment: .leading, spacing: 4) {
       Text("제조시간")
+        .frame(height: 23)
         .font(.pretendardSubtitle3)
         .foregroundColor(AppColor.grayscale700)
 
@@ -152,6 +154,7 @@ public struct MenuEditView: View {
         Spacer()
       }
     }
+    .frame(height: 26)
     .buttonStyle(.plain)
   }
 
@@ -159,9 +162,10 @@ public struct MenuEditView: View {
     selectedCategory: MenuCategory,
     onSelect: @escaping (MenuCategory) -> Void
   ) -> some View {
-    VStack(alignment: .leading, spacing: 12) {
+    VStack(alignment: .leading, spacing: 8) {
       Text("카테고리")
-        .font(.pretendardSubtitle3)
+        .frame(height: 26)
+        .font(.pretendardBody3)
         .foregroundColor(AppColor.grayscale700)
 
       VStack(alignment: .leading, spacing: 12) {
@@ -191,15 +195,12 @@ private struct RadioIndicator: View {
   let isSelected: Bool
 
   var body: some View {
-    ZStack {
-      Circle()
-        .strokeBorder(AppColor.grayscale400, lineWidth: 1.5)
-        .frame(width: 20, height: 20)
-      if isSelected {
-        Circle()
-          .fill(AppColor.primaryBlue500)
-          .frame(width: 10, height: 10)
-      }
+    if isSelected {
+      Image.radioIcon
+        .frame(width: 24, height: 24)
+    } else {
+      Image.radioUnselectedIcon
+        .frame(width: 24, height: 24)
     }
   }
 }
