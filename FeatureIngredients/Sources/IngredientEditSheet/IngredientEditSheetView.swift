@@ -181,7 +181,7 @@ private struct UnderlinedFieldWithDropdown: View {
               .foregroundColor(AppColor.grayscale900)
             Image(systemName: "chevron.down")
               .font(.system(size: 12))
-              .foregroundColor(AppColor.grayscale500)
+              .foregroundColor(AppColor.grayscale900)
               .rotationEffect(.degrees(isExpanded ? 180 : 0))
           }
         }
@@ -192,47 +192,38 @@ private struct UnderlinedFieldWithDropdown: View {
         .fill(AppColor.grayscale300)
         .frame(height: 1)
     }
-    .overlay(alignment: .topLeading) {
+    .overlay(alignment: .topTrailing) {
       if isExpanded {
         VStack(spacing: 0) {
-          ForEach(IngredientUnit.allCases, id: \.self) { unit in
+          ForEach(Array(IngredientUnit.allCases.enumerated()), id: \.element) { index, unit in
             Button {
               onUnitSelected(unit)
               isExpanded = false
             } label: {
               HStack {
                 Text(unit.title)
-                  .font(.pretendardBody2)
-                  .foregroundColor(unit == selectedUnit ? AppColor.primaryBlue500 : AppColor.grayscale900)
-                Spacer()
-                if unit == selectedUnit {
-                  Image(systemName: "checkmark")
-                    .font(.system(size: 14))
-                    .foregroundColor(AppColor.primaryBlue500)
-                }
+                  .font(.pretendardSubtitle2)
+                  .foregroundColor(AppColor.grayscale900)
               }
-              .padding(.horizontal, 12)
-              .padding(.vertical, 12)
-              .background(unit == selectedUnit ? AppColor.primaryBlue100 : Color.white)
+              .frame(width: 22, height: 27)
+              .padding(.leading, 35)
+              .padding(.trailing, 20)
+              .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
             
-            if unit != IngredientUnit.allCases.last {
+            if index < IngredientUnit.allCases.count - 1 {
               Rectangle()
-                .fill(AppColor.grayscale200)
+                .fill(AppColor.grayscale300)
                 .frame(height: 1)
             }
           }
         }
-        .background(Color.white)
+        .background(AppColor.grayscale200)
         .cornerRadius(8)
-        .overlay(
-          RoundedRectangle(cornerRadius: 8)
-            .stroke(AppColor.grayscale300, lineWidth: 1)
-        )
-        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
-        .frame(maxWidth: .infinity)
-        .offset(y: 60)
+        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 2)
+        .frame(maxWidth: 80)
+        .offset(y: 0)
       }
     }
     .zIndex(isExpanded ? 1000 : 0)
