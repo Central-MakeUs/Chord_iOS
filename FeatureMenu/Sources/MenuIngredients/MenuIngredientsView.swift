@@ -1,137 +1,153 @@
 import SwiftUI
+import ComposableArchitecture
 import CoreModels
 import DesignSystem
 
 public struct MenuIngredientsView: View {
+  let store: StoreOf<MenuIngredientsFeature>
   @Environment(\.dismiss) private var dismiss
-  @State private var ingredients: [IngredientItem]
-  @State private var selectedTab: IngredientTab = .ingredient
-  @State private var showAddSheet: Bool = false
   
-  let menuName: String
-  
-  public init(menuName: String, ingredients: [IngredientItem]) {
-    self.menuName = menuName
-    self._ingredients = State(initialValue: ingredients)
-  }
-  
-  enum IngredientTab: String, CaseIterable {
-    case sourceSearch = "출처찾기"
-    case ingredient = "식재료"
-    case operatingIngredient = "운영 재료"
+  public init(store: StoreOf<MenuIngredientsFeature>) {
+    self.store = store
   }
   
   public var body: some View {
-    VStack(spacing: 0) {
-      NavigationTopBar(
-        leading: {
-          HStack(spacing: 4) {
-            Text("재료")
-              .font(.pretendardTitle1)
+    WithViewStore(store, observe: { $0 }) { viewStore in
+      VStack(spacing: 0) {
+        HStack {
+          Button(action: {
+            viewStore.send(.backTapped)
+            dismiss()
+          }) {
+            Image.arrowLeftIcon
+              .renderingMode(.template)
               .foregroundColor(AppColor.grayscale900)
-            Text("\(ingredients.count)")
-              .font(.pretendardTitle1)
-              .foregroundColor(AppColor.primaryBlue500)
+              .frame(width: 20, height: 20)
           }
-        },
-        trailing: {
-          HStack(spacing: 16) {
-            Button(action: {}) {
-              Image.searchIcon
-                .frame(width: 24, height: 24)
-            }
-            Button(action: {}) {
-              Image.meatballIcon
-                .frame(width: 24, height: 24)
-            }
-          }
-        }
-      )
-      
-      HStack(spacing: 8) {
-        ForEach(IngredientTab.allCases, id: \.self) { tab in
-          Button(action: { selectedTab = tab }) {
-            Text(tab.rawValue)
-              .font(.pretendardBody2)
-              .foregroundColor(selectedTab == tab ? AppColor.grayscale900 : AppColor.grayscale600)
-              .padding(.horizontal, 16)
-              .padding(.vertical, 8)
-              .background(
-                RoundedRectangle(cornerRadius: 8)
-                  .fill(selectedTab == tab ? AppColor.grayscale200 : Color.clear)
-              )
+          .buttonStyle(.plain)
+          
+          Spacer()
+          
+          Text(viewStore.menuName)
+            .font(.pretendardSubtitle1)
+            .foregroundColor(AppColor.grayscale900)
+          
+          Spacer()
+          
+          Button(action: {
+            viewStore.send(.deleteTapped)
+          }) {
+            Text("삭제")
+              .font(.pretendardCTA)
+              .foregroundColor(viewStore.isEditMode ? AppColor.semanticWarningText : AppColor.grayscale600)
           }
           .buttonStyle(.plain)
         }
-        Spacer()
-      }
-      .padding(.horizontal, 20)
-      .padding(.top, 16)
-      .padding(.bottom, 12)
-      
-      ScrollView {
-        VStack(spacing: 0) {
-          ForEach(ingredients) { ingredient in
-            ingredientRow(ingredient: ingredient)
-            
-            if ingredient.id != ingredients.last?.id {
-              Divider()
-                .background(AppColor.grayscale300)
-                .padding(.leading, 20)
+        .padding(.horizontal, 20)
+        .padding(.vertical, 12)
+        .background(Color.white)
+        
+        ScrollView {
+          VStack(spacing: 0) {
+            ForEach(viewStore.ingredients) { ingredient in
+              ingredientRow(ingredient: ingredient, viewStore: viewStore)
+              
+              if ingredient.id != viewStore.ingredients.last?.id {
+                Divider()
+                  .background(AppColor.grayscale300)
+                  .padding(.leading, 20)
+              }
             }
           }
         }
       }
-    }
-    .background(Color.white.ignoresSafeArea())
-    .navigationBarBackButtonHidden(true)
-    .toolbar(.hidden, for: .navigationBar)
-    .sheet(isPresented: $showAddSheet) {
-      AddIngredientSheet { newIngredient in
-        ingredients.append(newIngredient)
+      .background(Color.white.ignoresSafeArea())
+      .navigationBarBackButtonHidden(true)
+      .toolbar(.hidden, for: .navigationBar)
+      .coachCoachAlert(
+        isPresented: viewStore.binding(
+          get: \.showDeleteAlert,
+          send: { _ in MenuIngredientsFeature.Action.deleteAlertCancelled }
+        ),
+        title: "메뉴를 삭제하시겠어요?",
+        alertType: .twoButton,
+        rightButtonTitle: "삭제하기",
+        leftButtonAction: {
+          viewStore.send(.deleteAlertCancelled)
+        },
+        rightButtonAction: {
+          viewStore.send(.deleteAlertConfirmed)
+        }
+      )
+      .sheet(
+        isPresented: viewStore.binding(
+          get: \.showAddSheet,
+          send: MenuIngredientsFeature.Action.addSheetPresented
+        )
+      ) {
+        AddIngredientSheet { newIngredient in
+          viewStore.send(.ingredientAdded(newIngredient))
+        }
+        .presentationDetents([.height(600)])
       }
-      .presentationDetents([.height(600)])
     }
   }
   
-  private func ingredientRow(ingredient: IngredientItem) -> some View {
-    HStack(alignment: .top, spacing: 12) {
-      Text(ingredient.name)
-        .font(.pretendardBody1)
-        .foregroundColor(AppColor.grayscale900)
-        .padding(.leading, 20)
-      
-      Spacer()
-      
-      VStack(alignment: .trailing, spacing: 4) {
-        Text(ingredient.price)
-          .font(.pretendardBody1)
-          .foregroundColor(AppColor.primaryBlue500)
-        Text("사용량 \(ingredient.amount)")
-          .font(.pretendardCaption2)
-          .foregroundColor(AppColor.grayscale600)
+  private func ingredientRow(ingredient: IngredientItem, viewStore: ViewStoreOf<MenuIngredientsFeature>) -> some View {
+    Button {
+      if viewStore.isEditMode {
+        viewStore.send(.ingredientToggled(ingredient.id))
       }
-      .padding(.trailing, 20)
+    } label: {
+      HStack(alignment: .center, spacing: 12) {
+        if viewStore.isEditMode {
+          Image(systemName: viewStore.selectedIngredients.contains(ingredient.id) ? "checkmark.circle.fill" : "circle")
+            .font(.system(size: 24))
+            .foregroundColor(viewStore.selectedIngredients.contains(ingredient.id) ? AppColor.primaryBlue500 : AppColor.grayscale400)
+        }
+        
+        Text(ingredient.name)
+          .font(.pretendardSubtitle3)
+          .foregroundColor(AppColor.grayscale900)
+        
+        Spacer()
+        
+        HStack(spacing: 4) {
+          Text(ingredient.amount)
+          Text(ingredient.price)
+        }
+        .font(.pretendardBody3)
+        .foregroundColor(AppColor.grayscale600)
+      }
+      .frame(height: 26)
+      .padding(.horizontal, 20)
+      .padding(.vertical, 20)
+      .contentShape(Rectangle())
     }
-    .padding(.vertical, 20)
-    .contentShape(Rectangle())
+    .buttonStyle(.plain)
   }
 }
 
 #Preview {
   NavigationStack {
     MenuIngredientsView(
-      menuName: "바닐라 라떼",
-      ingredients: [
-        IngredientItem(name: "우유", amount: "30g", price: "800원"),
-        IngredientItem(name: "설탕", amount: "30g", price: "800원"),
-        IngredientItem(name: "시럽", amount: "30g", price: "800원"),
-        IngredientItem(name: "초콜릿 가루", amount: "30g", price: "800원"),
-        IngredientItem(name: "생크림", amount: "30g", price: "800원"),
-        IngredientItem(name: "바닐라 엑스트랙", amount: "30g", price: "800원"),
-        IngredientItem(name: "종이컵", amount: "30g", price: "800원"),
-        IngredientItem(name: "컵 홀더", amount: "30g", price: "800원")
-      ]
+      store: Store(
+        initialState: MenuIngredientsFeature.State(
+          menuName: "바닐라 라떼",
+          ingredients: [
+            IngredientItem(name: "우유", amount: "30g", price: "800원"),
+            IngredientItem(name: "설탕", amount: "30g", price: "800원"),
+            IngredientItem(name: "시럽", amount: "30g", price: "800원"),
+            IngredientItem(name: "초콜릿 가루", amount: "30g", price: "800원"),
+            IngredientItem(name: "생크림", amount: "30g", price: "800원"),
+            IngredientItem(name: "바닐라 엑스트랙", amount: "30g", price: "800원"),
+            IngredientItem(name: "종이컵", amount: "30g", price: "800원"),
+            IngredientItem(name: "컵 홀더", amount: "30g", price: "800원")
+          ]
+        )
+      ) {
+        MenuIngredientsFeature()
+      }
     )
   }
 }

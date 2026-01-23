@@ -60,7 +60,16 @@ public struct MenuView: View {
               }
             )
           case let .ingredients(menuName, ingredients):
-            MenuIngredientsView(menuName: menuName, ingredients: ingredients)
+            MenuIngredientsView(
+              store: Store(
+                initialState: MenuIngredientsFeature.State(
+                  menuName: menuName,
+                  ingredients: ingredients
+                )
+              ) {
+                MenuIngredientsFeature()
+              }
+            )
           }
         }
       }
