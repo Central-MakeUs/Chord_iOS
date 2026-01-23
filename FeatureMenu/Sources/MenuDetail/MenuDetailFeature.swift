@@ -24,6 +24,7 @@ public struct MenuDetailFeature {
     Reduce { state, action in
       switch action {
       case .manageTapped:
+        menuRouter.push(.edit(state.item))
         return .none
         
       case .ingredientsTapped:
