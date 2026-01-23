@@ -22,9 +22,9 @@ public struct IngredientSupplierSheetView: View {
           .frame(width: 60, height: 6)
           .padding(.top, 12)
 
-        VStack(alignment: .leading, spacing: 24) {
-          Text("공급업체명을 알려주세요")
-            .font(.pretendardTitle1)
+        VStack(alignment: .center, spacing: 24) {
+          Text("공급업체")
+            .font(.pretendardHeadline2)
             .foregroundColor(AppColor.grayscale900)
 
           ClearableInputField(

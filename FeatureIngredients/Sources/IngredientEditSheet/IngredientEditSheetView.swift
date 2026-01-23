@@ -6,6 +6,8 @@ import DesignSystem
 public struct IngredientEditSheetView: View {
   let store: StoreOf<IngredientEditSheetFeature>
   let onComplete: (String, String, IngredientUnit) -> Void
+  
+  @State private var isDropdownExpanded = false
 
   public init(
     store: StoreOf<IngredientEditSheetFeature>,
@@ -24,13 +26,20 @@ public struct IngredientEditSheetView: View {
           .padding(.top, 12)
 
         VStack(alignment: .leading, spacing: 20) {
-          Text(viewStore.name)
-            .font(.pretendardTitle1)
-            .foregroundColor(AppColor.grayscale900)
+          VStack(alignment: .leading, spacing: 8) {
+            Text(viewStore.name)
+              .font(.pretendardTitle1)
+              .foregroundColor(AppColor.grayscale900)
+            
+            HStack(spacing: 6) {
+              BadgeView(text: "식재료", style: .blue)
+              BadgeView(text: "본사 제공", style: .gray)
+            }
+          }
 
-          VStack(alignment: .leading, spacing: 12) {
+          VStack(alignment: .leading, spacing: 24) {
             UnderlinedField(
-              title: "단가",
+              title: "가격",
               text: viewStore.binding(
                 get: \.draftPrice,
                 send: IngredientEditSheetFeature.Action.draftPriceChanged
@@ -40,39 +49,21 @@ public struct IngredientEditSheetView: View {
               allowsComma: true
             )
 
-            UnderlinedField(
+            UnderlinedFieldWithDropdown(
               title: "사용량",
               text: viewStore.binding(
                 get: \.draftUsage,
                 send: IngredientEditSheetFeature.Action.draftUsageChanged
               ),
-              trailingText: nil,
-              keyboardType: .numberPad,
-              allowsComma: false
+              selectedUnit: viewStore.draftUnit,
+              isExpanded: $isDropdownExpanded,
+              onUnitSelected: { viewStore.send(.unitSelected($0)) }
             )
-
-            VStack(alignment: .leading, spacing: 8) {
-              Text("단위")
-                .font(.pretendardBody2)
-                .foregroundColor(AppColor.grayscale700)
-
-              HStack(spacing: 8) {
-                ForEach(IngredientUnit.allCases, id: \.self) { unit in
-                  UnitChip(
-                    title: unit.title,
-                    isSelected: viewStore.draftUnit == unit
-                  ) {
-                    viewStore.send(.unitSelected(unit))
-                  }
-                  .frame(maxWidth: .infinity)
-                }
-              }
-              .frame(maxWidth: .infinity)
-            }
           }
         }
         .padding(.horizontal, 20)
         .padding(.top, 24)
+        .zIndex(isDropdownExpanded ? 1 : 0)
 
         Spacer(minLength: 20)
 
@@ -115,8 +106,8 @@ private struct UnderlinedField: View {
   var body: some View {
     VStack(alignment: .leading, spacing: 6) {
       Text(title)
-        .font(.pretendardBody2)
-        .foregroundColor(AppColor.grayscale700)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
 
       HStack(spacing: 6) {
         TextField(
@@ -150,30 +141,121 @@ private struct UnderlinedField: View {
   }
 }
 
-private struct UnitChip: View {
+private struct UnderlinedFieldWithDropdown: View {
   let title: String
-  let isSelected: Bool
-  let action: () -> Void
+  @Binding var text: String
+  let selectedUnit: IngredientUnit
+  @Binding var isExpanded: Bool
+  let onUnitSelected: (IngredientUnit) -> Void
 
   var body: some View {
-    Button(action: action) {
+    VStack(alignment: .leading, spacing: 6) {
       Text(title)
-        .font(.pretendardBody2)
-        .foregroundColor(isSelected ? AppColor.primaryBlue500 : AppColor.grayscale500)
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 8)
-        .frame(height: 40)
-        .background(
-          RoundedRectangle(cornerRadius: 8)
-            .fill(isSelected ? AppColor.primaryBlue100 : AppColor.grayscale100)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
+
+      HStack(spacing: 6) {
+        TextField(
+          "",
+          text: $text,
+          prompt: Text("")
         )
+        .font(.pretendardSubtitle1)
+        .foregroundColor(AppColor.grayscale900)
+        .keyboardType(.numberPad)
+        .textInputAutocapitalization(.never)
+        .disableAutocorrection(true)
+        .onChange(of: text) { newValue in
+          let filtered = newValue.filter { $0.isNumber }
+          if filtered != newValue {
+            text = filtered
+          }
+        }
+
+        Button {
+          isExpanded.toggle()
+        } label: {
+          HStack(spacing: 4) {
+            Text(selectedUnit.title)
+              .font(.pretendardSubtitle1)
+              .foregroundColor(AppColor.grayscale900)
+            Image(systemName: "chevron.down")
+              .font(.system(size: 12))
+              .foregroundColor(AppColor.grayscale500)
+              .rotationEffect(.degrees(isExpanded ? 180 : 0))
+          }
+        }
+        .buttonStyle(.plain)
+      }
+
+      Rectangle()
+        .fill(AppColor.grayscale300)
+        .frame(height: 1)
+    }
+    .overlay(alignment: .topLeading) {
+      if isExpanded {
+        VStack(spacing: 0) {
+          ForEach(IngredientUnit.allCases, id: \.self) { unit in
+            Button {
+              onUnitSelected(unit)
+              isExpanded = false
+            } label: {
+              HStack {
+                Text(unit.title)
+                  .font(.pretendardBody2)
+                  .foregroundColor(unit == selectedUnit ? AppColor.primaryBlue500 : AppColor.grayscale900)
+                Spacer()
+                if unit == selectedUnit {
+                  Image(systemName: "checkmark")
+                    .font(.system(size: 14))
+                    .foregroundColor(AppColor.primaryBlue500)
+                }
+              }
+              .padding(.horizontal, 12)
+              .padding(.vertical, 12)
+              .background(unit == selectedUnit ? AppColor.primaryBlue100 : Color.white)
+            }
+            .buttonStyle(.plain)
+            
+            if unit != IngredientUnit.allCases.last {
+              Rectangle()
+                .fill(AppColor.grayscale200)
+                .frame(height: 1)
+            }
+          }
+        }
+        .background(Color.white)
+        .cornerRadius(8)
         .overlay(
           RoundedRectangle(cornerRadius: 8)
-            .stroke(isSelected ? AppColor.primaryBlue500 : AppColor.grayscale300, lineWidth: 1)
+            .stroke(AppColor.grayscale300, lineWidth: 1)
         )
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+        .frame(maxWidth: .infinity)
+        .offset(y: 60)
+      }
     }
-    .buttonStyle(.plain)
+    .zIndex(isExpanded ? 1000 : 0)
+  }
+}
+
+private struct BadgeView: View {
+  enum Style {
+    case blue
+    case gray
+  }
+  
+  let text: String
+  let style: Style
+  
+  var body: some View {
+    Text(text)
+      .font(.pretendardCaption2)
+      .foregroundColor(style == .blue ? AppColor.primaryBlue500 : AppColor.grayscale600)
+      .padding(.horizontal, 8)
+      .padding(.vertical, 4)
+      .background(style == .blue ? AppColor.primaryBlue100 : AppColor.grayscale200)
+      .cornerRadius(4)
   }
 }
 

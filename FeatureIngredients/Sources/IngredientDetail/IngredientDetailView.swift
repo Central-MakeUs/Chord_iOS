@@ -37,16 +37,15 @@ public struct IngredientDetailView: View {
               priceText: viewStore.priceText,
               usageText: viewStore.usageText,
               unit: viewStore.unit,
-              onTap: { viewStore.send(.editPresented(true)) }
-            )
-            supplierRow(
               supplierName: viewStore.supplierName,
-              onTap: { viewStore.send(.supplierPresented(true)) }
+              onTap: { viewStore.send(.editPresented(true)) },
+              onSupplierTap: { viewStore.send(.supplierPresented(true)) }
             )
-            Spacer().frame(height: 8)
             usageSection
-            Divider()
-              .background(AppColor.grayscale200)
+            Rectangle()
+              .fill(AppColor.grayscale200)
+              .frame(height: 10)
+              .padding(.horizontal, -20)
             historySection
             BottomButton(title: "재료 삭제", style: .tertiary) {}
               .padding(.top, 12)
@@ -85,7 +84,6 @@ public struct IngredientDetailView: View {
         )
         .presentationDetents([.height(420)])
         .presentationDragIndicator(.hidden)
-        .modifier(SheetCornerRadiusModifier(radius: 24))
       }
       .sheet(
         isPresented: viewStore.binding(
@@ -101,7 +99,6 @@ public struct IngredientDetailView: View {
         )
         .presentationDetents([.height(296)])
         .presentationDragIndicator(.hidden)
-        .modifier(SheetCornerRadiusModifier(radius: 24))
       }
     }
   }
@@ -111,48 +108,62 @@ public struct IngredientDetailView: View {
     priceText: String,
     usageText: String,
     unit: IngredientUnit,
-    onTap: @escaping () -> Void
+    supplierName: String,
+    onTap: @escaping () -> Void,
+    onSupplierTap: @escaping () -> Void
   ) -> some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text(name)
-        .font(.pretendardBody2)
-        .foregroundColor(AppColor.grayscale900)
-      Button(action: onTap) {
-        HStack(spacing: 4) {
-          Text("\(priceText)원 / \(usageText)\(unit.title)")
-            .font(.pretendardDisplay2)
-            .foregroundColor(AppColor.grayscale900)
-          Image.chevronRightOutlineIcon
-            .foregroundColor(AppColor.grayscale500)
+    VStack(alignment: .leading, spacing: 16) {
+      VStack(alignment: .leading, spacing: 8) {
+        Text("식재료")
+          .font(.pretendardCaption2)
+          .foregroundColor(AppColor.grayscale600)
+        
+        Text(name)
+          .font(.pretendardTitle1)
+          .foregroundColor(AppColor.grayscale900)
+        
+        Button(action: onTap) {
+          HStack(spacing: 4) {
+            Text("\(priceText)원 \(usageText)\(unit.title)")
+              .font(.pretendardHeadline2)
+              .foregroundColor(AppColor.grayscale900)
+            Image.pencleIcon
+              .renderingMode(.template)
+              .foregroundColor(AppColor.grayscale500)
+              .frame(width: 20, height: 20)
+          }
         }
+        .buttonStyle(.plain)
       }
-      .buttonStyle(.plain)
+      supplierRow(supplierName: supplierName, onTap: onSupplierTap)
     }
+    .padding(24)
+    .background(Color.white)
+    .cornerRadius(16)
+    .overlay(
+      RoundedRectangle(cornerRadius: 16)
+        .stroke(AppColor.grayscale300, lineWidth: 1)
+    )
   }
 
   private func supplierRow(supplierName: String, onTap: @escaping () -> Void) -> some View {
     Button(action: onTap) {
       HStack(spacing: 4) {
         Text("공급업체")
-          .font(.pretendardSubtitle3)
-          .foregroundColor(AppColor.grayscale700)
+          .font(.pretendardBody2)
+          .foregroundColor(AppColor.grayscale600)
+        
         Spacer()
-
-        HStack(spacing: 4) {
-//          Circle()
-//            .fill(AppColor.semanticWarningText)
-//            .frame(width: 18, height: 18)
-          Text(supplierName)
-            .font(.pretendardSubtitle3)
-            .foregroundColor(AppColor.grayscale900)
-        }
+        
+        Text(supplierName.isEmpty ? "쿠팡" : supplierName)
+          .font(.pretendardBody2)
+          .foregroundColor(AppColor.grayscale700)
+        
         Image.chevronRightOutlineIcon
+          .renderingMode(.template)
           .foregroundColor(AppColor.grayscale400)
+          .frame(width: 16, height: 16)
       }
-      .padding(.horizontal, 16)
-      .padding(.vertical, 12)
-      .background(AppColor.grayscale200)
-      .clipShape(RoundedRectangle(cornerRadius: 8))
     }
     .buttonStyle(.plain)
   }
@@ -200,21 +211,23 @@ private struct UsageMenuCard: View {
   let amount: String
 
   var body: some View {
-    VStack(alignment: .leading, spacing: 4) {
+    VStack(alignment: .leading, spacing: 0) {
       Text(menuName)
         .font(.pretendardCaption1)
-        .foregroundColor(AppColor.grayscale900)
+        .foregroundColor(AppColor.grayscale700)
         .lineLimit(2)
         .multilineTextAlignment(.leading)
       
+      Spacer(minLength: 0)
+      
       Text(amount)
-        .font(.pretendardCaption2)
+        .font(.pretendardCaption3)
         .foregroundColor(AppColor.grayscale600)
     }
-    .padding(.horizontal, 12)
+    .padding(.horizontal, 10)
     .padding(.vertical, 12)
-    .frame(width: 100)
-    .background(Color.white)
+    .frame(width: 106, height: 86, alignment: .topLeading)
+    .background(AppColor.grayscale200)
     .cornerRadius(8)
   }
 }
@@ -264,18 +277,6 @@ private struct TimelineLine: View {
   }
 }
 
-private struct SheetCornerRadiusModifier: ViewModifier {
-  let radius: CGFloat
-
-  @ViewBuilder
-  func body(content: Content) -> some View {
-    if #available(iOS 16.4, *) {
-      content.presentationCornerRadius(radius)
-    } else {
-      content
-    }
-  }
-}
 
 #Preview {
   IngredientDetailView(

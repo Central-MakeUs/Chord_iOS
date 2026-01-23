@@ -31,6 +31,7 @@
 		D94D849A06797DE1023C3765 /* Pretendard-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 25FC97589DD9BA5A0EDE419D /* Pretendard-Black.otf */; };
 		E02EDB5C2FD3D9B04146AF9D /* Pretendard-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = B703D4144B05344E5B182B05 /* Pretendard-Thin.otf */; };
 		E520B15ED54D2D978231B0E0 /* UnderlinedTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5001B646352F2E9715FCD647 /* UnderlinedTextField.swift */; };
+		E812D44FD819AEB4132FFCA3 /* CoachCoachAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70FE7178F88DB78FD4DA19D3 /* CoachCoachAlert.swift */; };
 		ED70FE3A78DA1AFA18C2D226 /* Pretendard-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 787314F304CCE64A43BBC240 /* Pretendard-ExtraLight.otf */; };
 		F492B482CCE97AF2189A41DB /* Pretendard-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = ADF6DFDF43CD9EDAAE8CDFFB /* Pretendard-Bold.otf */; };
 		F6018B5F7748E322214C52D6 /* TuistBundle+DesignSystem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BE4AD9735556ECA8C8008FEC /* TuistBundle+DesignSystem.swift */; };
@@ -68,6 +69,7 @@
 		69B7BBEAD5472C7195924AC8 /* DesignSystem.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DesignSystem.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6D75322AAC1FF5C0A1ABBB98 /* Pretendard-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Medium.otf"; sourceTree = "<group>"; };
 		70377F96CF316325DDCAA5CC /* TagInputField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TagInputField.swift; sourceTree = "<group>"; };
+		70FE7178F88DB78FD4DA19D3 /* CoachCoachAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoachCoachAlert.swift; sourceTree = "<group>"; };
 		787314F304CCE64A43BBC240 /* Pretendard-ExtraLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraLight.otf"; sourceTree = "<group>"; };
 		7899D0E68F7416CB347E9489 /* Pretendard-ExtraBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraBold.otf"; sourceTree = "<group>"; };
 		8937FA9427EEA938B58C5B3E /* DesignSystem-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "DesignSystem-Info.plist"; sourceTree = "<group>"; };
@@ -192,6 +194,7 @@
 			children = (
 				3D158AA18CA1EBCF4BFDF722 /* BottomButton.swift */,
 				2B24B7FD9EEC3836BD78AA89 /* ClearableInputField.swift */,
+				70FE7178F88DB78FD4DA19D3 /* CoachCoachAlert.swift */,
 				08BD8907F0DFEEAE011076DE /* NavigationTopBar.swift */,
 				3548D0314654BD3DA843750B /* PriceInputField.swift */,
 				1D05E89E8143725FD2CEBFED /* ProfitCard.swift */,
@@ -314,6 +317,7 @@
 				2C2A6F1B0843699ACFE53D23 /* TuistFonts+DesignSystem.swift in Sources */,
 				BEA9083DD77691F3BD87A524 /* BottomButton.swift in Sources */,
 				414C4334CDDE3E755DE1A70E /* ClearableInputField.swift in Sources */,
+				E812D44FD819AEB4132FFCA3 /* CoachCoachAlert.swift in Sources */,
 				A1C2FF50B5B84F59A0248D2B /* NavigationTopBar.swift in Sources */,
 				730881517CA5CC87CED4C4BB /* PriceInputField.swift in Sources */,
 				CCAE83F708D699EFD78DBB61 /* ProfitCard.swift in Sources */,

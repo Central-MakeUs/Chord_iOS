@@ -11,12 +11,17 @@ enum PretendardTextStyle {
   case subtitle1
   case subtitle2
   case subtitle3
+  case subtitle4
   case body1
   case body2
+  case body3
+  case body4
   case cta
   case caption
   case caption1
   case caption2
+  case caption3
+  case caption4
 
   var size: CGFloat {
     switch self {
@@ -29,12 +34,17 @@ enum PretendardTextStyle {
     case .subtitle1: return 20
     case .subtitle2: return 20
     case .subtitle3: return 18
+    case .subtitle4: return 18
     case .body1:     return 16
     case .body2:     return 16
+    case .body3:     return 16
+    case .body4:     return 16
     case .cta:       return 16
     case .caption:   return 14
     case .caption1:  return 14
     case .caption2:  return 12
+    case .caption3:  return 12
+    case .caption4:  return 12
     }
   }
 
@@ -49,13 +59,14 @@ enum PretendardTextStyle {
          .subtitle3,
          .cta,
          .caption,
-         .caption1:
+         .caption1,
+         .caption3:
       return "Pretendard-SemiBold"
-    case .title2, .subtitle2, .body2:
+    case .title2, .subtitle2, .subtitle4, .body2, .body3, .caption4:
       return "Pretendard-Medium"
     case .body1:
       return "Pretendard-Bold"
-    case .caption2:
+    case .body4, .caption2:
       return "Pretendard-Regular"
     }
   }

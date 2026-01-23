@@ -83,13 +83,17 @@ public extension Font {
   static var pretendardSubtitle1: Font { PretendardTextStyle.subtitle1.font }
   static var pretendardSubtitle2: Font { PretendardTextStyle.subtitle2.font }
   static var pretendardSubtitle3: Font { PretendardTextStyle.subtitle3.font }
+  static var pretendardSubtitle4: Font { PretendardTextStyle.subtitle4.font }
   static var pretendardSubTitle: Font { PretendardTextStyle.subtitle1.font }
   static var pretendardBody1: Font { PretendardTextStyle.body1.font }
   static var pretendardBody2: Font { PretendardTextStyle.body2.font }
+  static var pretendardBody3: Font { PretendardTextStyle.body3.font }
+  static var pretendardBody4: Font { PretendardTextStyle.body4.font }
   static var pretendardCTA: Font { PretendardTextStyle.cta.font }
   static var pretendardCaption: Font { PretendardTextStyle.caption.font }
   static var pretendardCaption1: Font { PretendardTextStyle.caption1.font }
   static var pretendardCaption2: Font { PretendardTextStyle.caption2.font }
+  static var pretendardCaption3: Font { PretendardTextStyle.caption3.font }
+  static var pretendardCaption4: Font { PretendardTextStyle.caption4.font }
 
 }
-
