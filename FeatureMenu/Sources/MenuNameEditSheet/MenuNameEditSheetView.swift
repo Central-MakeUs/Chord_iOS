@@ -22,9 +22,9 @@ public struct MenuNameEditSheetView: View {
           .frame(width: 60, height: 6)
           .padding(.top, 12)
 
-        VStack(alignment: .leading, spacing: 24) {
-          Text("메뉴명을 입력해주세요")
-            .font(.pretendardHeadline2)
+        VStack(alignment: .center, spacing: 24) {
+          Text("메뉴명")
+            .font(.pretendardHeadline1)
             .foregroundColor(AppColor.grayscale900)
 
           ClearableInputField(

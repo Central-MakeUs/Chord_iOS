@@ -3,7 +3,6 @@ import Foundation
 public enum IngredientUnit: String, CaseIterable, Hashable {
   case ml = "ml"
   case g = "g"
-  case kg = "kg"
   case count = "개"
 
   public var title: String { rawValue }
@@ -12,7 +11,6 @@ public enum IngredientUnit: String, CaseIterable, Hashable {
     switch text {
     case "ml": return .ml
     case "g": return .g
-    case "kg": return .kg
     case "개": return .count
     default: return .g
     }

@@ -33,8 +33,8 @@ public struct NavigationTopBar: View {
             Spacer()
             Button(action: action) {
               Text(text)
-                .font(.pretendardBody2)
-                .foregroundColor(AppColor.grayscale900)
+                .font(.pretendardCTA)
+                .foregroundColor(AppColor.grayscale600)
             }
             .buttonStyle(.plain)
           }

@@ -26,10 +26,10 @@ public struct ClearableInputField: View {
         "",
         text: $text,
         prompt: Text(placeholder)
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale400)
+          .font(.pretendardCTA)
+          .foregroundColor(AppColor.grayscale500)
       )
-      .font(.pretendardBody2)
+      .font(.pretendardCTA)
       .foregroundColor(textColor)
       .focused($isFocused)
       .textInputAutocapitalization(.never)
@@ -55,21 +55,18 @@ public struct ClearableInputField: View {
     )
     .overlay(
       RoundedRectangle(cornerRadius: height / 2)
-        .stroke(borderColor, lineWidth: 1)
+        .stroke(AppColor.grayscale700, lineWidth: 1)
     )
   }
 
-  private var borderColor: Color {
-    if isFocused {
-      return AppColor.primaryBlue500
-    }
-    return text.isEmpty ? AppColor.grayscale300 : AppColor.grayscale700
-  }
+//  private var borderColor: Color {
+//    if isFocused {
+//      return AppColor.primaryBlue500
+//    }
+//    return text.isEmpty ? AppColor.grayscale300 : AppColor.grayscale700
+//  }
 
   private var textColor: Color {
-    if isFocused {
-      return AppColor.grayscale900
-    }
     return text.isEmpty ? AppColor.grayscale400 : AppColor.grayscale700
   }
 }
