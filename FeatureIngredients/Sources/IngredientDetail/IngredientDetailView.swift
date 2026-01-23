@@ -26,7 +26,7 @@ public struct IngredientDetailView: View {
             viewStore.send(.backTapped)
             dismiss()
           },
-          title: "재료",
+          title: "",
           trailing: .icon(Image.starIcon, action: {})
         )
         
@@ -47,14 +47,22 @@ public struct IngredientDetailView: View {
               .frame(height: 10)
               .padding(.horizontal, -20)
             historySection
-            BottomButton(title: "재료 삭제", style: .tertiary) {}
-              .padding(.top, 12)
+            Spacer(minLength: 24)
           }
           .padding(.horizontal, 20)
           .padding(.top, 12)
           .padding(.bottom, 24)
         }
+        
+        VStack(spacing: 0) {
+          BottomButton(title: "재료 삭제", style: .tertiary) {}
+        }
+        .padding(.horizontal, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 24)
         .background(AppColor.grayscale100)
+        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 4)
+
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
