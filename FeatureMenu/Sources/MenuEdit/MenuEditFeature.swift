@@ -12,6 +12,7 @@ public struct MenuEditFeature {
     var selectedCategory: MenuCategory
     var isNameEditPresented = false
     var isPriceEditPresented = false
+    var isPrepareTimePresented = false
 
     public init(item: MenuItem) {
       self.item = item
@@ -25,8 +26,10 @@ public struct MenuEditFeature {
   public enum Action: Equatable {
     case nameEditPresented(Bool)
     case priceEditPresented(Bool)
+    case prepareTimePresented(Bool)
     case menuNameUpdated(String)
     case menuPriceUpdated(String)
+    case prepareTimeUpdated(minutes: Int, seconds: Int)
     case prepareTimeTapped
     case categorySelected(MenuCategory)
     case deleteTapped
@@ -44,6 +47,9 @@ public struct MenuEditFeature {
       case let .priceEditPresented(isPresented):
         state.isPriceEditPresented = isPresented
         return .none
+      case let .prepareTimePresented(isPresented):
+        state.isPrepareTimePresented = isPresented
+        return .none
       case let .menuNameUpdated(name):
         state.menuName = name
         state.isNameEditPresented = false
@@ -52,7 +58,12 @@ public struct MenuEditFeature {
         state.menuPrice = price
         state.isPriceEditPresented = false
         return .none
+      case let .prepareTimeUpdated(minutes, seconds):
+        state.prepareTime = "\(minutes)분 \(seconds)초"
+        state.isPrepareTimePresented = false
+        return .none
       case .prepareTimeTapped:
+        state.isPrepareTimePresented = true
         return .none
       case let .categorySelected(category):
         state.selectedCategory = category

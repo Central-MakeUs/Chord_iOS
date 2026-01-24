@@ -100,6 +100,29 @@ public struct MenuEditView: View {
         .presentationDragIndicator(.hidden)
         .modifier(SheetCornerRadiusModifier(radius: 24))
       }
+      .sheet(
+        isPresented: viewStore.binding(
+          get: \.isPrepareTimePresented,
+          send: MenuEditFeature.Action.prepareTimePresented
+        )
+      ) {
+        PrepareTimeSheetView(
+          store: Store(
+            initialState: PrepareTimeSheetFeature.State(
+              minutes: extractMinutes(from: viewStore.prepareTime),
+              seconds: extractSeconds(from: viewStore.prepareTime)
+            )
+          ) {
+            PrepareTimeSheetFeature()
+          },
+          onComplete: { minutes, seconds in
+            viewStore.send(.prepareTimeUpdated(minutes: minutes, seconds: seconds))
+          }
+        )
+        .presentationDetents([.height(357)])
+        .presentationDragIndicator(.hidden)
+        .modifier(SheetCornerRadiusModifier(radius: 24))
+      }
     }
   }
 
@@ -188,6 +211,25 @@ public struct MenuEditView: View {
   private var sectionDivider: some View {
     Divider()
       .background(AppColor.grayscale300)
+  }
+  
+  private func extractMinutes(from time: String) -> Int {
+    let components = time.components(separatedBy: "분")
+    guard let first = components.first,
+          let minutes = Int(first.trimmingCharacters(in: .whitespaces)) else {
+      return 0
+    }
+    return minutes
+  }
+  
+  private func extractSeconds(from time: String) -> Int {
+    let components = time.components(separatedBy: "분")
+    guard components.count > 1 else { return 0 }
+    let secondsPart = components[1].replacingOccurrences(of: "초", with: "")
+    guard let seconds = Int(secondsPart.trimmingCharacters(in: .whitespaces)) else {
+      return 0
+    }
+    return seconds
   }
 }
 

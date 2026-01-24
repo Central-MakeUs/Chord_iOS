@@ -31,6 +31,7 @@
 		49452881586B9AC2F0EDC972 /* DesignSystem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7763CCDF9222A2DD292961BC /* DesignSystem.framework */; };
 		4955A1DF7F7FD489E00D6CA1 /* Perception.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2F9EB330FE6E6584D3326025 /* Perception.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		49AAD4CF8A93CA54118DFBB9 /* UIKitNavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 546AB3EAD53D223DF36DAAAC /* UIKitNavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		4AAA65A2B68ECD3CA8F58422 /* PrepareTimeSheetFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2541CB180E615501692439E /* PrepareTimeSheetFeature.swift */; };
 		4AB5E24AAA07DA8577C7F787 /* DataLayer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8906027CCE4D7BE2DB90F649 /* DataLayer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		55938046678B015673A7A5CE /* MenuDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 86C0896E64366DF6CA7C40FF /* MenuDetailView.swift */; };
 		5601A49CF120AD2193E3C665 /* DesignSystem.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7763CCDF9222A2DD292961BC /* DesignSystem.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -48,6 +49,7 @@
 		6F9D156E49585666B68A2A87 /* CasePaths.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 562222E3ED0347043FEBA1DC /* CasePaths.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		727B166FFF7653A86BE576C2 /* SwiftNavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3201F433D93ED6FDD8C5E385 /* SwiftNavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		808B6FBE5F5DEF5055A30081 /* MenuDetailFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAB10EED09F9E49E33684355 /* MenuDetailFeature.swift */; };
+		826723FC7029EF8D5E8FA8CE /* PrepareTimeSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F548DD01897E1C764E409168 /* PrepareTimeSheetView.swift */; };
 		89741513054D54456BD9DB98 /* ComposableArchitecture.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DD672DBE8DD04AD63DC9DA7 /* ComposableArchitecture.framework */; };
 		89D1102316565ED48C07FCD0 /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FC7EC82310F574060F0535A4 /* MenuView.swift */; };
 		8E773A7F14F8E0207C1D4819 /* Clocks.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 7967481CEACCAC8FFD540FD6 /* Clocks.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -189,6 +191,7 @@
 		C6DA3397EB03F2B56ACC67EC /* IssueReporting.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IssueReporting.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CF03F32EB43DFDD93C616348 /* Pretendard-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Light.otf"; sourceTree = "<group>"; };
 		D13B0BAE9F783B24DE597D83 /* Dependencies.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Dependencies.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D2541CB180E615501692439E /* PrepareTimeSheetFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareTimeSheetFeature.swift; sourceTree = "<group>"; };
 		D3DE292B4B5108D3119796FD /* AddIngredientSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddIngredientSheet.swift; sourceTree = "<group>"; };
 		D614C69D42FC88F211D21994 /* MenuEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuEditView.swift; sourceTree = "<group>"; };
 		D6E33B5A0099691CAE485B25 /* FeatureMenuDemo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "FeatureMenuDemo-Info.plist"; sourceTree = "<group>"; };
@@ -198,6 +201,7 @@
 		EC0E5195A0A71E47CCDDDA41 /* UIKitNavigationShim.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = UIKitNavigationShim.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F00DFADAFDFAADDD8A46AE7A /* XCTestDynamicOverlay.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = XCTestDynamicOverlay.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F2E95F1FEEE904EE49B68978 /* ConcurrencyExtras.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ConcurrencyExtras.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		F548DD01897E1C764E409168 /* PrepareTimeSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrepareTimeSheetView.swift; sourceTree = "<group>"; };
 		FC7EC82310F574060F0535A4 /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -270,9 +274,19 @@
 				A0A0F437422AF34F9A52607F /* MenuManageSheet */,
 				B299889F47DD59E9CE86DCEE /* MenuNameEditSheet */,
 				D29349821C5CDC422C0C0544 /* MenuPriceEditSheet */,
+				3D213A742EDF0D1F4D596782 /* PrepareTimeSheet */,
 				AD0CF757BEDCDE2C0A516233 /* MenuRoute.swift */,
 			);
 			path = Sources;
+			sourceTree = "<group>";
+		};
+		3D213A742EDF0D1F4D596782 /* PrepareTimeSheet */ = {
+			isa = PBXGroup;
+			children = (
+				D2541CB180E615501692439E /* PrepareTimeSheetFeature.swift */,
+				F548DD01897E1C764E409168 /* PrepareTimeSheetView.swift */,
+			);
+			path = PrepareTimeSheet;
 			sourceTree = "<group>";
 		};
 		481A52BF98B15F048FB1CB30 /* MenuIngredients */ = {
@@ -564,6 +578,8 @@
 				44E92962A850F5F34D6ACD83 /* MenuPriceEditSheetFeature.swift in Sources */,
 				B67EEE697E64E547ABCAB719 /* MenuPriceEditSheetView.swift in Sources */,
 				153DFFC22521FBE1B3C21B0C /* MenuRoute.swift in Sources */,
+				4AAA65A2B68ECD3CA8F58422 /* PrepareTimeSheetFeature.swift in Sources */,
+				826723FC7029EF8D5E8FA8CE /* PrepareTimeSheetView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
