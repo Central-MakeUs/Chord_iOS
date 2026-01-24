@@ -40,7 +40,7 @@ public struct TemplateApplySheet: View {
           onApply()
         }
       }
-      .padding(.horizontal, 20)
+      .padding(.horizontal, 34)
       .padding(.bottom, 20)
     }
     .background(Color.white)

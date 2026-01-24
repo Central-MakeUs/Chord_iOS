@@ -60,7 +60,7 @@ public struct AddIngredientSheet: View {
         addIngredient()
       }
       .padding(.horizontal, 20)
-      .padding(.bottom, 20)
+      .padding(.bottom, 34)
     }
     .background(Color.white)
   }

@@ -67,7 +67,7 @@ public struct OnboardingStaffCountSheetView: View {
           onComplete(viewStore.staffCount)
         }
         .padding(.horizontal, 20)
-        .padding(.bottom, 24)
+        .padding(.bottom, 34)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background(AppColor.grayscale100)

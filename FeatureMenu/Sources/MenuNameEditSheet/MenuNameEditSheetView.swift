@@ -16,7 +16,7 @@ public struct MenuNameEditSheetView: View {
 
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
-      VStack(spacing: 0) {
+      VStack(alignment: .center, spacing: 0) {
         Capsule()
           .fill(AppColor.grayscale300)
           .frame(width: 60, height: 6)
@@ -54,7 +54,7 @@ public struct MenuNameEditSheetView: View {
         }
         .disabled(!isEnabled)
         .padding(.horizontal, 20)
-        .padding(.bottom, 24)
+        .padding(.bottom, 34)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background(AppColor.grayscale100)

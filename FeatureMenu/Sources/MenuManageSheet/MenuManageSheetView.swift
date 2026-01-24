@@ -65,7 +65,7 @@ public struct MenuManageSheetView: View {
         }
         .disabled(!isEnabled)
         .padding(.horizontal, 20)
-        .padding(.bottom, 24)
+        .padding(.bottom, 34)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background(AppColor.grayscale100)
