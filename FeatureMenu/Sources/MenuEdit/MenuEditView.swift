@@ -7,8 +7,6 @@ public struct MenuEditView: View {
   let store: StoreOf<MenuEditFeature>
   @Environment(\.dismiss) private var dismiss
 
-  private let categories: [MenuCategory] = [.beverage, .dessert, .food]
-
   public init(store: StoreOf<MenuEditFeature>) {
     self.store = store
   }
@@ -27,28 +25,28 @@ public struct MenuEditView: View {
             },
             title: ""
           )
-          
+
           VStack(alignment: .leading, spacing: 24) {
-          
+
           menuNameRow(name: viewStore.menuName) {
             viewStore.send(.nameEditPresented(true))
           }
-          
+
           sectionDivider
-          
+
           priceSection(price: viewStore.menuPrice) {
             viewStore.send(.priceEditPresented(true))
           }
-          
+
           sectionDivider
-          
+
           prepareTimeSection(time: viewStore.prepareTime) {
             viewStore.send(.prepareTimeTapped)
           }
           sectionDivider
 
-          
           categorySection(
+            categories: viewStore.categories,
             selectedCategory: viewStore.selectedCategory,
             onSelect: { viewStore.send(.categorySelected($0)) }
           )
@@ -109,8 +107,8 @@ public struct MenuEditView: View {
         PrepareTimeSheetView(
           store: Store(
             initialState: PrepareTimeSheetFeature.State(
-              minutes: extractMinutes(from: viewStore.prepareTime),
-              seconds: extractSeconds(from: viewStore.prepareTime)
+              minutes: viewStore.prepareTimeMinutes,
+              seconds: viewStore.prepareTimeSeconds
             )
           ) {
             PrepareTimeSheetFeature()
@@ -119,7 +117,7 @@ public struct MenuEditView: View {
             viewStore.send(.prepareTimeUpdated(minutes: minutes, seconds: seconds))
           }
         )
-        .presentationDetents([.height(357)])
+        .presentationDetents([.height(360)])
         .presentationDragIndicator(.hidden)
         .modifier(SheetCornerRadiusModifier(radius: 24))
       }
@@ -182,6 +180,7 @@ public struct MenuEditView: View {
   }
 
   private func categorySection(
+    categories: [MenuCategory],
     selectedCategory: MenuCategory,
     onSelect: @escaping (MenuCategory) -> Void
   ) -> some View {
@@ -211,25 +210,6 @@ public struct MenuEditView: View {
   private var sectionDivider: some View {
     Divider()
       .background(AppColor.grayscale300)
-  }
-  
-  private func extractMinutes(from time: String) -> Int {
-    let components = time.components(separatedBy: "분")
-    guard let first = components.first,
-          let minutes = Int(first.trimmingCharacters(in: .whitespaces)) else {
-      return 0
-    }
-    return minutes
-  }
-  
-  private func extractSeconds(from time: String) -> Int {
-    let components = time.components(separatedBy: "분")
-    guard components.count > 1 else { return 0 }
-    let secondsPart = components[1].replacingOccurrences(of: "초", with: "")
-    guard let seconds = Int(secondsPart.trimmingCharacters(in: .whitespaces)) else {
-      return 0
-    }
-    return seconds
   }
 }
 
