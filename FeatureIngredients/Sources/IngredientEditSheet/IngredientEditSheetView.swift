@@ -6,7 +6,7 @@ import DesignSystem
 public struct IngredientEditSheetView: View {
   let store: StoreOf<IngredientEditSheetFeature>
   let onComplete: (String, String, IngredientUnit) -> Void
-  
+
   @State private var isDropdownExpanded = false
 
   public init(
@@ -30,7 +30,7 @@ public struct IngredientEditSheetView: View {
             Text(viewStore.name)
               .font(.pretendardTitle1)
               .foregroundColor(AppColor.grayscale900)
-            
+
             HStack(spacing: 6) {
               BadgeView(text: "식재료", style: .blue)
               BadgeView(text: "본사 제공", style: .gray)
@@ -67,32 +67,19 @@ public struct IngredientEditSheetView: View {
 
         Spacer(minLength: 20)
 
-        let cleanedPrice = formattedPrice(viewStore.draftPrice)
-        let cleanedUsage = viewStore.draftUsage.filter { $0.isNumber }
-        let hasChanges = cleanedPrice != viewStore.initialPrice ||
-          cleanedUsage != viewStore.initialUsage ||
-          viewStore.draftUnit != viewStore.initialUnit
-        let isEnabled = hasChanges && !cleanedPrice.isEmpty && !cleanedUsage.isEmpty
+        let isEnabled = viewStore.isSaveEnabled
         BottomButton(title: "수정", style: isEnabled ? .primary : .secondary) {
           guard isEnabled else { return }
           viewStore.send(.saveTapped)
-          onComplete(cleanedPrice, cleanedUsage, viewStore.draftUnit)
+          onComplete(viewStore.cleanedPrice, viewStore.cleanedUsage, viewStore.draftUnit)
         }
         .disabled(!isEnabled)
         .padding(.horizontal, 20)
-        .padding(.bottom, 24)
+        .padding(.bottom, 34)
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background(AppColor.grayscale100)
     }
-  }
-
-  private func formattedPrice(_ value: String) -> String {
-    let digits = value.filter { $0.isNumber }
-    guard let number = Int64(digits), !digits.isEmpty else { return "" }
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .decimal
-    return formatter.string(from: NSNumber(value: number)) ?? digits
   }
 }
 
@@ -120,12 +107,6 @@ private struct UnderlinedField: View {
         .keyboardType(keyboardType)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
-        .onChange(of: text) { newValue in
-          let filtered = newValue.filter { $0.isNumber || (allowsComma && $0 == ",") }
-          if filtered != newValue {
-            text = filtered
-          }
-        }
 
         if let trailingText {
           Text(trailingText)
@@ -165,12 +146,6 @@ private struct UnderlinedFieldWithDropdown: View {
         .keyboardType(.numberPad)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
-        .onChange(of: text) { newValue in
-          let filtered = newValue.filter { $0.isNumber }
-          if filtered != newValue {
-            text = filtered
-          }
-        }
 
         Button {
           isExpanded.toggle()
@@ -211,7 +186,7 @@ private struct UnderlinedFieldWithDropdown: View {
               .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
-            
+
             if index < IngredientUnit.allCases.count - 1 {
               Rectangle()
                 .fill(AppColor.grayscale300)
@@ -235,10 +210,10 @@ private struct BadgeView: View {
     case blue
     case gray
   }
-  
+
   let text: String
   let style: Style
-  
+
   var body: some View {
     Text(text)
       .font(.pretendardCaption2)
