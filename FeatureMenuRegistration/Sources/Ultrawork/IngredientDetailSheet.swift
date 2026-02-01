@@ -3,186 +3,251 @@ import DesignSystem
 
 public struct IngredientDetailSheet: View {
   @Environment(\.dismiss) private var dismiss
-  @State private var applyRecommendedPrice: Bool = false
-  
-  public init() {}
-  
+  let ingredient: MenuRegistrationFeature.RegistrationIngredient
+
+  public init(ingredient: MenuRegistrationFeature.RegistrationIngredient) {
+    self.ingredient = ingredient
+  }
+
   public var body: some View {
     VStack(spacing: 0) {
       NavigationTopBar(
         onBackTap: { dismiss() },
-        trailing: .text("관리", action: {})
+        title: "재료 상세",
+        trailing: .text("편집", action: { })
       )
-      
+
       ScrollView {
-        VStack(spacing: 12) {
-          menuInfoCard
-          marginInfoCard
-          ingredientsCard
+        VStack(spacing: 20) {
+          ingredientHeroSection
+          
+          VStack(spacing: 16) {
+            detailInfoSection
+            usageSection
+            priceAnalysisSection
+          }
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 16)
+        .padding(.vertical, 20)
       }
-    }
-    .background(AppColor.grayscale200.ignoresSafeArea())
-  }
-  
-  private var menuInfoCard: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text("바닐라 라떼")
-        .font(.pretendardSubtitle1)
-        .foregroundColor(AppColor.grayscale900)
       
-      HStack(alignment: .top) {
-        Text("6,500원")
-          .font(.pretendardTitle1)
-          .foregroundColor(AppColor.grayscale900)
+      actionButtons
+    }
+    .background(Color.white.ignoresSafeArea())
+  }
+
+  private var ingredientHeroSection: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      HStack {
+        VStack(alignment: .leading, spacing: 8) {
+          Text(ingredient.name)
+            .font(.pretendardTitle2)
+            .foregroundColor(AppColor.grayscale900)
+          
+          Text(ingredient.unitCode)
+            .font(.pretendardBody2)
+            .foregroundColor(AppColor.grayscale600)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 4)
+            .background(AppColor.grayscale100)
+            .cornerRadius(6)
+        }
         
         Spacer()
         
         VStack(alignment: .trailing, spacing: 4) {
-          Text("제조시간")
-            .font(.pretendardCaption2)
+          Text("재료비")
+            .font(.pretendardCaption1)
             .foregroundColor(AppColor.grayscale600)
-          Text("1분 30초")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale900)
+          Text(ingredient.formattedPrice)
+            .font(.pretendardTitle1)
+            .foregroundColor(AppColor.primaryBlue600)
         }
-      }
-    }
-    .padding(20)
-    .background(Color.white)
-    .cornerRadius(12)
-  }
-  
-  private var marginInfoCard: some View {
-    VStack(alignment: .leading, spacing: 16) {
-      HStack(spacing: 8) {
-        Text("마진률")
-          .font(.pretendardSubtitle3)
-          .foregroundColor(AppColor.grayscale900)
-        
-        Text("위험")
-          .font(.pretendardCaption2)
-          .foregroundColor(.white)
-          .padding(.horizontal, 8)
-          .padding(.vertical, 4)
-          .background(AppColor.semanticWarningText)
-          .cornerRadius(4)
       }
       
-      VStack(alignment: .leading, spacing: 4) {
-        Text("원가율이 너무 높은 편이에요!")
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale900)
-        Text("가격 또는 원가 구조를 점검해 주세요")
-          .font(.pretendardCaption2)
-          .foregroundColor(AppColor.grayscale600)
-      }
+      Divider()
+        .background(AppColor.grayscale200)
       
-      HStack(spacing: 0) {
-        VStack(spacing: 4) {
-          Text("마진율")
-            .font(.pretendardCaption2)
-            .foregroundColor(AppColor.grayscale600)
-          Text("50.6%")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale900)
-        }
-        .frame(maxWidth: .infinity)
-        
-        VStack(spacing: 4) {
-          Text("원가율")
-            .font(.pretendardCaption2)
-            .foregroundColor(AppColor.grayscale600)
-          Text("62.9%")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale900)
-        }
-        .frame(maxWidth: .infinity)
-        
-        VStack(spacing: 4) {
-          Text("공헌이익")
-            .font(.pretendardCaption2)
-            .foregroundColor(AppColor.grayscale600)
-          Text("3,670원")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale900)
-        }
-        .frame(maxWidth: .infinity)
-      }
-      .padding(.vertical, 12)
-      
-      Button(action: { applyRecommendedPrice.toggle() }) {
-        HStack(spacing: 8) {
-          Image(systemName: applyRecommendedPrice ? "checkmark.square.fill" : "square")
-            .font(.system(size: 20))
-            .foregroundColor(applyRecommendedPrice ? AppColor.primaryBlue500 : AppColor.grayscale400)
-          
-          Text("권장가격 ")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale900)
-          + Text("6,000원")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.primaryBlue500)
-        }
-      }
-      .buttonStyle(.plain)
-    }
-    .padding(20)
-    .background(Color.white)
-    .cornerRadius(12)
-  }
-  
-  private var ingredientsCard: some View {
-    VStack(alignment: .leading, spacing: 16) {
       HStack {
-        Text("재료 ")
-          .font(.pretendardSubtitle3)
-          .foregroundColor(AppColor.grayscale900)
-        + Text("4")
-          .font(.pretendardSubtitle3)
-          .foregroundColor(AppColor.primaryBlue500)
-        
-        Image.chevronRightOutlineIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale500)
-          .frame(width: 16, height: 16)
+        VStack(alignment: .leading, spacing: 4) {
+          Text("사용량")
+            .font(.pretendardCaption1)
+            .foregroundColor(AppColor.grayscale600)
+          Text(ingredient.formattedAmount)
+            .font(.pretendardSubtitle2)
+            .foregroundColor(AppColor.grayscale900)
+        }
         
         Spacer()
+        
+        VStack(alignment: .trailing, spacing: 4) {
+          Text("단위당 비용")
+            .font(.pretendardCaption1)
+            .foregroundColor(AppColor.grayscale600)
+          Text(ingredient.formattedPrice)
+            .font(.pretendardSubtitle2)
+            .foregroundColor(AppColor.grayscale900)
+        }
       }
-      
-      VStack(spacing: 12) {
-        ingredientRow(name: "원두", amount: "30g", price: "450원")
-        ingredientRow(name: "바닐라 시럽", amount: "10ml", price: "250원")
-        ingredientRow(name: "우유", amount: "230ml", price: "750원")
-        ingredientRow(name: "종이컵", amount: "1개", price: "100원")
-      }
-      
-      Text("총 1,450원")
+    }
+    .padding(24)
+    .background(Color.white)
+    .cornerRadius(16)
+    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
+  }
+
+  private var detailInfoSection: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      Text("상세 정보")
         .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
-        .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.top, 8)
+
+      VStack(spacing: 16) {
+        detailRow(label: "재료명", value: ingredient.name)
+        detailRow(label: "사용량", value: ingredient.formattedAmount)
+        detailRow(label: "단위", value: ingredient.unitCode)
+        detailRow(label: "가격", value: ingredient.formattedPrice)
+      }
     }
     .padding(20)
     .background(Color.white)
     .cornerRadius(12)
   }
   
-  private func ingredientRow(name: String, amount: String, price: String) -> some View {
-    HStack {
-      Text("\(name) (\(amount))")
-        .font(.pretendardBody2)
+  private var usageSection: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      Text("사용 현황")
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
-      Spacer()
-      Text(price)
-        .font(.pretendardBody2)
+
+      HStack(spacing: 16) {
+        VStack(spacing: 8) {
+          Text("이번 달")
+            .font(.pretendardCaption1)
+            .foregroundColor(AppColor.grayscale600)
+          Text("3회")
+            .font(.pretendardSubtitle1)
+            .foregroundColor(AppColor.grayscale900)
+          Text("사용")
+            .font(.pretendardCaption2)
+            .foregroundColor(AppColor.grayscale500)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(AppColor.primaryBlue100)
+        .cornerRadius(8)
+        
+        VStack(spacing: 8) {
+          Text("평균 사용량")
+            .font(.pretendardCaption1)
+            .foregroundColor(AppColor.grayscale600)
+          Text(ingredient.formattedAmount)
+            .font(.pretendardSubtitle1)
+            .foregroundColor(AppColor.grayscale900)
+          Text("per 메뉴")
+            .font(.pretendardCaption2)
+            .foregroundColor(AppColor.grayscale500)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 16)
+        .background(Color.white)
+        .cornerRadius(8)
+      }
+    }
+    .padding(20)
+    .background(Color.white)
+    .cornerRadius(12)
+  }
+  
+  private var priceAnalysisSection: some View {
+    VStack(alignment: .leading, spacing: 16) {
+      Text("가격 분석")
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
+
+      VStack(spacing: 12) {
+        HStack {
+          Text("시장 평균 대비")
+            .font(.pretendardBody2)
+            .foregroundColor(AppColor.grayscale600)
+          Spacer()
+          HStack(spacing: 4) {
+            Text("5% 절약")
+              .font(.pretendardSubtitle3)
+              .foregroundColor(AppColor.semanticSafe)
+            Image.caretDownIcon
+              .renderingMode(.template)
+              .foregroundColor(AppColor.semanticSafe)
+              .frame(width: 16, height: 16)
+          }
+        }
+        
+        HStack {
+          Text("지난 달 대비")
+            .font(.pretendardBody2)
+            .foregroundColor(AppColor.grayscale600)
+          Spacer()
+          HStack(spacing: 4) {
+            Text("2% 상승")
+              .font(.pretendardSubtitle3)
+              .foregroundColor(AppColor.semanticWarning)
+            Image.caretUpIcon
+              .renderingMode(.template)
+              .foregroundColor(AppColor.semanticWarning)
+              .frame(width: 16, height: 16)
+          }
+        }
+      }
+    }
+    .padding(20)
+    .background(Color.white)
+    .cornerRadius(12)
+  }
+  
+  private var actionButtons: some View {
+    VStack(spacing: 0) {
+      Divider()
+        .background(AppColor.grayscale200)
+      
+      HStack(spacing: 12) {
+        BottomButton(
+          title: "삭제",
+          style: .secondary
+        ) {
+        }
+
+        BottomButton(
+          title: "수정",
+          style: .primary
+        ) {
+        }
+      }
+      .padding(.horizontal, 20)
+      .padding(.top, 16)
+      .padding(.bottom, 20)
+      .background(Color.white)
     }
   }
-}
 
-#Preview {
-  IngredientDetailSheet()
+  private func detailRow(label: String, value: String, icon: Image? = nil) -> some View {
+    HStack(spacing: 12) {
+      if let icon = icon {
+        icon
+          .renderingMode(.template)
+          .foregroundColor(AppColor.grayscale400)
+          .frame(width: 20, height: 20)
+      }
+      
+      Text(label)
+        .font(.pretendardBody2)
+        .foregroundColor(AppColor.grayscale600)
+      
+      Spacer()
+      
+      Text(value)
+        .font(.pretendardSubtitle3)
+        .foregroundColor(AppColor.grayscale900)
+    }
+    .padding(.vertical, 8)
+  }
 }

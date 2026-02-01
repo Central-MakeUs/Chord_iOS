@@ -29,6 +29,22 @@ public struct IngredientEditSheetFeature {
       self.initialUsage = initialUsage
       self.initialUnit = initialUnit
     }
+    
+    public var cleanedPrice: String {
+      draftPrice.replacingOccurrences(of: ",", with: "")
+    }
+    
+    public var cleanedUsage: String {
+      draftUsage.replacingOccurrences(of: ",", with: "")
+    }
+    
+    public var isSaveEnabled: Bool {
+      let hasChanges = draftPrice != initialPrice ||
+                       draftUsage != initialUsage ||
+                       draftUnit != initialUnit
+      let isNotEmpty = !draftPrice.isEmpty && !draftUsage.isEmpty
+      return hasChanges && isNotEmpty
+    }
   }
 
   public enum Action: Equatable {

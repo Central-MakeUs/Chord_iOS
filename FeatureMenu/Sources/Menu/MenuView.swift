@@ -2,6 +2,7 @@ import SwiftUI
 import ComposableArchitecture
 import CoreModels
 import DesignSystem
+import FeatureMenuRegistration
 
 public struct MenuView: View {
   let store: StoreOf<MenuFeature>
@@ -52,7 +53,11 @@ public struct MenuView: View {
               }
             )
           case .add:
-            BlankMenuView(title: "메뉴 추가")
+            MenuRegistrationView(
+              store: Store(initialState: MenuRegistrationFeature.State()) {
+                MenuRegistrationFeature()
+              }
+            )
           case let .edit(item):
             MenuEditView(
               store: Store(initialState: MenuEditFeature.State(item: item)) {
@@ -77,21 +82,37 @@ public struct MenuView: View {
       .onAppear {
         viewStore.send(.onAppear)
       }
-      .sheet(
-        isPresented: viewStore.binding(
-          get: \.isMenuManagePresented,
-          send: MenuFeature.Action.isMenuManagePresentedChanged
-        )
-      ) {
-        MenuManageSheetView(
-          store: Store(initialState: MenuManageSheetFeature.State()) {
-            MenuManageSheetFeature()
-          },
-          onComplete: { viewStore.send(.isMenuManagePresentedChanged(false)) }
-        )
-        .presentationDetents([.height(357)])
-        .presentationDragIndicator(.hidden)
-        .modifier(SheetCornerRadiusModifier(radius: 24))
+      .overlay(alignment: .topTrailing) {
+        if viewStore.isMenuManagePresented {
+          ZStack(alignment: .topTrailing) {
+            Color.black.opacity(0.001)
+              .ignoresSafeArea()
+              .onTapGesture {
+                viewStore.send(.isMenuManagePresentedChanged(false))
+              }
+            
+            Button {
+              viewStore.send(.addMenuTapped)
+            } label: {
+              HStack(spacing: 6) {
+                Text("메뉴 추가")
+                  .font(.pretendardSubtitle1)
+                  .foregroundColor(AppColor.grayscale900)
+                Text("+")
+                  .font(.pretendardSubtitle1)
+                  .foregroundColor(AppColor.grayscale600)
+              }
+              .padding(.horizontal, 20)
+              .padding(.vertical, 14)
+              .background(AppColor.grayscale100)
+              .clipShape(RoundedRectangle(cornerRadius: 12))
+              .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 44)
+            .padding(.trailing, 20)
+          }
+        }
       }
     }
   }
@@ -180,20 +201,6 @@ private struct MenuTabs: View {
         }
         .buttonStyle(.plain)
       }
-    }
-  }
-}
-
-private struct BlankMenuView: View {
-  let title: String
-
-  var body: some View {
-    ZStack {
-      AppColor.grayscale100
-        .ignoresSafeArea()
-      Text(title)
-        .font(.pretendardTitle1)
-        .foregroundColor(AppColor.grayscale900)
     }
   }
 }

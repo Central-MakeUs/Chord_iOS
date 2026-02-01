@@ -1,9 +1,11 @@
 import ComposableArchitecture
 import CoreModels
+import DataLayer
 import Foundation
 
 @Reducer
 public struct MenuEditFeature {
+  @Dependency(\.menuRepository) var menuRepository
   public struct State: Equatable {
     let item: MenuItem
     var menuName: String
@@ -20,6 +22,29 @@ public struct MenuEditFeature {
       menuPrice = MenuEditFeature.formattedPrice(from: item.price)
       prepareTime = "1분 30초"
       selectedCategory = item.category
+    }
+    
+    public var categories: [MenuCategory] {
+      [.beverage, .food, .dessert]
+    }
+    
+    public var prepareTimeMinutes: Int {
+      let components = prepareTime.components(separatedBy: "분")
+      guard let firstPart = components.first,
+            let minutes = Int(firstPart.trimmingCharacters(in: .whitespaces)) else {
+        return 1
+      }
+      return minutes
+    }
+    
+    public var prepareTimeSeconds: Int {
+      let components = prepareTime.components(separatedBy: "분")
+      guard components.count > 1 else { return 30 }
+      let secondPart = components[1].replacingOccurrences(of: "초", with: "")
+      guard let seconds = Int(secondPart.trimmingCharacters(in: .whitespaces)) else {
+        return 30
+      }
+      return seconds
     }
   }
 
@@ -53,22 +78,51 @@ public struct MenuEditFeature {
       case let .menuNameUpdated(name):
         state.menuName = name
         state.isNameEditPresented = false
-        return .none
+        
+        guard let apiId = state.item.apiId else { return .none }
+        let request = MenuNameUpdateRequest(menuName: name)
+        return .run { send in
+          try await menuRepository.updateMenuName(apiId, request)
+        }
       case let .menuPriceUpdated(price):
         state.menuPrice = price
         state.isPriceEditPresented = false
-        return .none
+        
+        guard let apiId = state.item.apiId else { return .none }
+        let numericPrice = price.replacingOccurrences(of: ",", with: "")
+        guard let priceValue = Double(numericPrice) else { return .none }
+        let request = MenuPriceUpdateRequest(sellingPrice: priceValue)
+        return .run { send in
+          try await menuRepository.updateMenuPrice(apiId, request)
+        }
       case let .prepareTimeUpdated(minutes, seconds):
         state.prepareTime = "\(minutes)분 \(seconds)초"
         state.isPrepareTimePresented = false
-        return .none
+        
+        guard let apiId = state.item.apiId else { return .none }
+        let totalSeconds = minutes * 60 + seconds
+        let request = MenuWorktimeUpdateRequest(workTime: totalSeconds)
+        return .run { send in
+          try await menuRepository.updateWorkTime(apiId, request)
+        }
       case .prepareTimeTapped:
         state.isPrepareTimePresented = true
         return .none
       case let .categorySelected(category):
         state.selectedCategory = category
-        return .none
-      case .deleteTapped, .backTapped:
+        
+        guard let apiId = state.item.apiId else { return .none }
+        let categoryCode = categoryToCode(category)
+        let request = MenuCategoryUpdateRequest(category: categoryCode)
+        return .run { send in
+          try await menuRepository.updateMenuCategory(apiId, request)
+        }
+      case .deleteTapped:
+        guard let apiId = state.item.apiId else { return .none }
+        return .run { send in
+          try await menuRepository.deleteMenu(apiId)
+        }
+      case .backTapped:
         return .none
       }
     }
@@ -82,5 +136,14 @@ private extension MenuEditFeature {
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
     return formatter.string(from: NSNumber(value: number)) ?? digits
+  }
+  
+  func categoryToCode(_ category: MenuCategory) -> String {
+    switch category {
+    case .all: return "ALL"
+    case .beverage: return "BEVERAGE"
+    case .food: return "FOOD"
+    case .dessert: return "DESSERT"
+    }
   }
 }

@@ -13,7 +13,6 @@
 		0D4A79237285A674701C0F44 /* IngredientSupplierSheetFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 675A8C0FAC25803800D763F9 /* IngredientSupplierSheetFeature.swift */; };
 		0D710EAC4D771135894DF41D /* SwiftUINavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 147B93A81D53873DA3269D29 /* SwiftUINavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		15855E62807E14A8B144A8F7 /* Pretendard-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 2523C90CE890976FF576C200 /* Pretendard-SemiBold.otf */; };
-		158ECD38BFE9CBC43022A155 /* IngredientSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F3782E75F1B7BD22422F0D19 /* IngredientSearchView.swift */; };
 		16D09078F30B49563660758D /* IngredientEditSheetFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 433404FC19AB17B8B3059D47 /* IngredientEditSheetFeature.swift */; };
 		17FBCAA40DD2E9B592EBE4FE /* ComposableArchitecture.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 782ECD506F16B00CEBAA7F7A /* ComposableArchitecture.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1D3F355CEEE232592EA24973 /* Clocks.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9AB52C51CC0C3DB90B2E377F /* Clocks.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -39,8 +38,10 @@
 		7398C25B341F4820927F503A /* CoreModels.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 29C6B22CC272B5B22DCBADD5 /* CoreModels.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		74BC172E13DB582EF532819D /* DataLayer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 78E6F1BCC75E05FF1E4412C6 /* DataLayer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		7F9AB0D864D3DE1291F05D6C /* CasePathsCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = AA17D13EFDDEEE233EEFE6CC /* CasePathsCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		87B8FBD1CC005CD1152410E1 /* IngredientSearchFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 14DFDDC2C85ED9473601BE4F /* IngredientSearchFeature.swift */; };
 		91C4DF1F546AAE4833B21D30 /* InternalCollectionsUtilities.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = CC04C69415C1741330B57913 /* InternalCollectionsUtilities.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		934711C82D13C400477240B0 /* IssueReporting.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 4061AAA5E2BD1EC1333F398E /* IssueReporting.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		96BCA613D8850FA468E88025 /* IngredientSearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4733068E6AA2CB63A0B1976 /* IngredientSearchView.swift */; };
 		9AF6DD9E1FC5E478EDE2E412 /* IngredientDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC7E59AE901236ECFC151D12 /* IngredientDetailView.swift */; };
 		9E9338BA5769854E5A40FBB6 /* Pretendard-Black.otf in Resources */ = {isa = PBXBuildFile; fileRef = 1729AFCC05A3B133FF1E9DD5 /* Pretendard-Black.otf */; };
 		A50E0E8DF9BC01EF018D6CCA /* IngredientsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6BD49AA2AF37DE3F1228D215 /* IngredientsView.swift */; };
@@ -136,6 +137,7 @@
 		113C6FA49A069DDBA79AA90A /* TuistFonts+FeatureIngredientsDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistFonts+FeatureIngredientsDemo.swift"; sourceTree = "<group>"; };
 		11C857051FBC4BD79DAEA3AE /* Sharing.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sharing.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		147B93A81D53873DA3269D29 /* SwiftUINavigation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftUINavigation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		14DFDDC2C85ED9473601BE4F /* IngredientSearchFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientSearchFeature.swift; sourceTree = "<group>"; };
 		1729AFCC05A3B133FF1E9DD5 /* Pretendard-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Black.otf"; sourceTree = "<group>"; };
 		1CBF8A79BDFB08BDE9484AD9 /* SwiftNavigation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftNavigation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E34DA258CEBF9E33E3ACDF3 /* Sharing1.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sharing1.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -177,11 +179,11 @@
 		CC04C69415C1741330B57913 /* InternalCollectionsUtilities.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = InternalCollectionsUtilities.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		CC7E59AE901236ECFC151D12 /* IngredientDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientDetailView.swift; sourceTree = "<group>"; };
 		D0B5CBEA965932C79C539E99 /* FeatureIngredientsDemo-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "FeatureIngredientsDemo-Info.plist"; sourceTree = "<group>"; };
+		D4733068E6AA2CB63A0B1976 /* IngredientSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientSearchView.swift; sourceTree = "<group>"; };
 		D483207044096BAE7106CE45 /* TuistAssets+FeatureIngredientsDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+FeatureIngredientsDemo.swift"; sourceTree = "<group>"; };
 		E56DA2D80864A49F803CC0C8 /* Pretendard-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Regular.otf"; sourceTree = "<group>"; };
 		E9845E1F30936EE1D358B2AD /* FeatureIngredientsDemo.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = FeatureIngredientsDemo.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EFECC310C7422CB8FAF13D32 /* UIKitNavigationShim.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = UIKitNavigationShim.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F3782E75F1B7BD22422F0D19 /* IngredientSearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientSearchView.swift; sourceTree = "<group>"; };
 		F45FE55FD28901EAEC097E65 /* CustomDump.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CustomDump.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F7661DAAAA4ADFB0875738C6 /* Pretendard-ExtraBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraBold.otf"; sourceTree = "<group>"; };
 		F8B795ED5B5FE138CE294B0D /* FeatureIngredientsDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureIngredientsDemoApp.swift; sourceTree = "<group>"; };
@@ -261,6 +263,15 @@
 				6C4FDC52C44713346B2475F9 /* XCTestDynamicOverlay.framework */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		482BFB89C7AE043B684094D9 /* IngredientSearch */ = {
+			isa = PBXGroup;
+			children = (
+				14DFDDC2C85ED9473601BE4F /* IngredientSearchFeature.swift */,
+				D4733068E6AA2CB63A0B1976 /* IngredientSearchView.swift */,
+			);
+			path = IngredientSearch;
 			sourceTree = "<group>";
 		};
 		58AADC3D74AB385F1A1011E3 /* IngredientEditSheet */ = {
@@ -351,6 +362,7 @@
 				AEE922F4CC87AC82ABF39CE7 /* IngredientDetail */,
 				58AADC3D74AB385F1A1011E3 /* IngredientEditSheet */,
 				E811DBC8CBDE5C76FDDF963A /* Ingredients */,
+				482BFB89C7AE043B684094D9 /* IngredientSearch */,
 				E6D0F4CAF7AB943EB48398A4 /* IngredientSupplierSheet */,
 				403931EA0F4DA29EE674AB19 /* IngredientsRoute.swift */,
 			);
@@ -378,7 +390,6 @@
 		E811DBC8CBDE5C76FDDF963A /* Ingredients */ = {
 			isa = PBXGroup;
 			children = (
-				F3782E75F1B7BD22422F0D19 /* IngredientSearchView.swift */,
 				6DF58BA95042FD98500372F4 /* IngredientsFeature.swift */,
 				6BD49AA2AF37DE3F1228D215 /* IngredientsView.swift */,
 			);
@@ -517,9 +528,10 @@
 				9AF6DD9E1FC5E478EDE2E412 /* IngredientDetailView.swift in Sources */,
 				16D09078F30B49563660758D /* IngredientEditSheetFeature.swift in Sources */,
 				BB1562DAACE4083AAE4514F7 /* IngredientEditSheetView.swift in Sources */,
+				87B8FBD1CC005CD1152410E1 /* IngredientSearchFeature.swift in Sources */,
+				96BCA613D8850FA468E88025 /* IngredientSearchView.swift in Sources */,
 				0D4A79237285A674701C0F44 /* IngredientSupplierSheetFeature.swift in Sources */,
 				CDF9F36D15A3CFD6CB28A185 /* IngredientSupplierSheetView.swift in Sources */,
-				158ECD38BFE9CBC43022A155 /* IngredientSearchView.swift in Sources */,
 				0035E609D71F0822CC97EC36 /* IngredientsFeature.swift in Sources */,
 				A50E0E8DF9BC01EF018D6CCA /* IngredientsView.swift in Sources */,
 				AD860D519B9B4C3B8B159D20 /* IngredientsRoute.swift in Sources */,

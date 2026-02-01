@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 56;
+	objectVersion = 55;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -28,6 +28,7 @@
 		41E87BC371DF89E171055CD8 /* MenuIngredientsFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 556E39917087818813DE2012 /* MenuIngredientsFeature.swift */; };
 		4375A963A883472469B6ABEC /* MenuManageSheetFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = E797864F952771AF758D07FF /* MenuManageSheetFeature.swift */; };
 		44E92962A850F5F34D6ACD83 /* MenuPriceEditSheetFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 39A0872B081F20386A4A4ACA /* MenuPriceEditSheetFeature.swift */; };
+		48922CDD4ABDDF9385776CA9 /* FeatureMenuRegistration.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 42ED6FB79B31E9567D175A43 /* FeatureMenuRegistration.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		49452881586B9AC2F0EDC972 /* DesignSystem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 7763CCDF9222A2DD292961BC /* DesignSystem.framework */; };
 		4955A1DF7F7FD489E00D6CA1 /* Perception.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2F9EB330FE6E6584D3326025 /* Perception.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		49AAD4CF8A93CA54118DFBB9 /* UIKitNavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 546AB3EAD53D223DF36DAAAC /* UIKitNavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -72,6 +73,7 @@
 		EC365BFDDB07038D5CCCB838 /* PretendardVariable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4033C9CBB6932DCB46FE6DC0 /* PretendardVariable.ttf */; };
 		F056EBE62CDE13F90A44E8F3 /* CoreModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4E58D7BAC46A7AD1D5D3F3F8 /* CoreModels.framework */; };
 		F2804D6160FFA7F58C9FB559 /* FeatureMenu.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 71C49C60DDBCE506BAE2AF2F /* FeatureMenu.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		F3333BAB7537F4DC6659AF2D /* FeatureMenuRegistration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 42ED6FB79B31E9567D175A43 /* FeatureMenuRegistration.framework */; };
 		F44D43B493FCE4A8C2809647 /* Pretendard-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = CF03F32EB43DFDD93C616348 /* Pretendard-Light.otf */; };
 		FC75F30F2DE18494E63FDA01 /* Sharing2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 367E9F77F13E841F8A045C5C /* Sharing2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		FE3D6E221E31D7852B1B3995 /* TuistBundle+FeatureMenuDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8107C8808688A48A84D3F669 /* TuistBundle+FeatureMenuDemo.swift */; };
@@ -116,6 +118,7 @@
 				9BF3C9C22F9CFCF2286B4B0C /* Dependencies.framework in Embed Frameworks */,
 				5601A49CF120AD2193E3C665 /* DesignSystem.framework in Embed Frameworks */,
 				F2804D6160FFA7F58C9FB559 /* FeatureMenu.framework in Embed Frameworks */,
+				48922CDD4ABDDF9385776CA9 /* FeatureMenuRegistration.framework in Embed Frameworks */,
 				0ECA6F87C1AEEC5932CBF7A3 /* IdentifiedCollections.framework in Embed Frameworks */,
 				6080E237C46DEB7210D8EE7C /* InternalCollectionsUtilities.framework in Embed Frameworks */,
 				AA234A8C38E68E9CB8A8BD48 /* IssueReporting.framework in Embed Frameworks */,
@@ -148,6 +151,7 @@
 		39A0872B081F20386A4A4ACA /* MenuPriceEditSheetFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuPriceEditSheetFeature.swift; sourceTree = "<group>"; };
 		3DD672DBE8DD04AD63DC9DA7 /* ComposableArchitecture.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ComposableArchitecture.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4033C9CBB6932DCB46FE6DC0 /* PretendardVariable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = PretendardVariable.ttf; sourceTree = "<group>"; };
+		42ED6FB79B31E9567D175A43 /* FeatureMenuRegistration.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FeatureMenuRegistration.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		49ADB9E75936BD9C4D912F84 /* MenuRouter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuRouter.swift; sourceTree = "<group>"; };
 		4B1627AF9B42B9D978914172 /* Pretendard-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Regular.otf"; sourceTree = "<group>"; };
 		4E58D7BAC46A7AD1D5D3F3F8 /* CoreModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -223,6 +227,7 @@
 				F056EBE62CDE13F90A44E8F3 /* CoreModels.framework in Frameworks */,
 				D3472F0EFD12D1AFAE9AAC89 /* DataLayer.framework in Frameworks */,
 				49452881586B9AC2F0EDC972 /* DesignSystem.framework in Frameworks */,
+				F3333BAB7537F4DC6659AF2D /* FeatureMenuRegistration.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -408,6 +413,7 @@
 				7763CCDF9222A2DD292961BC /* DesignSystem.framework */,
 				71C49C60DDBCE506BAE2AF2F /* FeatureMenu.framework */,
 				B2DE9CF9F70614FBB1B8269A /* FeatureMenuDemo.app */,
+				42ED6FB79B31E9567D175A43 /* FeatureMenuRegistration.framework */,
 				01F55FBFE19B3216ACC0FEDD /* IdentifiedCollections.framework */,
 				791A2118507EC647FF410694 /* InternalCollectionsUtilities.framework */,
 				C6DA3397EB03F2B56ACC67EC /* IssueReporting.framework */,
@@ -505,6 +511,8 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				ORGANIZATIONNAME = CoachCoach;
+				TargetAttributes = {
+				};
 			};
 			buildConfigurationList = 17C9B658F75D1DD642A360AA /* Build configuration list for PBXProject "FeatureMenu" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -610,7 +618,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = YH4A87H8M4;
 				ENABLE_DEBUG_DYLIB = YES;
 				ENABLE_PREVIEWS = YES;
 				HEADER_SEARCH_PATHS = (
@@ -629,7 +636,21 @@
 					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
 					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/CasePathsMacros#CasePathsMacros -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/ComposableArchitectureMacros#ComposableArchitectureMacros -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros";
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/CasePathsMacros#CasePathsMacros",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/ComposableArchitectureMacros#ComposableArchitectureMacros",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoach.FeatureMenuDemo;
 				PRODUCT_NAME = FeatureMenuDemo;
 				SDKROOT = iphoneos;
@@ -669,7 +690,21 @@
 					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
 					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/CasePathsMacros#CasePathsMacros -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/ComposableArchitectureMacros#ComposableArchitectureMacros -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros";
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/CasePathsMacros#CasePathsMacros",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/ComposableArchitectureMacros#ComposableArchitectureMacros",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoach.FeatureMenu;
 				PRODUCT_NAME = FeatureMenu;
 				SDKROOT = iphoneos;
@@ -692,7 +727,6 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
-				DEVELOPMENT_TEAM = YH4A87H8M4;
 				ENABLE_DEBUG_DYLIB = YES;
 				ENABLE_PREVIEWS = YES;
 				HEADER_SEARCH_PATHS = (
@@ -711,14 +745,31 @@
 					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
 					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/CasePathsMacros#CasePathsMacros -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/ComposableArchitectureMacros#ComposableArchitectureMacros -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros";
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/CasePathsMacros#CasePathsMacros",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/ComposableArchitectureMacros#ComposableArchitectureMacros",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoach.FeatureMenuDemo;
 				PRODUCT_NAME = FeatureMenuDemo;
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 1;
@@ -806,7 +857,21 @@
 					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
 					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap",
 				);
-				OTHER_SWIFT_FLAGS = "$(inherited) -Xcc -fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap -Xcc -fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/CasePathsMacros#CasePathsMacros -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/ComposableArchitectureMacros#ComposableArchitectureMacros -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin -load-plugin-executable $BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros";
+				OTHER_SWIFT_FLAGS = (
+					"$(inherited)",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include/module.modulemap",
+					"-Xcc",
+					"-fmodule-map-file=$(SRCROOT)/../Tuist/.build/tuist-derived/UIKitNavigationShim/UIKitNavigationShim.modulemap",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/CasePathsMacros#CasePathsMacros",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/ComposableArchitectureMacros#ComposableArchitectureMacros",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/DependenciesMacrosPlugin#DependenciesMacrosPlugin",
+					"-load-plugin-executable",
+					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoach.FeatureMenu;
 				PRODUCT_NAME = FeatureMenu;
 				SDKROOT = iphoneos;
@@ -815,7 +880,10 @@
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFTUI_PREVIEW_HOST_APPLICATION = "$(BUILT_PRODUCTS_DIR)/FeatureMenuDemo.app/FeatureMenuDemo";
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = (
+					"$(inherited)",
+					DEBUG,
+				);
 				SWIFT_COMPILATION_MODE = singlefile;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				TARGETED_DEVICE_FAMILY = 1;

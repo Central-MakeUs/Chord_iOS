@@ -49,6 +49,7 @@ let project = Project(
         .project(target: "CoreModels", path: "../CoreModels"),
         .project(target: "DataLayer", path: "../DataLayer"),
         .project(target: "DesignSystem", path: "../DesignSystem"),
+        .project(target: "FeatureMenuRegistration", path: "../FeatureMenuRegistration"),
         .external(name: "ComposableArchitecture")
       ],
       settings: .settings(

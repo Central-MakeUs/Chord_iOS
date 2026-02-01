@@ -1,5 +1,9 @@
 # Code Conventions
 
+## Communication
+- **Language**: 모든 설명과 문서는 **한국어**를 기본으로 작성합니다.
+  - 기술적인 정확성을 위해 필요한 경우 **영어** 단어나 문장을 혼용하여 사용합니다. (e.g., `feature`, `repository`, `commit message`)
+
 ## Naming
 
 ### Modules (Tuist)

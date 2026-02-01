@@ -9,11 +9,12 @@ struct FeatureMenuRegistrationDemoApp: App {
       NavigationStack {
         List {
           Section("Ultrawork") {
-            NavigationLink("메뉴 등록 Step 1") {
-              MenuRegistrationStep1View()
-            }
-            NavigationLink("메뉴 등록 Step 2") {
-              MenuRegistrationStep2View()
+            NavigationLink("메뉴 등록 (Step 플로우)") {
+              MenuRegistrationView(
+                store: Store(initialState: MenuRegistrationFeature.State()) {
+                  MenuRegistrationFeature()
+                }
+              )
             }
           }
           Section("Existing") {

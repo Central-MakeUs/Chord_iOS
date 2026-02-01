@@ -1,233 +1,231 @@
 import SwiftUI
+import ComposableArchitecture
+import CoreModels
 import DesignSystem
 
 public struct MenuRegistrationStep1View: View {
-  @Environment(\.dismiss) private var dismiss
-  @State private var menuName: String = ""
-  @State private var price: String = ""
-  @State private var selectedCategory: String = "음료"
-  @State private var showSuggestions: Bool = false
-  @State private var isTemplateApplied: Bool = false
-  @State private var showTemplateSheet: Bool = false
-  
-  private let allMenuTemplates = [
-    "흑임자라떼", "흑임자스콘", "흑임자케이크", "흑임자우유",
-    "아메리카노", "아이스티", "에스프레소", "카푸치노",
-    "카페라떼", "바닐라라떼", "카라멜마키아또", "녹차라떼"
-  ]
-  
-  private var filteredTemplates: [String] {
-    if menuName.isEmpty {
-      return []
-    }
-    return allMenuTemplates.filter { $0.hasPrefix(menuName) }
+  let store: StoreOf<MenuRegistrationFeature>
+
+  public init(store: StoreOf<MenuRegistrationFeature>) {
+    self.store = store
   }
-  
-  public init() {}
-  
+
   public var body: some View {
-    VStack(spacing: 0) {
-      NavigationTopBar(onBackTap: { dismiss() })
-      
-      HStack {
-        stepIndicator
-        Spacer()
-      }
-      .padding(.horizontal, 20)
-      .padding(.top, 24)
-      
-      nameInputSection
+    WithViewStore(store, observe: { $0 }) { viewStore in
+      VStack(spacing: 0) {
+        NavigationTopBar(onBackTap: { viewStore.send(.backTapped) })
+
+        HStack {
+          stepIndicator
+          Spacer()
+        }
         .padding(.horizontal, 20)
-        .padding(.top, 10)
-      
-      if showSuggestions {
-        suggestionList
-      } else {
-        ScrollView {
-          VStack(spacing: 24) {
-            if isTemplateApplied || !menuName.isEmpty {
-              filledContentSection
-            }
-          }
+        .padding(.top, 24)
+
+        nameInputSection(viewStore: viewStore)
           .padding(.horizontal, 20)
           .padding(.top, 10)
+
+        if viewStore.showSuggestions {
+          suggestionList(viewStore: viewStore)
+        } else {
+          ScrollView {
+            VStack(spacing: 0) {
+              if viewStore.isTemplateApplied || !viewStore.menuName.isEmpty {
+                filledContentSection(viewStore: viewStore)
+              }
+            }
+          }
+          
+          VStack(spacing: 20) {
+            if viewStore.isTemplateApplied {
+              templateAppliedBanner
+            }
+            
+            bottomButtons(viewStore: viewStore)
+          }
+          .padding(.horizontal, 20)
+          .padding(.bottom, 20)
         }
-        
-        bottomButtons
       }
-    }
-    .background(Color.white.ignoresSafeArea())
-    .sheet(isPresented: $showTemplateSheet) {
-      TemplateApplySheet(
-        onApply: {
-          showTemplateSheet = false
-          isTemplateApplied = true
-          showSuggestions = false
-          price = "6500"
-        },
-        onCancel: {
-          showTemplateSheet = false
-        }
-      )
-      .presentationDetents([.height(280)])
-    }
-    .onChange(of: menuName) { newValue in
-      if !newValue.isEmpty && !isTemplateApplied {
-        showSuggestions = true
-      } else {
-        showSuggestions = false
+      .background(Color.white.ignoresSafeArea())
+      .sheet(
+        isPresented: viewStore.binding(
+          get: \.showTemplateSheet,
+          send: MenuRegistrationFeature.Action.showTemplateSheetChanged
+        )
+      ) {
+        TemplateApplySheet(
+          menuName: viewStore.selectedTemplateName,
+          onApply: { viewStore.send(.applyTemplateTapped) },
+          onCancel: { viewStore.send(.cancelTemplateTapped) }
+        )
+        .presentationDetents([.height(280)])
+        .presentationBackground(Color.white)
       }
+      .navigationBarBackButtonHidden(true)
+      .toolbar(.hidden, for: .navigationBar)
     }
-    .navigationBarBackButtonHidden(true)
-    .toolbar(.hidden, for: .navigationBar)
   }
-  
+
   private var stepIndicator: some View {
     HStack(spacing: 2) {
-        Circle()
-          .fill(AppColor.primaryBlue500)
-          .overlay(
-            Text("1")
-              .font(.pretendardCaption2)
-              .foregroundColor(.white)
-          )
-          .frame(width: 24, height: 24)
-        
-        Rectangle()
-          .fill(AppColor.grayscale300)
-          .frame(height: 2)
-        
-        Circle()
-          .fill(AppColor.grayscale300)
-          .frame(width: 24, height: 24)
-          .overlay(
-            Text("2")
-              .font(.pretendardCaption2)
-          .foregroundColor(.white)
+      Circle()
+        .fill(AppColor.primaryBlue500)
+        .overlay(
+          Text("1")
+            .font(.pretendardCaption2)
+            .foregroundColor(.white)
+        )
+        .frame(width: 24, height: 24)
+
+      Rectangle()
+        .fill(AppColor.grayscale300)
+        .frame(height: 2)
+
+      Circle()
+        .fill(AppColor.grayscale300)
+        .frame(width: 24, height: 24)
+        .overlay(
+          Text("2")
+            .font(.pretendardCaption2)
+            .foregroundColor(.white)
         )
     }
     .frame(width: 70)
   }
-  
-  private var nameInputSection: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      //TODO: 이거 피그마랑 다름
-//      if menuName.isEmpty {
-//        Text("등록하실 메뉴명을 입력해주세요")
-//          .font(.pretendardCaption2)
-//          .foregroundColor(AppColor.primaryBlue500)
-//          .padding(.horizontal, 12)
-//          .padding(.vertical, 8)
-//          .background(AppColor.primaryBlue100)
-//          .cornerRadius(8)
-//          .padding(.bottom, -4)
-//      }
-//      
+
+  private func nameInputSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
+    VStack(alignment: .leading, spacing: 24) {
       UnderlinedTextField(
-        text: $menuName,
+        text: viewStore.binding(
+          get: \.menuName,
+          send: MenuRegistrationFeature.Action.menuNameChanged
+        ),
         title: "메뉴명",
         placeholder: "예)아메리카노",
         titleColor: AppColor.grayscale900,
-        trailingIcon: !menuName.isEmpty ? Image.cancelRoundedIcon : nil,
+        trailingIcon: !viewStore.menuName.isEmpty ? Image.cancelRoundedIcon : nil,
         onTrailingTap: {
-          menuName = ""
-          isTemplateApplied = false
-          showSuggestions = false
+          viewStore.send(.clearMenuNameTapped)
         }
       )
-    }
-  }
-  
-  private var filledContentSection: some View {
-    VStack(alignment: .leading, spacing: 24) {
-      
-      if isTemplateApplied {
-        HStack {
-          Image.infoFilledIcon
-            .renderingMode(.template)
-            .foregroundColor(AppColor.primaryBlue500)
-          Text("템플릿이 적용됐어요")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.primaryBlue500)
-          Spacer()
-        }
-        .padding(12)
-        .background(AppColor.primaryBlue100)
-        .cornerRadius(8)
-      } else {
-        HStack {
-          Text("템플릿 없는 메뉴 입력")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale600)
-          Spacer()
-          Button(action: {}) {
-            Text("직접입력")
-              .font(.pretendardCaption1)
-              .foregroundColor(AppColor.grayscale500)
-              .underline()
-          }
-        }
-      }
       
       UnderlinedTextField(
-        text: $price,
+        text: viewStore.binding(
+          get: \.price,
+          send: MenuRegistrationFeature.Action.priceChanged
+        ),
         title: "가격",
         placeholder: "가격을 입력해주세요",
         keyboardType: .numberPad
       )
+    }
+  }
+
+  private func filledContentSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+      Color(uiColor: .systemGray6)
+        .frame(height: 8)
+        .padding(.top, 24)
       
-      VStack(alignment: .leading, spacing: 12) {
-        Text("카테고리")
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale900)
-        
-        HStack(spacing: 8) {
-          ForEach(["음료", "디저트", "푸드"], id: \.self) { category in
-            Button(action: { selectedCategory = category }) {
-              Text(category)
-                .font(.pretendardCaption1)
-                .foregroundColor(selectedCategory == category ? AppColor.primaryBlue500 : AppColor.grayscale600)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .background(
-                  RoundedRectangle(cornerRadius: 100)
-                    .fill(selectedCategory == category ? AppColor.primaryBlue100 : AppColor.grayscale100)
-                )
-                .overlay(
-                  RoundedRectangle(cornerRadius: 100)
-                    .stroke(selectedCategory == category ? AppColor.primaryBlue500 : Color.clear, lineWidth: 1)
-                )
+      VStack(alignment: .leading, spacing: 24) {
+        VStack(alignment: .leading, spacing: 16) {
+          Text("카테고리")
+            .font(.pretendardBody2)
+            .foregroundColor(AppColor.grayscale900)
+
+          VStack(alignment: .leading, spacing: 16) {
+            categoryRadioButton(label: "음료", isSelected: viewStore.selectedCategory == "음료") {
+              viewStore.send(.categorySelected("음료"))
+            }
+            categoryRadioButton(label: "디저트", isSelected: viewStore.selectedCategory == "디저트") {
+              viewStore.send(.categorySelected("디저트"))
+            }
+            categoryRadioButton(label: "푸드", isSelected: viewStore.selectedCategory == "푸드") {
+              viewStore.send(.categorySelected("푸드"))
             }
           }
         }
+        .padding(.top, 24)
+
+        HStack {
+          Text("제조시간")
+            .font(.pretendardBody2)
+            .foregroundColor(AppColor.grayscale900)
+          Spacer()
+          HStack(spacing: 4) {
+            Text(viewStore.workTimeText)
+              .font(.pretendardBody2)
+              .foregroundColor(AppColor.grayscale900)
+            Image.chevronRightOutlineIcon
+              .renderingMode(.template)
+              .foregroundColor(AppColor.grayscale500)
+          }
+        }
+        .padding(16)
+        .background(Color(uiColor: .systemGray6))
+        .cornerRadius(12)
+        .padding(.top, 8)
       }
-      
-      HStack {
-        Text("제조시간")
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale900)
-        Spacer()
-        Text("1분 30초")
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale900)
-        Image.chevronRightOutlineIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale500)
-      }
-      .padding(.vertical, 12)
-      .background(Color.white)
-      .onTapGesture {
-      }
+      .padding(.horizontal, 20)
     }
   }
   
-  private var suggestionList: some View {
+  private func categoryRadioButton(label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    Button(action: action) {
+      HStack(spacing: 12) {
+        ZStack {
+          Circle()
+            .stroke(isSelected ? AppColor.primaryBlue500 : AppColor.grayscale300, lineWidth: 1.5)
+            .frame(width: 20, height: 20)
+          
+          if isSelected {
+            Circle()
+              .fill(AppColor.primaryBlue500)
+              .frame(width: 10, height: 10)
+          }
+        }
+        
+        Text(label)
+          .font(.pretendardBody2)
+          .foregroundColor(isSelected ? AppColor.primaryBlue500 : AppColor.grayscale900)
+      }
+    }
+    .buttonStyle(.plain)
+  }
+  
+  private var templateAppliedBanner: some View {
+    HStack(spacing: 8) {
+      ZStack {
+        Circle()
+          .fill(AppColor.primaryBlue500)
+          .frame(width: 20, height: 20)
+        
+        Image(systemName: "checkmark")
+          .font(.system(size: 10, weight: .bold))
+          .foregroundColor(.white)
+      }
+      
+      Text("템플릿이 적용됐어요")
+        .font(.pretendardBody2)
+        .foregroundColor(.white)
+      
+      Spacer()
+    }
+    .padding(.horizontal, 16)
+    .padding(.vertical, 14)
+    .background(AppColor.grayscale700)
+    .cornerRadius(12)
+  }
+
+  private func suggestionList(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     VStack(spacing: 0) {
       Divider()
-      
+
       ScrollView {
         VStack(spacing: 0) {
-          if filteredTemplates.isEmpty {
+          if viewStore.searchResults.isEmpty {
             HStack {
               Image.searchIcon
                 .renderingMode(.template)
@@ -240,18 +238,16 @@ public struct MenuRegistrationStep1View: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 32)
           } else {
-            ForEach(filteredTemplates, id: \.self) { item in
+            ForEach(viewStore.searchResults, id: \.templateId) { item in
               Button(action: {
-                menuName = item
-                showSuggestions = false
-                showTemplateSheet = true
+                viewStore.send(.templateSelected(item))
               }) {
                 HStack(spacing: 8) {
-                  highlightedText(for: item, query: menuName)
+                  highlightedText(for: item.menuName, query: viewStore.menuName)
                     .font(.pretendardBody2)
-                  
+
                   Spacer()
-                  
+
                   Image.plusCircleBlueIcon
                     .resizable()
                     .frame(width: 24, height: 24)
@@ -261,8 +257,8 @@ public struct MenuRegistrationStep1View: View {
                 .contentShape(Rectangle())
               }
               .buttonStyle(.plain)
-              
-              if item != filteredTemplates.last {
+
+              if item.templateId != viewStore.searchResults.last?.templateId {
                 Divider().padding(.horizontal, 20)
               }
             }
@@ -272,42 +268,36 @@ public struct MenuRegistrationStep1View: View {
     }
     .background(Color.white)
   }
-  
-  private var bottomButtons: some View {
+
+  private func bottomButtons(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     HStack(spacing: 8) {
       BottomButton(
         title: "이전",
         style: .secondary
       ) {
-        
+        viewStore.send(.previousStepTapped)
       }
-      
+
       BottomButton(
         title: "다음",
         style: .primary
       ) {
-        
+        viewStore.send(.nextStepTapped)
       }
     }
-    .padding(.horizontal, 20)
-    .padding(.bottom, 20)
   }
-  
+
   private func highlightedText(for text: String, query: String) -> Text {
     guard query.count > 0, text.hasPrefix(query) else {
       return Text(text).foregroundColor(AppColor.grayscale900)
     }
-    
+
     let matchedPart = String(text.prefix(query.count))
     let remainingPart = String(text.dropFirst(query.count))
-    
+
     return Text(matchedPart)
       .foregroundColor(AppColor.grayscale500)
       + Text(remainingPart)
       .foregroundColor(AppColor.grayscale900)
   }
-}
-
-#Preview {
-  MenuRegistrationStep1View()
 }

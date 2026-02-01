@@ -36,7 +36,9 @@
 		8431F07E32123827578E2522 /* Pretendard-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = C175BF4E172656BFBF217456 /* Pretendard-Medium.otf */; };
 		85D8FA62497664855F50336B /* MenuRegistrationStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509ED58A0521D6ADCD866F02 /* MenuRegistrationStartView.swift */; };
 		92384FEB5B2686073F4AAE23 /* TemplateApplySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0B9C2D4DEF71152E91050D /* TemplateApplySheet.swift */; };
+		97501CB5560B295810C4B640 /* CoreModels.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 90E4675C99CF8A8DB37933AA /* CoreModels.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A08E52B0C93D40D714B5B282 /* FeatureMenuRegistration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 212CBFE2FBB91967DBD12D34 /* FeatureMenuRegistration.framework */; };
+		A3E763B9DBB874AC644BA79E /* CoreModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 90E4675C99CF8A8DB37933AA /* CoreModels.framework */; };
 		A976B1E42F541B3818F71382 /* Sharing.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = BC3622BD509AFFBA1C0EF446 /* Sharing.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		AC71980E153CC000B976588E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 6CD31E50B5DE586CF537D619 /* Assets.xcassets */; };
 		AF2849FD7448D3395816A7A6 /* UIKitNavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 3E3C6119271C6F0DF0DD0CDA /* UIKitNavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -47,9 +49,11 @@
 		CA4C56FFBF0C2EC8F59F4F97 /* Pretendard-ExtraBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 338CC5836EE31D1FD2A689ED /* Pretendard-ExtraBold.otf */; };
 		CA97E981A93B5BD3F5DB969E /* FeatureMenuRegistration.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 212CBFE2FBB91967DBD12D34 /* FeatureMenuRegistration.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CCC30B9F91263165F7F89DA3 /* IdentifiedCollections.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1D2820FA42D53875E4480936 /* IdentifiedCollections.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		CD3702FBE08088D62D3E6EED /* DataLayer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6E5BE447B7B809861D472BA7 /* DataLayer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		CF85BEF38B1418029D8EE2E9 /* Pretendard-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = 611C67BA476197BBEB6AA70C /* Pretendard-Light.otf */; };
 		D01A586440246F2BC90DCCAE /* Sharing1.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = DA2E4336509F53A9D3B9471C /* Sharing1.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		D7C4ACC8C33F09ADFB7C05FE /* Clocks.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 8B51AC4E9921573F7FC4D824 /* Clocks.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		DF83D5B162E2C8F8C7E065C3 /* DataLayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E5BE447B7B809861D472BA7 /* DataLayer.framework */; };
 		DFB6C3F6845305827C6B8F0C /* TuistFonts+FeatureMenuRegistrationDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0496E77B42CD9F1E8BF05BA1 /* TuistFonts+FeatureMenuRegistrationDemo.swift */; };
 		E106DDCE666ECC0B645F361A /* SwiftNavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 030A403CF329AC6465DE15EC /* SwiftNavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E4077D0FF835A52969602D6C /* OrderedCollections.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2DE6D8B2645D7183ED8F3E89 /* OrderedCollections.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -85,7 +89,9 @@
 				1547DDB763B2622178DE405C /* CombineSchedulers.framework in Embed Frameworks */,
 				E6685199A28674DF802A820E /* ComposableArchitecture.framework in Embed Frameworks */,
 				3823C2296A6A37FA35459702 /* ConcurrencyExtras.framework in Embed Frameworks */,
+				97501CB5560B295810C4B640 /* CoreModels.framework in Embed Frameworks */,
 				FFA55E976168A590C702D852 /* CustomDump.framework in Embed Frameworks */,
+				CD3702FBE08088D62D3E6EED /* DataLayer.framework in Embed Frameworks */,
 				5F0A8E33B0EBD6025DFB7F73 /* Dependencies.framework in Embed Frameworks */,
 				8076CF22EB0D47EA43BA8041 /* DesignSystem.framework in Embed Frameworks */,
 				CA97E981A93B5BD3F5DB969E /* FeatureMenuRegistration.framework in Embed Frameworks */,
@@ -146,6 +152,7 @@
 		5D03631DC78A110476C96314 /* Perception.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Perception.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		611C67BA476197BBEB6AA70C /* Pretendard-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Light.otf"; sourceTree = "<group>"; };
 		6CD31E50B5DE586CF537D619 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		6E5BE447B7B809861D472BA7 /* DataLayer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataLayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7DC7B268D42D66757AF5B92D /* CustomDump.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CustomDump.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		7E574BB04C0B5D44823171E5 /* Pretendard-Black.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Black.otf"; sourceTree = "<group>"; };
 		80E8B14F2A9E8C92D3194977 /* ConcurrencyExtras.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ConcurrencyExtras.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -153,6 +160,7 @@
 		83CA5C5FE55BA0E390CCC3B8 /* SwiftUINavigation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftUINavigation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8B51AC4E9921573F7FC4D824 /* Clocks.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Clocks.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8C48CB3B2C6AD07C2108D179 /* IngredientDetailSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientDetailSheet.swift; sourceTree = "<group>"; };
+		90E4675C99CF8A8DB37933AA /* CoreModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		912F3AB520B37D96CB3F8625 /* PerceptionCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PerceptionCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		93235782BF19BA9D560C8DBA /* MenuRegistrationStep1View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuRegistrationStep1View.swift; sourceTree = "<group>"; };
 		9F1993D0AC496BD1B4694890 /* Pretendard-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Regular.otf"; sourceTree = "<group>"; };
@@ -181,6 +189,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				64D956090471B96F1EF761DC /* ComposableArchitecture.framework in Frameworks */,
+				A3E763B9DBB874AC644BA79E /* CoreModels.framework in Frameworks */,
+				DF83D5B162E2C8F8C7E065C3 /* DataLayer.framework in Frameworks */,
 				25384FC96FFB7B7626C4515B /* DesignSystem.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -223,7 +233,9 @@
 				108EA496EBFFAE8FCB19A72D /* CombineSchedulers.framework */,
 				4AFA6015B86E743C87A1CB76 /* ComposableArchitecture.framework */,
 				80E8B14F2A9E8C92D3194977 /* ConcurrencyExtras.framework */,
+				90E4675C99CF8A8DB37933AA /* CoreModels.framework */,
 				7DC7B268D42D66757AF5B92D /* CustomDump.framework */,
+				6E5BE447B7B809861D472BA7 /* DataLayer.framework */,
 				D7E473617165CC2ED63DBF3D /* Dependencies.framework */,
 				1DB9E44101BC25F2D0E51DFF /* DesignSystem.framework */,
 				212CBFE2FBB91967DBD12D34 /* FeatureMenuRegistration.framework */,

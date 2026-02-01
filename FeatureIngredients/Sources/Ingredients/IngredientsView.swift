@@ -12,11 +12,7 @@ public struct IngredientsView: View {
 
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
-      let filtered = filteredIngredients(
-        searchText: viewStore.searchText,
-        items: mockIngredients
-      )
-      let totalCount = mockIngredients.count
+      let totalCount = viewStore.filteredIngredients.count
 
       NavigationStack(
         path: viewStore.binding(
@@ -25,69 +21,34 @@ public struct IngredientsView: View {
         )
       ) {
         ZStack {
-          if viewStore.isSearchMode {
-            AppColor.grayscale100
-              .ignoresSafeArea()
-            
-            VStack(spacing: 0) {
-              searchBar(viewStore: viewStore)
-              
-              if viewStore.searchText.isEmpty {
-                VStack(alignment: .leading, spacing: 16) {
-                  Text("최근 검색")
-                    .font(.pretendardBody2)
-                    .foregroundColor(AppColor.grayscale700)
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
-                  
-                  VStack(spacing: 0) {
-                    ForEach(viewStore.recentSearches, id: \.self) { keyword in
-                      recentSearchRow(keyword: keyword, viewStore: viewStore)
-                    }
-                  }
-                }
-              } else {
-                VStack(spacing: 12) {
-                  ForEach(viewStore.searchResults, id: \.self) { ingredientName in
-                    searchResultCell(name: ingredientName)
-                  }
-                }
-                .padding(.horizontal, 20)
-                .padding(.top, 20)
-              }
-              
-              Spacer()
-            }
-          } else {
-            AppColor.grayscale200
-              .ignoresSafeArea()
+          AppColor.grayscale200
+            .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-              header(totalCount: totalCount, viewStore: viewStore)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
-              
-              filterChips(
-                selected: viewStore.selectedSearch,
-                onSelect: { viewStore.send(.searchChipTapped($0)) }
-              )
+          VStack(spacing: 0) {
+            header(totalCount: totalCount, viewStore: viewStore)
               .padding(.horizontal, 20)
-              .padding(.top, 16)
-              .padding(.bottom, 16)
-              
-              ScrollView {
-                ingredientList(items: filtered)
-              }
-              .background(
-                Color.white
-                  .clipShape(
-                    UnevenRoundedRectangle(
-                      topLeadingRadius: 24,
-                      topTrailingRadius: 24
-                    )
-                  )
-              )
+              .padding(.vertical, 12)
+            
+            filterChips(
+              selected: viewStore.selectedSearch,
+              onSelect: { viewStore.send(.searchChipTapped($0)) }
+            )
+            .padding(.horizontal, 20)
+            .padding(.top, 16)
+            .padding(.bottom, 16)
+            
+            ScrollView {
+              ingredientList(items: viewStore.filteredIngredients)
             }
+            .background(
+              Color.white
+                .clipShape(
+                  UnevenRoundedRectangle(
+                    topLeadingRadius: 24,
+                    topTrailingRadius: 24
+                  )
+                )
+            )
           }
         }
         .navigationDestination(for: IngredientsRoute.self) { route in
@@ -101,11 +62,18 @@ public struct IngredientsView: View {
           case .add:
             EmptyView()
           case .search:
-            EmptyView()
+            IngredientSearchView(
+              store: Store(initialState: IngredientSearchFeature.State()) {
+                IngredientSearchFeature()
+              }
+            )
           }
         }
       }
       .toolbar(.hidden, for: .navigationBar)
+      .onAppear {
+        viewStore.send(.onAppear)
+      }
     }
   }
   
@@ -133,68 +101,8 @@ public struct IngredientsView: View {
     }
   }
   
-  private func searchBar(viewStore: ViewStoreOf<IngredientsFeature>) -> some View {
-    HStack(spacing: 12) {
-      HStack(spacing: 8) {
-        Image.searchIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale500)
-          .frame(width: 16, height: 16)
-        
-        TextField(
-          "",
-          text: viewStore.binding(
-            get: \.searchText,
-            send: IngredientsFeature.Action.searchTextChanged
-          ),
-          prompt: Text("재료명, 메뉴명으로 검색")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale500)
-        )
-        .font(.pretendardBody2)
-        .foregroundColor(AppColor.grayscale900)
-        .textInputAutocapitalization(.never)
-        .disableAutocorrection(true)
-      }
-      .padding(.horizontal, 12)
-      .padding(.vertical, 10)
-      .background(AppColor.grayscale200)
-      .clipShape(RoundedRectangle(cornerRadius: 8))
-      
-      Button(action: { viewStore.send(.cancelSearchTapped) }) {
-        Text("취소")
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale900)
-      }
-    }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 12)
-    .background(Color.white)
-  }
-  
-  private func recentSearchRow(keyword: String, viewStore: ViewStoreOf<IngredientsFeature>) -> some View {
-    HStack {
-      Text(keyword)
-        .font(.pretendardBody2)
-        .foregroundColor(AppColor.grayscale900)
-      
-      Spacer()
-      
-      Button(action: {
-        viewStore.send(.removeRecentSearch(keyword))
-      }) {
-        Image(systemName: "xmark")
-          .font(.system(size: 12, weight: .medium))
-          .foregroundColor(AppColor.grayscale600)
-      }
-    }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 16)
-    .background(Color.white)
-  }
-  
   private func filterChips(
-    selected: String,
+    selected: String?,
     onSelect: @escaping (String) -> Void
   ) -> some View {
     HStack(spacing: 8) {
@@ -225,19 +133,6 @@ public struct IngredientsView: View {
       Spacer()
     }
   }
-  
-  private func searchResultCell(name: String) -> some View {
-    Text(name)
-      .font(.pretendardTitle2)
-      .foregroundColor(AppColor.grayscale900)
-      .frame(maxWidth: .infinity, alignment: .leading)
-      .padding(.horizontal, 20)
-      .padding(.vertical, 20)
-      .background(Color.white)
-      .cornerRadius(16)
-      .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 2)
-  }
-  
   private func ingredientList(items: [InventoryIngredientItem]) -> some View {
     VStack(spacing: 0) {
       ForEach(Array(items.enumerated()), id: \.element.id) { index, ingredient in
@@ -253,36 +148,8 @@ public struct IngredientsView: View {
       }
     }
   }
-  
-  private func filteredIngredients(
-    searchText: String,
-    items: [InventoryIngredientItem]
-  ) -> [InventoryIngredientItem] {
-    let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
-    if !trimmed.isEmpty {
-      return items.filter { $0.name.localizedCaseInsensitiveContains(trimmed) }
-    }
-    return items
-  }
-
   private var filterOptions: [String] {
     ["출처찾기", "식재료", "운영 재료"]
-  }
-  
-  private var mockIngredients: [InventoryIngredientItem] {
-    [
-      InventoryIngredientItem(name: "우유", amount: "1500ml", price: "2,500원"),
-      InventoryIngredientItem(name: "설탕", amount: "500g", price: "1,000원"),
-      InventoryIngredientItem(name: "시럽", amount: "250ml", price: "3,500원"),
-      InventoryIngredientItem(name: "초콜릿 가루", amount: "200g", price: "4,200원"),
-      InventoryIngredientItem(name: "생크림", amount: "300g", price: "3,800원"),
-      InventoryIngredientItem(name: "바닐라 엑스트랙", amount: "100ml", price: "6,000원"),
-      InventoryIngredientItem(name: "종이컵", amount: "1개", price: "100원"),
-      InventoryIngredientItem(name: "컵 홀더", amount: "1개", price: "150원"),
-      InventoryIngredientItem(name: "시나몬 파우더", amount: "80g", price: "2,200원"),
-      InventoryIngredientItem(name: "카라멜 시럽", amount: "200ml", price: "3,900원"),
-      InventoryIngredientItem(name: "민트", amount: "30g", price: "1,300원")
-    ]
   }
 }
 

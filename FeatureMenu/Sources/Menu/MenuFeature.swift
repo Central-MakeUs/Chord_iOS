@@ -31,6 +31,7 @@ public struct MenuFeature {
     case pathChanged([MenuRoute])
     case menuItemsLoaded(Result<[MenuItem], Error>)
     case navigateTo(MenuRoute)
+    case addMenuTapped
     
     public static func == (lhs: Action, rhs: Action) -> Bool {
       switch (lhs, rhs) {
@@ -41,6 +42,7 @@ public struct MenuFeature {
       case (.menuItemsLoaded(.success(let l)), .menuItemsLoaded(.success(let r))): return l == r
       case (.menuItemsLoaded(.failure), .menuItemsLoaded(.failure)): return true
       case let (.navigateTo(l), .navigateTo(r)): return l == r
+      case (.addMenuTapped, .addMenuTapped): return true
       default: return false
       }
     }
@@ -70,7 +72,7 @@ public struct MenuFeature {
         return .merge(
           routerEffect,
           .run { send in
-            let result = await Result { try await menuRepository.fetchMenuItems() }
+            let result = await Result { try await menuRepository.fetchMenuItems(nil) }
             await send(.menuItemsLoaded(result))
           }
         )
@@ -100,6 +102,11 @@ public struct MenuFeature {
         
       case let .pathChanged(path):
         state.path = path
+        return .none
+        
+      case .addMenuTapped:
+        state.isMenuManagePresented = false
+        state.path.append(.add)
         return .none
       }
     }

@@ -29,6 +29,7 @@ public enum MenuStatus: CaseIterable, Hashable {
 
 public struct MenuItem: Identifiable, Hashable {
   public let id: UUID
+  public let apiId: Int?
   public let name: String
   public let price: String
   public let category: MenuCategory
@@ -42,6 +43,7 @@ public struct MenuItem: Identifiable, Hashable {
 
   public init(
     id: UUID = UUID(),
+    apiId: Int? = nil,
     name: String,
     price: String,
     category: MenuCategory,
@@ -54,6 +56,7 @@ public struct MenuItem: Identifiable, Hashable {
     totalIngredientCost: String
   ) {
     self.id = id
+    self.apiId = apiId
     self.name = name
     self.price = price
     self.category = category
