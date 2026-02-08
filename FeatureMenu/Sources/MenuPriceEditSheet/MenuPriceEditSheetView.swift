@@ -17,10 +17,7 @@ public struct MenuPriceEditSheetView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        Capsule()
-          .fill(AppColor.grayscale300)
-          .frame(width: 60, height: 6)
-          .padding(.top, 12)
+        SheetDragHandle()
 
         VStack(alignment: .leading, spacing: 24) {
           Text("가격을 입력해주세요")
@@ -59,6 +56,7 @@ public struct MenuPriceEditSheetView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background(AppColor.grayscale100)
     }
+    .presentationCornerRadius(24)
   }
 
   private func formattedPrice(_ value: String) -> String {

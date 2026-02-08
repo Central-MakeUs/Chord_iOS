@@ -17,10 +17,7 @@ public struct PrepareTimeSheetView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        Capsule()
-          .fill(AppColor.grayscale400)
-          .frame(width: 60, height: 6)
-          .padding(.top, 16)
+        SheetDragHandle()
         
         Text("제조 시간")
           .font(.pretendardHeadline2)
@@ -98,8 +95,8 @@ public struct PrepareTimeSheetView: View {
       }
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background(AppColor.grayscale100)
-      
     }
+    .presentationCornerRadius(24)
   }
 }
 

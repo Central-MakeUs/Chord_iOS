@@ -4,5 +4,5 @@ public enum MenuRoute: Hashable {
   case detail(MenuItem)
   case add
   case edit(MenuItem)
-  case ingredients(menuName: String, ingredients: [IngredientItem])
+  case ingredients(menuId: Int, menuName: String, ingredients: [IngredientItem])
 }

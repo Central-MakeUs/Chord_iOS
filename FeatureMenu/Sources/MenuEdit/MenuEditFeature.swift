@@ -6,6 +6,7 @@ import Foundation
 @Reducer
 public struct MenuEditFeature {
   @Dependency(\.menuRepository) var menuRepository
+  @Dependency(\.menuRouter) var menuRouter
   public struct State: Equatable {
     let item: MenuItem
     var menuName: String
@@ -15,13 +16,21 @@ public struct MenuEditFeature {
     var isNameEditPresented = false
     var isPriceEditPresented = false
     var isPrepareTimePresented = false
+    var isDeleteConfirmPresented = false
+    var isDeleteSuccessPresented = false
+    var isUpdateSuccessPresented = false
+    var isUpdating = false
 
     public init(item: MenuItem) {
       self.item = item
       menuName = item.name
       menuPrice = MenuEditFeature.formattedPrice(from: item.price)
-      prepareTime = "1분 30초"
-      selectedCategory = item.category
+      prepareTime = item.workTimeText
+      if item.category == .all {
+        selectedCategory = .beverage
+      } else {
+        selectedCategory = item.category
+      }
     }
     
     public var categories: [MenuCategory] {
@@ -58,7 +67,43 @@ public struct MenuEditFeature {
     case prepareTimeTapped
     case categorySelected(MenuCategory)
     case deleteTapped
+    case deleteConfirmTapped
+    case deleteCancelTapped
+    case deleteSuccessTapped
+    case deleteMenuResponse(Result<Void, Error>)
+    case updateResponse(Result<Void, Error>)
+    case updateSuccessDismissed
     case backTapped
+    case delegate(Delegate)
+    
+    public enum Delegate: Equatable {
+      case menuDeleted
+    }
+    
+    public static func == (lhs: Action, rhs: Action) -> Bool {
+      switch (lhs, rhs) {
+      case let (.nameEditPresented(l), .nameEditPresented(r)): return l == r
+      case let (.priceEditPresented(l), .priceEditPresented(r)): return l == r
+      case let (.prepareTimePresented(l), .prepareTimePresented(r)): return l == r
+      case let (.menuNameUpdated(l), .menuNameUpdated(r)): return l == r
+      case let (.menuPriceUpdated(l), .menuPriceUpdated(r)): return l == r
+      case let (.prepareTimeUpdated(lm, ls), .prepareTimeUpdated(rm, rs)): return lm == rm && ls == rs
+      case (.prepareTimeTapped, .prepareTimeTapped): return true
+      case let (.categorySelected(l), .categorySelected(r)): return l == r
+      case (.deleteTapped, .deleteTapped): return true
+      case (.deleteConfirmTapped, .deleteConfirmTapped): return true
+      case (.deleteCancelTapped, .deleteCancelTapped): return true
+      case (.deleteSuccessTapped, .deleteSuccessTapped): return true
+      case (.deleteMenuResponse(.success), .deleteMenuResponse(.success)): return true
+      case (.deleteMenuResponse(.failure), .deleteMenuResponse(.failure)): return true
+      case (.updateResponse(.success), .updateResponse(.success)): return true
+      case (.updateResponse(.failure), .updateResponse(.failure)): return true
+      case (.updateSuccessDismissed, .updateSuccessDismissed): return true
+      case (.backTapped, .backTapped): return true
+      case let (.delegate(l), .delegate(r)): return l == r
+      default: return false
+      }
+    }
   }
 
   public init() {}
@@ -79,50 +124,111 @@ public struct MenuEditFeature {
         state.menuName = name
         state.isNameEditPresented = false
         
+        guard name != state.item.name else { return .none }
         guard let apiId = state.item.apiId else { return .none }
+        
+        state.isUpdating = true
         let request = MenuNameUpdateRequest(menuName: name)
         return .run { send in
-          try await menuRepository.updateMenuName(apiId, request)
+          let result = await Result { try await menuRepository.updateMenuName(apiId, request) }
+          await send(.updateResponse(result))
         }
       case let .menuPriceUpdated(price):
         state.menuPrice = price
         state.isPriceEditPresented = false
         
+        let originalPrice = Self.formattedPrice(from: state.item.price)
+        guard price != originalPrice else { return .none }
         guard let apiId = state.item.apiId else { return .none }
+        
         let numericPrice = price.replacingOccurrences(of: ",", with: "")
         guard let priceValue = Double(numericPrice) else { return .none }
+        
+        state.isUpdating = true
         let request = MenuPriceUpdateRequest(sellingPrice: priceValue)
         return .run { send in
-          try await menuRepository.updateMenuPrice(apiId, request)
+          let result = await Result { try await menuRepository.updateMenuPrice(apiId, request) }
+          await send(.updateResponse(result))
         }
       case let .prepareTimeUpdated(minutes, seconds):
-        state.prepareTime = "\(minutes)분 \(seconds)초"
+        let newPrepareTime = "\(minutes)분 \(seconds)초"
+        state.prepareTime = newPrepareTime
         state.isPrepareTimePresented = false
         
-        guard let apiId = state.item.apiId else { return .none }
         let totalSeconds = minutes * 60 + seconds
+        guard totalSeconds != state.item.workTime else { return .none }
+        guard let apiId = state.item.apiId else { return .none }
+        
+        state.isUpdating = true
         let request = MenuWorktimeUpdateRequest(workTime: totalSeconds)
         return .run { send in
-          try await menuRepository.updateWorkTime(apiId, request)
+          let result = await Result { try await menuRepository.updateWorkTime(apiId, request) }
+          await send(.updateResponse(result))
         }
       case .prepareTimeTapped:
         state.isPrepareTimePresented = true
         return .none
       case let .categorySelected(category):
+        guard category != state.item.category else {
+          state.selectedCategory = category
+          return .none
+        }
+        
         state.selectedCategory = category
+        state.isUpdating = true
         
         guard let apiId = state.item.apiId else { return .none }
         let categoryCode = categoryToCode(category)
         let request = MenuCategoryUpdateRequest(category: categoryCode)
         return .run { send in
-          try await menuRepository.updateMenuCategory(apiId, request)
+          let result = await Result { try await menuRepository.updateMenuCategory(apiId, request) }
+          await send(.updateResponse(result))
         }
+      case .updateResponse(.success):
+        state.isUpdating = false
+        state.isUpdateSuccessPresented = true
+        return .none
+        
+      case .updateResponse(.failure):
+        state.isUpdating = false
+        return .none
+        
+      case .updateSuccessDismissed:
+        state.isUpdateSuccessPresented = false
+        return .none
       case .deleteTapped:
+        state.isDeleteConfirmPresented = true
+        return .none
+        
+      case .deleteConfirmTapped:
         guard let apiId = state.item.apiId else { return .none }
+        state.isDeleteConfirmPresented = false
         return .run { send in
-          try await menuRepository.deleteMenu(apiId)
+          let result = await Result { try await menuRepository.deleteMenu(apiId) }
+          await send(.deleteMenuResponse(result))
         }
+        
+      case .deleteCancelTapped:
+        state.isDeleteConfirmPresented = false
+        return .none
+        
+      case .deleteMenuResponse(.success):
+        state.isDeleteSuccessPresented = true
+        return .none
+        
+      case .deleteMenuResponse(.failure):
+        return .none
+        
+      case .deleteSuccessTapped:
+        state.isDeleteSuccessPresented = false
+        menuRouter.popToRoot()
+        return .send(.delegate(.menuDeleted))
+        
       case .backTapped:
+        menuRouter.pop()
+        return .none
+        
+      case .delegate:
         return .none
       }
     }

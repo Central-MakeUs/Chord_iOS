@@ -19,10 +19,7 @@ public struct MenuEditView: View {
 
         VStack(spacing: 0) {
           NavigationTopBar(
-            onBackTap: {
-              viewStore.send(.backTapped)
-              dismiss()
-            },
+            onBackTap: { dismiss() },
             title: ""
           )
 
@@ -121,6 +118,35 @@ public struct MenuEditView: View {
         .presentationDragIndicator(.hidden)
         .modifier(SheetCornerRadiusModifier(radius: 24))
       }
+      .coachCoachAlert(
+        isPresented: viewStore.binding(
+          get: \.isDeleteConfirmPresented,
+          send: { _ in MenuEditFeature.Action.deleteCancelTapped }
+        ),
+        title: "메뉴를 삭제하시겠어요?",
+        alertType: .twoButton,
+        leftButtonTitle: "아니요",
+        rightButtonTitle: "삭제하기",
+        leftButtonAction: { viewStore.send(.deleteCancelTapped) },
+        rightButtonAction: { viewStore.send(.deleteConfirmTapped) }
+      )
+      .coachCoachAlert(
+        isPresented: viewStore.binding(
+          get: \.isDeleteSuccessPresented,
+          send: { _ in MenuEditFeature.Action.deleteSuccessTapped }
+        ),
+        title: "메뉴가 삭제 됐어요",
+        alertType: .oneButton,
+        rightButtonTitle: "확인",
+        rightButtonAction: { viewStore.send(.deleteSuccessTapped) }
+      )
+      .toastBanner(
+        isPresented: viewStore.binding(
+          get: \.isUpdateSuccessPresented,
+          send: { _ in MenuEditFeature.Action.updateSuccessDismissed }
+        ),
+        message: "수정이 반영되었어요!"
+      )
     }
   }
 
@@ -155,7 +181,7 @@ public struct MenuEditView: View {
     VStack(alignment: .leading, spacing: 4) {
       Text("제조시간")
         .frame(height: 23)
-        .font(.pretendardSubtitle3)
+        .font(.pretendardBody3)
         .foregroundColor(AppColor.grayscale700)
 
       valueRow(value: time, onTap: onTap)
@@ -196,7 +222,7 @@ public struct MenuEditView: View {
             HStack(spacing: 8) {
               RadioIndicator(isSelected: selectedCategory == category)
               Text(category.title)
-                .font(.pretendardSubtitle2)
+                .font(.pretendardSubtitle4)
                 .foregroundColor(selectedCategory == category ? AppColor.primaryBlue500 : AppColor.grayscale900)
               Spacer()
             }

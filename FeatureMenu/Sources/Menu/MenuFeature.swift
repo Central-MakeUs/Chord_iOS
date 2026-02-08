@@ -7,7 +7,6 @@ public struct MenuFeature {
   public struct State: Equatable {
     var selectedCategory: MenuCategory = .all
     var isMenuManagePresented = false
-    var path: [MenuRoute] = []
     var menuItems: [MenuItem] = []
     var isLoading = false
     var error: String?
@@ -15,22 +14,15 @@ public struct MenuFeature {
     public init(menuItems: [MenuItem] = []) {
       self.menuItems = menuItems
     }
-    
-    public var filteredMenuItems: [MenuItem] {
-      if selectedCategory == .all {
-        return menuItems
-      }
-      return menuItems.filter { $0.category == selectedCategory }
-    }
   }
-
+  
   public enum Action: Equatable {
     case onAppear
     case selectedCategoryChanged(MenuCategory)
     case isMenuManagePresentedChanged(Bool)
-    case pathChanged([MenuRoute])
     case menuItemsLoaded(Result<[MenuItem], Error>)
     case navigateTo(MenuRoute)
+    case popToRoot
     case addMenuTapped
     
     public static func == (lhs: Action, rhs: Action) -> Bool {
@@ -38,16 +30,16 @@ public struct MenuFeature {
       case (.onAppear, .onAppear): return true
       case let (.selectedCategoryChanged(l), .selectedCategoryChanged(r)): return l == r
       case let (.isMenuManagePresentedChanged(l), .isMenuManagePresentedChanged(r)): return l == r
-      case let (.pathChanged(l), .pathChanged(r)): return l == r
       case (.menuItemsLoaded(.success(let l)), .menuItemsLoaded(.success(let r))): return l == r
       case (.menuItemsLoaded(.failure), .menuItemsLoaded(.failure)): return true
       case let (.navigateTo(l), .navigateTo(r)): return l == r
+      case (.popToRoot, .popToRoot): return true
       case (.addMenuTapped, .addMenuTapped): return true
       default: return false
       }
     }
   }
-
+  
   public init() {}
   
   @Dependency(\.menuRepository) var menuRepository
@@ -60,8 +52,13 @@ public struct MenuFeature {
       switch action {
       case .onAppear:
         let routerEffect: Effect<Action> = .run { send in
-          for await route in menuRouter.routePublisher.values {
-            await send(.navigateTo(route))
+          for await routerAction in menuRouter.routePublisher.values {
+            switch routerAction {
+            case let .push(route):
+              await send(.navigateTo(route))
+            case .pop, .popToRoot:
+              await send(.popToRoot)
+            }
           }
         }
         .cancellable(id: CancelID.router)
@@ -69,17 +66,24 @@ public struct MenuFeature {
         guard state.menuItems.isEmpty && !state.isLoading else { return routerEffect }
         
         state.isLoading = true
+        let category = state.selectedCategory.serverCode
         return .merge(
           routerEffect,
           .run { send in
-            let result = await Result { try await menuRepository.fetchMenuItems(nil) }
+            let result = await Result { try await menuRepository.fetchMenuItems(category) }
             await send(.menuItemsLoaded(result))
           }
         )
         
-      case let .navigateTo(route):
-        state.path.append(route)
+      case .navigateTo:
         return .none
+
+      case .popToRoot:
+        let category = state.selectedCategory.serverCode
+        return .run { send in
+          let result = await Result { try await menuRepository.fetchMenuItems(category) }
+          await send(.menuItemsLoaded(result))
+        }
 
       case let .menuItemsLoaded(.success(items)):
         state.menuItems = items
@@ -94,19 +98,19 @@ public struct MenuFeature {
         
       case let .selectedCategoryChanged(category):
         state.selectedCategory = category
-        return .none
+        state.isLoading = true
+        let serverCode = category.serverCode
+        return .run { send in
+          let result = await Result { try await menuRepository.fetchMenuItems(serverCode) }
+          await send(.menuItemsLoaded(result))
+        }
         
       case let .isMenuManagePresentedChanged(isPresented):
         state.isMenuManagePresented = isPresented
         return .none
         
-      case let .pathChanged(path):
-        state.path = path
-        return .none
-        
       case .addMenuTapped:
         state.isMenuManagePresented = false
-        state.path.append(.add)
         return .none
       }
     }

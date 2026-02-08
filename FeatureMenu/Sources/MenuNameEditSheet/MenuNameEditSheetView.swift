@@ -17,10 +17,7 @@ public struct MenuNameEditSheetView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(alignment: .center, spacing: 0) {
-        Capsule()
-          .fill(AppColor.grayscale300)
-          .frame(width: 60, height: 6)
-          .padding(.top, 12)
+        SheetDragHandle()
 
         VStack(alignment: .center, spacing: 24) {
           Text("메뉴명")
@@ -59,6 +56,7 @@ public struct MenuNameEditSheetView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background(AppColor.grayscale100)
     }
+    .presentationCornerRadius(24)
   }
 }
 

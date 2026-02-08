@@ -1,15 +1,17 @@
 import SwiftUI
 import CoreModels
 import DesignSystem
+import DataLayer
+import ComposableArchitecture
 
 public struct AddIngredientSheet: View {
   @Environment(\.dismiss) private var dismiss
   @State private var ingredientName: String = ""
-  @State private var selectedTab: IngredientTab = .custom
-  @State private var price: String = ""
-  @State private var amount: String = ""
-  @State private var selectedUnit: String = "g"
-  @State private var supplier: String = ""
+  @State private var searchResults: [SearchMyIngredientsResponse] = []
+  @State private var isSearching: Bool = false
+  @State private var searchTask: Task<Void, Never>?
+  
+  @Dependency(\.ingredientRepository) var ingredientRepository
   
   let onAdd: (IngredientItem) -> Void
   
@@ -17,21 +19,9 @@ public struct AddIngredientSheet: View {
     self.onAdd = onAdd
   }
   
-  enum IngredientTab {
-    case custom
-    case existing
-    
-    var title: String {
-      switch self {
-      case .custom: return "직접 등록"
-      case .existing: return "운영 재료"
-      }
-    }
-  }
-  
   public var body: some View {
     VStack(spacing: 0) {
-      dragIndicator
+      SheetDragHandle()
       
       Text("재료 추가")
         .font(.pretendardSubtitle1)
@@ -39,14 +29,11 @@ public struct AddIngredientSheet: View {
         .padding(.top, 20)
         .padding(.bottom, 24)
       
-      VStack(spacing: 24) {
+      VStack(alignment: .leading, spacing: 16) {
         ingredientNameSection
-        tabSelector
         
-        if selectedTab == .custom {
-          priceSection
-          amountSection
-          supplierSection
+        if !searchResults.isEmpty {
+          searchResultsSection
         }
       }
       .padding(.horizontal, 20)
@@ -55,134 +42,144 @@ public struct AddIngredientSheet: View {
       
       BottomButton(
         title: "추가하기",
-        style: .primary
+        style: ingredientName.isEmpty ? .secondary : .primary
       ) {
-        addIngredient()
+        addCustomIngredient()
       }
+      .disabled(ingredientName.isEmpty)
       .padding(.horizontal, 20)
       .padding(.bottom, 34)
     }
     .background(Color.white)
   }
   
-  private var dragIndicator: some View {
-    RoundedRectangle(cornerRadius: 2.5)
-      .fill(AppColor.grayscale400)
-      .frame(width: 40, height: 4)
-      .padding(.top, 12)
-  }
-  
   private var ingredientNameSection: some View {
     VStack(alignment: .leading, spacing: 8) {
       Text("재료명")
-        .font(.pretendardSubtitle3)
-        .foregroundColor(AppColor.grayscale900)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale700)
       
       TextField("", text: $ingredientName)
-        .font(.pretendardTitle2)
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
-        .padding(.vertical, 4)
+        .placeholder(when: ingredientName.isEmpty) {
+          Text("템플릿 있는 재료")
+            .font(.pretendardSubtitle2)
+            .foregroundColor(AppColor.grayscale400)
+        }
+        .padding(.bottom, 8)
+        .overlay(alignment: .bottom) {
+          Rectangle()
+            .fill(AppColor.grayscale300)
+            .frame(height: 1)
+        }
+        .onChange(of: ingredientName) { _, newValue in
+          performSearch(query: newValue)
+        }
     }
   }
   
-  private var tabSelector: some View {
-    HStack(spacing: 8) {
-      ForEach([IngredientTab.custom, IngredientTab.existing], id: \.title) { tab in
-        Button(action: { selectedTab = tab }) {
-          Text(tab.title)
-            .font(.pretendardBody2)
-            .foregroundColor(selectedTab == tab ? AppColor.primaryBlue500 : AppColor.grayscale600)
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(
-              RoundedRectangle(cornerRadius: 8)
-                .fill(selectedTab == tab ? AppColor.primaryBlue100 : AppColor.grayscale200)
-            )
-        }
-        .buttonStyle(.plain)
+  private var searchResultsSection: some View {
+    VStack(spacing: 0) {
+      ForEach(searchResults, id: \.ingredientId) { result in
+        searchResultRow(result: result)
       }
+    }
+  }
+  
+  private func searchResultRow(result: SearchMyIngredientsResponse) -> some View {
+    HStack {
+      Text(highlightedText(fullText: result.ingredientName, searchText: ingredientName))
+      
       Spacer()
-    }
-  }
-  
-  private var priceSection: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text("가격")
-        .font(.pretendardSubtitle3)
-        .foregroundColor(AppColor.grayscale900)
       
-      HStack {
-        TextField("", text: $price)
-          .font(.pretendardTitle2)
-          .foregroundColor(AppColor.grayscale900)
-          .keyboardType(.numberPad)
-        Text("원")
-          .font(.pretendardTitle2)
-          .foregroundColor(AppColor.grayscale900)
+      Button {
+        addExistingIngredient(result)
+      } label: {
+        Image.plusCircleBlueIcon
+          .resizable()
+          .frame(width: 24, height: 24)
       }
-      .padding(.vertical, 4)
+      .buttonStyle(.plain)
     }
+    .padding(.vertical, 12)
   }
   
-  private var amountSection: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text("사용량")
-        .font(.pretendardSubtitle3)
-        .foregroundColor(AppColor.grayscale900)
-      
-      HStack {
-        TextField("", text: $amount)
-          .font(.pretendardTitle2)
-          .foregroundColor(AppColor.grayscale900)
-          .keyboardType(.numberPad)
-        
-        Menu {
-          Button("g") { selectedUnit = "g" }
-          Button("ml") { selectedUnit = "ml" }
-          Button("개") { selectedUnit = "개" }
-        } label: {
-          HStack(spacing: 4) {
-            Text(selectedUnit)
-              .font(.pretendardTitle2)
-              .foregroundColor(AppColor.grayscale900)
-            Image(systemName: "chevron.down")
-              .font(.system(size: 14))
-              .foregroundColor(AppColor.grayscale500)
-          }
-        }
-      }
-      .padding(.vertical, 4)
+  private func highlightedText(fullText: String, searchText: String) -> AttributedString {
+    var attributedString = AttributedString(fullText)
+    attributedString.foregroundColor = AppColor.grayscale900
+    attributedString.font = .pretendardSubtitle2
+    
+    if let range = attributedString.range(of: searchText, options: .caseInsensitive) {
+      attributedString[range].foregroundColor = AppColor.primaryBlue500
     }
+    
+    return attributedString
   }
   
-  private var supplierSection: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text("공급업체")
-        .font(.pretendardSubtitle3)
-        .foregroundColor(AppColor.grayscale900)
-      
-      TextField("", text: $supplier)
-        .font(.pretendardTitle2)
-        .foregroundColor(AppColor.grayscale900)
-        .padding(.vertical, 4)
-    }
-  }
-  
-  private func addIngredient() {
-    guard !ingredientName.isEmpty,
-          !price.isEmpty,
-          !amount.isEmpty else {
+  private func performSearch(query: String) {
+    searchTask?.cancel()
+    
+    guard !query.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+      searchResults = []
       return
     }
     
+    isSearching = true
+    searchTask = Task {
+      try? await Task.sleep(for: .milliseconds(300))
+      
+      guard !Task.isCancelled else { return }
+      
+      do {
+        let results = try await ingredientRepository.searchIngredients(query)
+        await MainActor.run {
+          self.searchResults = results
+          self.isSearching = false
+        }
+      } catch {
+        await MainActor.run {
+          self.searchResults = []
+          self.isSearching = false
+        }
+      }
+    }
+  }
+  
+  private func addExistingIngredient(_ result: SearchMyIngredientsResponse) {
     let ingredient = IngredientItem(
-      name: ingredientName,
-      amount: "\(amount)\(selectedUnit)",
-      price: "\(price)원"
+      ingredientId: result.ingredientId,
+      name: result.ingredientName,
+      amount: "0g",
+      price: "0원"
     )
-    
     onAdd(ingredient)
     dismiss()
+  }
+  
+  private func addCustomIngredient() {
+    guard !ingredientName.isEmpty else { return }
+    
+    let ingredient = IngredientItem(
+      name: ingredientName,
+      amount: "0g",
+      price: "0원"
+    )
+    onAdd(ingredient)
+    dismiss()
+  }
+}
+
+private extension View {
+  func placeholder<Content: View>(
+    when shouldShow: Bool,
+    alignment: Alignment = .leading,
+    @ViewBuilder placeholder: () -> Content
+  ) -> some View {
+    ZStack(alignment: alignment) {
+      placeholder().opacity(shouldShow ? 1 : 0)
+      self
+    }
   }
 }
 

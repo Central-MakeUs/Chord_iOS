@@ -5,340 +5,323 @@ import DesignSystem
 import FeatureMenuRegistration
 
 public struct MenuView: View {
-  let store: StoreOf<MenuFeature>
-
-  public init(store: StoreOf<MenuFeature>) {
-    self.store = store
-  }
-  
-  public var body: some View {
-    WithViewStore(store, observe: { $0 }) { viewStore in
-      let filteredItems = filteredMenuItems(
-        selected: viewStore.selectedCategory,
-        items: viewStore.menuItems
-      )
-
-      NavigationStack(
-        path: viewStore.binding(
-          get: \.path,
-          send: MenuFeature.Action.pathChanged
-        )
-      ) {
-        ZStack {
-          AppColor.grayscale200
-            .ignoresSafeArea()
-
-          ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-              menuHeader(
-                count: filteredItems.count,
-                onManage: { viewStore.send(.isMenuManagePresentedChanged(true)) }
-              )
-              MenuTabs(selected: viewStore.selectedCategory) { category in
-                viewStore.send(.selectedCategoryChanged(category))
-              }
-              menuList(items: filteredItems)
+    let store: StoreOf<MenuFeature>
+    
+    public init(store: StoreOf<MenuFeature>) {
+        self.store = store
+    }
+    
+    public var body: some View {
+        WithViewStore(store, observe: { $0 }) { viewStore in
+            ZStack {
+                AppColor.grayscale200
+                    .ignoresSafeArea()
+                VStack(alignment: .leading, spacing: 16) {
+                    menuHeader(
+                        count: viewStore.menuItems.count,
+                        onManage: { viewStore.send(.isMenuManagePresentedChanged(true)) }
+                    )
+                    
+                    MenuTabs(selected: viewStore.selectedCategory) { category in
+                        viewStore.send(.selectedCategoryChanged(category))
+                    }
+                    
+                    HStack(spacing: 8) {
+                        Spacer()
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(AppColor.primaryBlue600)
+                                .frame(width: 8, height: 8)
+                            Text("마진율")
+                                .font(.pretendardCaption4)
+                                .foregroundColor(AppColor.primaryBlue600)
+                        }
+                        HStack(spacing: 4) {
+                            Circle()
+                                .fill(AppColor.grayscale500)
+                                .frame(width: 8, height: 8)
+                            Text("원가율")
+                                .font(.pretendardCaption4)
+                                .foregroundColor(AppColor.grayscale600)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                    
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 16) {
+                            
+                            menuList(items: viewStore.menuItems)
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 24)
+                    }
+                }
+                .toolbar(.hidden, for: .navigationBar)
             }
-            .padding(.horizontal, 20)
-            .padding(.top, 12)
-            .padding(.bottom, 24)
-          }
+            .toolbar(.hidden, for: .navigationBar)
+            .onAppear {
+                viewStore.send(.onAppear)
+            }
+            .overlay(alignment: .topTrailing) {
+                if viewStore.isMenuManagePresented {
+                    ZStack(alignment: .topTrailing) {
+                        Color.black.opacity(0.001)
+                            .ignoresSafeArea()
+                            .onTapGesture {
+                                viewStore.send(.isMenuManagePresentedChanged(false))
+                            }
+                        
+                        Button {
+                            viewStore.send(.addMenuTapped)
+                        } label: {
+                            HStack(spacing: 4) {
+                                Text("메뉴 추가")
+                                    .font(.pretendardBody3)
+                                    .foregroundColor(AppColor.grayscale900)
+                                    .frame(width: 60, height: 26)
+                                
+                                Image.plusIcon
+                                    .resizable()
+                                    .renderingMode(.template)
+                                    .frame(width: 16, height: 16)
+                                    .foregroundColor(AppColor.grayscale900)
+                            }
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 6)
+                            .background(Color.white)
+                            .clipShape(RoundedRectangle(cornerRadius: 12))
+                            .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
+                        }
+                        .buttonStyle(.plain)
+                        .padding(.top, 44)
+                        .padding(.trailing, 20)
+                    }
+                }
+            }
         }
-        .navigationDestination(for: MenuRoute.self) { route in
-          switch route {
-          case let .detail(item):
-            MenuDetailView(
-              store: Store(initialState: MenuDetailFeature.State(item: item)) {
-                MenuDetailFeature()
-              }
-            )
-          case .add:
-            MenuRegistrationView(
-              store: Store(initialState: MenuRegistrationFeature.State()) {
-                MenuRegistrationFeature()
-              }
-            )
-          case let .edit(item):
-            MenuEditView(
-              store: Store(initialState: MenuEditFeature.State(item: item)) {
-                MenuEditFeature()
-              }
-            )
-          case let .ingredients(menuName, ingredients):
-            MenuIngredientsView(
-              store: Store(
-                initialState: MenuIngredientsFeature.State(
-                  menuName: menuName,
-                  ingredients: ingredients
-                )
-              ) {
-                MenuIngredientsFeature()
-              }
-            )
-          }
-        }
-      }
-      .toolbar(.hidden, for: .navigationBar)
-      .onAppear {
-        viewStore.send(.onAppear)
-      }
-      .overlay(alignment: .topTrailing) {
-        if viewStore.isMenuManagePresented {
-          ZStack(alignment: .topTrailing) {
-            Color.black.opacity(0.001)
-              .ignoresSafeArea()
-              .onTapGesture {
-                viewStore.send(.isMenuManagePresentedChanged(false))
-              }
+    }
+    
+    private func menuHeader(count: Int, onManage: @escaping () -> Void) -> some View {
+        HStack {
+            HStack(spacing: 6) {
+                Text("메뉴")
+                    .font(.pretendardHeadline2)
+                    .foregroundColor(AppColor.grayscale900)
+                Text("\(count)")
+                    .font(.pretendardHeadline2)
+                    .foregroundColor(AppColor.primaryBlue500)
+            }
             
-            Button {
-              viewStore.send(.addMenuTapped)
-            } label: {
-              HStack(spacing: 6) {
-                Text("메뉴 추가")
-                  .font(.pretendardSubtitle1)
-                  .foregroundColor(AppColor.grayscale900)
-                Text("+")
-                  .font(.pretendardSubtitle1)
-                  .foregroundColor(AppColor.grayscale600)
-              }
-              .padding(.horizontal, 20)
-              .padding(.vertical, 14)
-              .background(AppColor.grayscale100)
-              .clipShape(RoundedRectangle(cornerRadius: 12))
-              .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
+            Spacer()
+            
+            Button(action: onManage) {
+                Image.meatballIcon
+                    .frame(width: 24, height: 24)
             }
-            .buttonStyle(.plain)
-            .padding(.top, 44)
-            .padding(.trailing, 20)
-          }
         }
-      }
+        .frame(height: 56)
+        .padding(.horizontal, 20)
     }
-  }
-
-  private func filteredMenuItems(
-    selected: MenuCategory,
-    items: [MenuItem]
-  ) -> [MenuItem] {
-    switch selected {
-    case .all:
-      return items
-    case .beverage, .dessert, .food:
-      return items.filter { $0.category == selected }
-    }
-  }
-
-  private func menuHeader(count: Int, onManage: @escaping () -> Void) -> some View {
-    HStack {
-      HStack(spacing: 6) {
-        Text("메뉴")
-          .font(.pretendardHeadline2)
-          .foregroundColor(AppColor.grayscale900)
-        Text("\(count)")
-          .font(.pretendardHeadline2)
-          .foregroundColor(AppColor.primaryBlue500)
-      }
-      
-      Spacer()
-      
-      Button(action: onManage) {
-        Image.meatballIcon
-          .frame(width: 24, height: 24)
-      }
-    }
-  }
-  
-  private func menuList(items: [MenuItem]) -> some View {
-    VStack(spacing: 12) {
-      ForEach(items) { item in
-        NavigationLink(value: MenuRoute.detail(item)) {
-          MenuItemRow(item: item)
+    
+    private func menuList(items: [MenuItem]) -> some View {
+        VStack(spacing: 12) {
+            ForEach(items) { item in
+                NavigationLink(value: MenuRoute.detail(item)) {
+                    MenuItemRow(item: item)
+                }
+                .buttonStyle(.plain)
+            }
         }
-        .buttonStyle(.plain)
-      }
     }
-  }
-
+    
 }
 
 private extension MenuStatus {
-  var color: Color {
-    switch self {
-    case .safe: return AppColor.semanticSafeText
-    case .warning: return AppColor.semanticCautionText
-    case .danger: return AppColor.semanticWarningText
+    var color: Color {
+        switch self {
+        case .safe: return AppColor.semanticSafeText
+        case .normal: return AppColor.primaryBlue500
+        case .warning: return AppColor.semanticCautionText
+        case .danger: return AppColor.semanticWarningText
+        }
     }
-  }
-
-  var badgeBackgroundColor: Color {
-    color.opacity(0.15)
-  }
-
-  var badgeTextColor: Color {
-    color
-  }
+    
+    var badgeBackgroundColor: Color {
+        color.opacity(0.15)
+    }
+    
+    var badgeTextColor: Color {
+        color
+    }
 }
 
 private struct MenuTabs: View {
-  let selected: MenuCategory
-  let onSelect: (MenuCategory) -> Void
-  private let tabCategories: [MenuCategory] = [.all, .beverage, .dessert]
-  
-  var body: some View {
-    HStack(spacing: 8) {
-      ForEach(tabCategories) { category in
-        Button(action: { onSelect(category) }) {
-          Text(category.title)
-            .font(.pretendardCTA)
-            .foregroundColor(selected == category ? AppColor.grayscale100 : AppColor.grayscale700)
-            .padding(.horizontal, 14)
-            .padding(.vertical, 6)
-            .background(
-              RoundedRectangle(cornerRadius: 12)
-                .fill(selected == category ? AppColor.grayscale700 : AppColor.grayscale100.opacity(0))
-            )
+    let selected: MenuCategory
+    let onSelect: (MenuCategory) -> Void
+    private let tabCategories: [MenuCategory] = [.all, .beverage, .dessert, .food]
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                ForEach(tabCategories) { category in
+                    Button(action: { onSelect(category) }) {
+                        VStack(spacing: 8) {
+                            Text(category.title)
+                                .font(.pretendardSubtitle3)
+                                .foregroundColor(selected == category ? AppColor.grayscale900 : AppColor.grayscale600)
+                            
+                            Rectangle()
+                                .fill(selected == category ? AppColor.grayscale900 : Color.clear)
+                                .frame(height: 2)
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .frame(maxWidth: .infinity)
+                }
+            }
+            
+            Rectangle()
+                .fill(AppColor.grayscale300)
+                .frame(height: 1)
+                .offset(y: -1)
         }
-        .buttonStyle(.plain)
-      }
     }
-  }
 }
 
 struct MenuBadge: View {
-  let status: MenuStatus
-  
-  var body: some View {
-    Text(status.text)
-      .font(.pretendardCaption)
-      .foregroundColor(status.badgeTextColor)
-      .padding(.horizontal, 6)
-      .padding(.vertical, 4)
-      .background(
-        RoundedRectangle(cornerRadius: 4)
-          .fill(status.badgeBackgroundColor)
-      )
-  }
+    let status: MenuStatus
+    
+    var body: some View {
+        Text(status.text)
+            .font(.pretendardCaption)
+            .foregroundColor(status.badgeTextColor)
+            .padding(.horizontal, 6)
+            .padding(.vertical, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(status.badgeBackgroundColor)
+            )
+    }
 }
 
 private struct MenuItemRow: View {
-  let item: MenuItem
-  
-  var body: some View {
-    HStack(alignment: .top, spacing: 12) {
-      VStack(alignment: .leading, spacing: 10) {
-        Text(item.name)
-          .font(.pretendardSubtitle1)
-          .foregroundColor(AppColor.grayscale900)
-        HStack(spacing: 6) {
-          Text(item.price)
-            .foregroundColor(AppColor.grayscale900)
-
-          Text("원가율 \(item.costRate)")
-            .foregroundColor(AppColor.grayscale600)
-
+    let item: MenuItem
+    
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(item.name)
+                    .font(.pretendardSubtitle3)
+                    .foregroundColor(AppColor.grayscale900)
+                Text(item.price)
+                    .font(.pretendardBody2)
+                    .foregroundColor(AppColor.grayscale600)
+            }
+            Spacer()
+            VStack(alignment: .trailing, spacing: 6) {
+                MenuBadge(status: item.status)
+                HStack(spacing: 0) {
+                    
+                    Text(item.costRate)
+                        .font(.pretendardBody4)
+                        .foregroundColor(AppColor.grayscale600)
+                    Text(item.marginRate)
+                        .font(.pretendardBody2)
+                        .foregroundColor(AppColor.primaryBlue600)
+                        .frame(width: 60, alignment: .trailing)
+                }
+            }
         }
-        .font(.pretendardBody2)
-      }
-      Spacer()
-      VStack(alignment: .trailing, spacing: 4) {
-        MenuBadge(status: item.status)
-        Text(item.marginRate)
-          .font(.pretendardSubtitle2)
-          .foregroundColor(item.status.color)
-      }
+        .padding(.horizontal, 24)
+        .padding(.vertical, 20)
+        .background(AppColor.grayscale100)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
-    .padding(.horizontal, 12)
-    .padding(.vertical, 20)
-    .background(AppColor.grayscale100)
-    .clipShape(RoundedRectangle(cornerRadius: 8))
- 
-  }
 }
 
 #Preview {
-//  MenuView(
-//    store: Store(
-//      initialState: MenuFeature.State(
-//        menuItems: [
-//          MenuItem(
-//            name: "아메리카노",
-//            price: "4,500원",
-//            category: .beverage,
-//            status: .safe,
-//            costRate: "22.2%",
-//            marginRate: "30.5%",
-//            costAmount: "1,000원",
-//            contribution: "3,500원",
-//            ingredients: [],
-//            totalIngredientCost: "1,000원"
-//          ),
-//          MenuItem(
-//            name: "카페라떼",
-//            price: "5,000원",
-//            category: .beverage,
-//            status: .warning,
-//            costRate: "30.0%",
-//            marginRate: "25.0%",
-//            costAmount: "1,500원",
-//            contribution: "3,500원",
-//            ingredients: [],
-//            totalIngredientCost: "1,500원"
-//          ),
-//          MenuItem(
-//            name: "카푸치노",
-//            price: "5,500원",
-//            category: .beverage,
-//            status: .danger,
-//            costRate: "35.5%",
-//            marginRate: "20.0%",
-//            costAmount: "1,950원",
-//            contribution: "3,550원",
-//            ingredients: [],
-//            totalIngredientCost: "1,950원"
-//          ),
-//          MenuItem(
-//            name: "초콜릿 케이크",
-//            price: "6,000원",
-//            category: .dessert,
-//            status: .safe,
-//            costRate: "25.0%",
-//            marginRate: "28.0%",
-//            costAmount: "1,500원",
-//            contribution: "4,500원",
-//            ingredients: [],
-//            totalIngredientCost: "1,500원"
-//          ),
-//          MenuItem(
-//            name: "치즈케이크",
-//            price: "6,500원",
-//            category: .dessert,
-//            status: .warning,
-//            costRate: "32.0%",
-//            marginRate: "22.0%",
-//            costAmount: "2,080원",
-//            contribution: "4,420원",
-//            ingredients: [],
-//            totalIngredientCost: "2,080원"
-//          )
-//        ]
-//      )
-//    ) {
-//      MenuFeature()
-//    }
-//  )
-//  .environment(\.colorScheme, .light)
+    //  MenuView(
+    //    store: Store(
+    //      initialState: MenuFeature.State(
+    //        menuItems: [
+    //          MenuItem(
+    //            name: "아메리카노",
+    //            price: "4,500원",
+    //            category: .beverage,
+    //            status: .safe,
+    //            costRate: "22.2%",
+    //            marginRate: "30.5%",
+    //            costAmount: "1,000원",
+    //            contribution: "3,500원",
+    //            ingredients: [],
+    //            totalIngredientCost: "1,000원"
+    //          ),
+    //          MenuItem(
+    //            name: "카페라떼",
+    //            price: "5,000원",
+    //            category: .beverage,
+    //            status: .warning,
+    //            costRate: "30.0%",
+    //            marginRate: "25.0%",
+    //            costAmount: "1,500원",
+    //            contribution: "3,500원",
+    //            ingredients: [],
+    //            totalIngredientCost: "1,500원"
+    //          ),
+    //          MenuItem(
+    //            name: "카푸치노",
+    //            price: "5,500원",
+    //            category: .beverage,
+    //            status: .danger,
+    //            costRate: "35.5%",
+    //            marginRate: "20.0%",
+    //            costAmount: "1,950원",
+    //            contribution: "3,550원",
+    //            ingredients: [],
+    //            totalIngredientCost: "1,950원"
+    //          ),
+    //          MenuItem(
+    //            name: "초콜릿 케이크",
+    //            price: "6,000원",
+    //            category: .dessert,
+    //            status: .safe,
+    //            costRate: "25.0%",
+    //            marginRate: "28.0%",
+    //            costAmount: "1,500원",
+    //            contribution: "4,500원",
+    //            ingredients: [],
+    //            totalIngredientCost: "1,500원"
+    //          ),
+    //          MenuItem(
+    //            name: "치즈케이크",
+    //            price: "6,500원",
+    //            category: .dessert,
+    //            status: .warning,
+    //            costRate: "32.0%",
+    //            marginRate: "22.0%",
+    //            costAmount: "2,080원",
+    //            contribution: "4,420원",
+    //            ingredients: [],
+    //            totalIngredientCost: "2,080원"
+    //          )
+    //        ]
+    //      )
+    //    ) {
+    //      MenuFeature()
+    //    }
+    //  )
+    //  .environment(\.colorScheme, .light)
 }
 
 private struct SheetCornerRadiusModifier: ViewModifier {
-  let radius: CGFloat
-
-  @ViewBuilder
-  func body(content: Content) -> some View {
-    if #available(iOS 16.4, *) {
-      content.presentationCornerRadius(radius)
-    } else {
-      content
+    let radius: CGFloat
+    
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if #available(iOS 16.4, *) {
+            content.presentationCornerRadius(radius)
+        } else {
+            content
+        }
     }
-  }
 }

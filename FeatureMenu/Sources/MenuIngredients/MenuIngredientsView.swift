@@ -15,10 +15,7 @@ public struct MenuIngredientsView: View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
         HStack {
-          Button(action: {
-            viewStore.send(.backTapped)
-            dismiss()
-          }) {
+          Button(action: { dismiss() }) {
             Image.arrowLeftIcon
               .renderingMode(.template)
               .foregroundColor(AppColor.grayscale900)
@@ -34,14 +31,24 @@ public struct MenuIngredientsView: View {
           
           Spacer()
           
-          Button(action: {
-            viewStore.send(.deleteTapped)
-          }) {
-            Text("삭제")
-              .font(.pretendardCTA)
-              .foregroundColor(viewStore.isEditMode ? AppColor.semanticWarningText : AppColor.grayscale600)
+          if viewStore.isEditMode {
+            Button(action: {
+              viewStore.send(.deleteTapped)
+            }) {
+              Text("삭제")
+                .font(.pretendardCTA)
+                .foregroundColor(viewStore.selectedIngredients.isEmpty ? AppColor.grayscale600 : AppColor.semanticWarningText)
+            }
+            .buttonStyle(.plain)
+          } else {
+            Button(action: {
+              viewStore.send(.manageTapped)
+            }) {
+              Image.meatballIcon
+                .frame(width: 24, height: 24)
+            }
+            .buttonStyle(.plain)
           }
-          .buttonStyle(.plain)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 12)
@@ -89,6 +96,71 @@ public struct MenuIngredientsView: View {
           viewStore.send(.ingredientAdded(newIngredient))
         }
         .presentationDetents([.height(600)])
+        .presentationDragIndicator(.hidden)
+      }
+      .alert(store: store.scope(state: \.$alert, action: { .alert($0) }))
+      .overlay {
+        if viewStore.isLoading {
+          ProgressView()
+        }
+      }
+      .overlay(alignment: .topTrailing) {
+        if viewStore.isManageMenuPresented {
+          ZStack(alignment: .topTrailing) {
+            Color.black.opacity(0.001)
+              .ignoresSafeArea()
+              .onTapGesture {
+                viewStore.send(.manageMenuDismissed)
+              }
+            
+            VStack(spacing: 0) {
+              Button {
+                viewStore.send(.addTapped)
+              } label: {
+                HStack(spacing: 4) {
+                  Text("추가")
+                    .font(.pretendardBody3)
+                    .foregroundColor(AppColor.grayscale900)
+                  Image.plusIcon
+                    .resizable()
+                    .renderingMode(.template)
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(AppColor.grayscale900)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+              }
+              .buttonStyle(.plain)
+              
+              Divider()
+                .background(AppColor.grayscale200)
+              
+              Button {
+                viewStore.send(.deleteTapped)
+              } label: {
+                HStack(spacing: 4) {
+                  Text("삭제")
+                    .font(.pretendardBody3)
+                    .foregroundColor(AppColor.grayscale900)
+                  Image.trashIcon
+                    .resizable()
+                    .renderingMode(.template)
+                    .frame(width: 16, height: 16)
+                    .foregroundColor(AppColor.grayscale900)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 12)
+              }
+              .buttonStyle(.plain)
+            }
+            .frame(width: 100)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
+            .padding(.top, 50)
+            .padding(.trailing, 20)
+          }
+        }
       }
     }
   }
@@ -133,6 +205,7 @@ public struct MenuIngredientsView: View {
     MenuIngredientsView(
       store: Store(
         initialState: MenuIngredientsFeature.State(
+          menuId: 1,
           menuName: "바닐라 라떼",
           ingredients: [
             IngredientItem(name: "우유", amount: "30g", price: "800원"),
