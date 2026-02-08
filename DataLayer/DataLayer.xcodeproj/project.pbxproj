@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		0ADE44E95DC3801E996C939C /* MenuRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBCB5036C23A202020B521 /* MenuRepository.swift */; };
+		1CD92052FDA614890964108B /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E60600F6CAAB7FEBDEA6A7D /* KeychainStorage.swift */; };
 		1CDA4C3A88076AB04B04A48F /* IngredientMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5457F203DA60AE2EDC7F1BA5 /* IngredientMapper.swift */; };
 		1DC7392A8B84F8B294F89174 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 85A2B48BA533A583C0467BF9 /* APIClient.swift */; };
 		247C2A69DB0A9FE7A2BCFD73 /* ComposableArchitecture.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 80EE0194C5B49A944E670E7B /* ComposableArchitecture.framework */; };
@@ -17,7 +18,10 @@
 		69C3A6D35696659658E9A5FE /* IngredientRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B126F8BCCBF55F093619ED /* IngredientRepository.swift */; };
 		73428370E463074007772088 /* CategoryRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E83946B1C184C6110FC5 /* CategoryRepository.swift */; };
 		965D8E7F4EB79FB13D3B8C1F /* MockMenuData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5404FC03E05C7CB278F3E70E /* MockMenuData.swift */; };
+		AE71E452C6BAF866A1FA2744 /* TokenStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F36809ED630E1A96C8542E89 /* TokenStorage.swift */; };
 		DB81E5E69B3849ADE409918E /* CoreModels.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3D15E28B2609182E5B0DCEA9 /* CoreModels.framework */; };
+		E3703BD374F434EA64FE81DA /* UserRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 715EF8D63456ECE8C0768D5E /* UserRepository.swift */; };
+		EE57D9A0966F323C647BD0BA /* AuthRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE44F80EF88E4B3B7A93C275 /* AuthRepository.swift */; };
 		F4427C756FAFAD8AB6A6F561 /* HomeRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04FC687D431E1AD7AD312FB1 /* HomeRepository.swift */; };
 /* End PBXBuildFile section */
 
@@ -36,10 +40,12 @@
 
 /* Begin PBXFileReference section */
 		04FC687D431E1AD7AD312FB1 /* HomeRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeRepository.swift; sourceTree = "<group>"; };
+		0E60600F6CAAB7FEBDEA6A7D /* KeychainStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStorage.swift; sourceTree = "<group>"; };
 		3D15E28B2609182E5B0DCEA9 /* CoreModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		5241E83946B1C184C6110FC5 /* CategoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRepository.swift; sourceTree = "<group>"; };
 		5404FC03E05C7CB278F3E70E /* MockMenuData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockMenuData.swift; sourceTree = "<group>"; };
 		5457F203DA60AE2EDC7F1BA5 /* IngredientMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientMapper.swift; sourceTree = "<group>"; };
+		715EF8D63456ECE8C0768D5E /* UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepository.swift; sourceTree = "<group>"; };
 		7CFAA2F7BA414C190CBECD2F /* MockIngredientData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockIngredientData.swift; sourceTree = "<group>"; };
 		80EE0194C5B49A944E670E7B /* ComposableArchitecture.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ComposableArchitecture.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84EBCB5036C23A202020B521 /* MenuRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuRepository.swift; sourceTree = "<group>"; };
@@ -49,6 +55,8 @@
 		A3B126F8BCCBF55F093619ED /* IngredientRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientRepository.swift; sourceTree = "<group>"; };
 		B57B565A65DB2D871571D540 /* DataLayer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataLayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BFE16DAFEB5A2DE7006990DD /* MenuMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuMapper.swift; sourceTree = "<group>"; };
+		CE44F80EF88E4B3B7A93C275 /* AuthRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthRepository.swift; sourceTree = "<group>"; };
+		F36809ED630E1A96C8542E89 /* TokenStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenStorage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +81,15 @@
 			path = Mapper;
 			sourceTree = "<group>";
 		};
+		2FA6CB7DA4D80148487E7959 /* Storage */ = {
+			isa = PBXGroup;
+			children = (
+				0E60600F6CAAB7FEBDEA6A7D /* KeychainStorage.swift */,
+				F36809ED630E1A96C8542E89 /* TokenStorage.swift */,
+			);
+			path = Storage;
+			sourceTree = "<group>";
+		};
 		61418DC90AF2A2D994DF7E05 /* InfoPlists */ = {
 			isa = PBXGroup;
 			children = (
@@ -88,6 +105,7 @@
 				83AA24E6D743121768DF2119 /* Mock */,
 				99799120998F05743F5A75FB /* Network */,
 				CA53A966A6CD5C26B04B6CFE /* Repositories */,
+				2FA6CB7DA4D80148487E7959 /* Storage */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -131,11 +149,13 @@
 		CA53A966A6CD5C26B04B6CFE /* Repositories */ = {
 			isa = PBXGroup;
 			children = (
+				CE44F80EF88E4B3B7A93C275 /* AuthRepository.swift */,
 				5241E83946B1C184C6110FC5 /* CategoryRepository.swift */,
 				04FC687D431E1AD7AD312FB1 /* HomeRepository.swift */,
 				A3B126F8BCCBF55F093619ED /* IngredientRepository.swift */,
 				84EBCB5036C23A202020B521 /* MenuRepository.swift */,
 				8EF228F048E01A1B90C78CCA /* RecipeRepository.swift */,
+				715EF8D63456ECE8C0768D5E /* UserRepository.swift */,
 			);
 			path = Repositories;
 			sourceTree = "<group>";
@@ -228,11 +248,15 @@
 				417DCFFB46CD14DDCE725422 /* MockIngredientData.swift in Sources */,
 				965D8E7F4EB79FB13D3B8C1F /* MockMenuData.swift in Sources */,
 				1DC7392A8B84F8B294F89174 /* APIClient.swift in Sources */,
+				EE57D9A0966F323C647BD0BA /* AuthRepository.swift in Sources */,
 				73428370E463074007772088 /* CategoryRepository.swift in Sources */,
 				F4427C756FAFAD8AB6A6F561 /* HomeRepository.swift in Sources */,
 				69C3A6D35696659658E9A5FE /* IngredientRepository.swift in Sources */,
 				0ADE44E95DC3801E996C939C /* MenuRepository.swift in Sources */,
 				5B77F7A298349D9BAF77BDD6 /* RecipeRepository.swift in Sources */,
+				E3703BD374F434EA64FE81DA /* UserRepository.swift in Sources */,
+				1CD92052FDA614890964108B /* KeychainStorage.swift in Sources */,
+				AE71E452C6BAF866A1FA2744 /* TokenStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

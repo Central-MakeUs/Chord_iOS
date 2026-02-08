@@ -25,31 +25,46 @@ public struct IngredientResponse: Codable, Equatable {
   }
 }
 
+public struct IngredientMenuResponse: Codable, Equatable, Hashable {
+  public let menuName: String
+  public let amount: Double
+  public let unitCode: String
+  
+  public init(menuName: String, amount: Double, unitCode: String) {
+    self.menuName = menuName
+    self.amount = amount
+    self.unitCode = unitCode
+  }
+}
+
 public struct IngredientDetailResponse: Codable, Equatable {
   public let ingredientId: Int
+  public let ingredientCategoryCode: String?
   public let ingredientName: String
   public let unitPrice: Double
   public let baseQuantity: Int
   public let unitCode: String
   public let supplier: String?
-  public let menus: [String]
+  public let menus: [IngredientMenuResponse]
   public let originalAmount: Double
   public let originalPrice: Double
   public let isFavorite: Bool
   
   public init(
     ingredientId: Int,
+    ingredientCategoryCode: String? = nil,
     ingredientName: String,
     unitPrice: Double,
     baseQuantity: Int,
     unitCode: String,
     supplier: String?,
-    menus: [String],
+    menus: [IngredientMenuResponse],
     originalAmount: Double,
     originalPrice: Double,
     isFavorite: Bool
   ) {
     self.ingredientId = ingredientId
+    self.ingredientCategoryCode = ingredientCategoryCode
     self.ingredientName = ingredientName
     self.unitPrice = unitPrice
     self.baseQuantity = baseQuantity
@@ -121,12 +136,14 @@ public struct IngredientCategoryResponse: Codable, Equatable {
   }
 }
 
-public struct PriceHistoryResponse: Codable, Equatable {
+public struct PriceHistoryResponse: Codable, Equatable, Identifiable {
   public let historyId: Int
   public let changeDate: String
   public let unitPrice: Double
   public let unitCode: String
   public let baseQuantity: Int
+  
+  public var id: Int { historyId }
   
   public init(
     historyId: Int,

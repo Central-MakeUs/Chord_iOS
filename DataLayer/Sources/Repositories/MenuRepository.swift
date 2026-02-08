@@ -55,19 +55,21 @@ extension MenuRepository: DependencyKey {
         if let category = category {
           queryItems = [URLQueryItem(name: "category", value: category)]
         }
-        let responses: [MenuResponse] = try await apiClient.request(
+        let response: BaseResponse<[MenuResponse]> = try await apiClient.request(
           path: "/api/v1/catalog/menus",
           method: .get,
           queryItems: queryItems
         )
-        return responses.map { $0.toMenuItem() }
+        guard let data = response.data else { throw APIError.decodingError("Missing data") }
+        return data.map { $0.toMenuItem() }
       },
       fetchMenuDetail: { id in
-        let response: MenuDetailResponse = try await apiClient.request(
+        let response: BaseResponse<MenuDetailResponse> = try await apiClient.request(
           path: "/api/v1/catalog/menus/\(id)",
           method: .get
         )
-        return response.toMenuItem()
+        guard let data = response.data else { throw APIError.decodingError("Missing data") }
+        return data.toMenuItem()
       },
       createMenu: { request in
         try await apiClient.requestVoid(
@@ -111,34 +113,38 @@ extension MenuRepository: DependencyKey {
         )
       },
       searchMenus: { keyword in
-        let responses: [SearchMenusResponse] = try await apiClient.request(
+        let response: BaseResponse<[SearchMenusResponse]> = try await apiClient.request(
           path: "/api/v1/catalog/menus/search",
           method: .get,
           queryItems: [URLQueryItem(name: "keyword", value: keyword)]
         )
-        return responses
+        guard let data = response.data else { return [] }
+        return data
       },
       checkDupNames: { request in
-        let response: CheckDupResponse = try await apiClient.request(
+        let response: BaseResponse<CheckDupResponse> = try await apiClient.request(
           path: "/api/v1/catalog/menus/check-dup",
           method: .post,
           body: request
         )
-        return response
+        guard let data = response.data else { throw APIError.decodingError("Missing data") }
+        return data
       },
       fetchTemplate: { templateId in
-        let response: TemplateBasicResponse = try await apiClient.request(
+        let response: BaseResponse<TemplateBasicResponse> = try await apiClient.request(
           path: "/api/v1/catalog/menus/templates/\(templateId)",
           method: .get
         )
-        return response
+        guard let data = response.data else { throw APIError.decodingError("Missing data") }
+        return data
       },
       fetchTemplateIngredients: { templateId in
-        let responses: [RecipeTemplateResponse] = try await apiClient.request(
+        let response: BaseResponse<[RecipeTemplateResponse]> = try await apiClient.request(
           path: "/api/v1/catalog/menus/templates/\(templateId)/ingredients",
           method: .get
         )
-        return responses
+        guard let data = response.data else { return [] }
+        return data
       }
     )
   }()

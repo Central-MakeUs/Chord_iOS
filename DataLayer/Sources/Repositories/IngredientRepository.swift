@@ -13,6 +13,7 @@ public struct IngredientRepository: Sendable {
   public var updateFavorite: @Sendable (Int, Bool) async throws -> Void
   public var fetchPriceHistory: @Sendable (Int) async throws -> [PriceHistoryResponse]
   public var checkDupName: @Sendable (String) async throws -> Bool
+  public var fetchIngredientCategories: @Sendable () async throws -> [IngredientCategoryResponse]
   
   public init(
     fetchIngredients: @escaping @Sendable ([String]?) async throws -> [InventoryIngredientItem],
@@ -24,7 +25,8 @@ public struct IngredientRepository: Sendable {
     updateSupplier: @escaping @Sendable (Int, SupplierUpdateRequest) async throws -> Void,
     updateFavorite: @escaping @Sendable (Int, Bool) async throws -> Void,
     fetchPriceHistory: @escaping @Sendable (Int) async throws -> [PriceHistoryResponse],
-    checkDupName: @escaping @Sendable (String) async throws -> Bool
+    checkDupName: @escaping @Sendable (String) async throws -> Bool,
+    fetchIngredientCategories: @escaping @Sendable () async throws -> [IngredientCategoryResponse]
   ) {
     self.fetchIngredients = fetchIngredients
     self.fetchIngredientDetail = fetchIngredientDetail
@@ -36,6 +38,7 @@ public struct IngredientRepository: Sendable {
     self.updateFavorite = updateFavorite
     self.fetchPriceHistory = fetchPriceHistory
     self.checkDupName = checkDupName
+    self.fetchIngredientCategories = fetchIngredientCategories
   }
 }
 
@@ -49,35 +52,39 @@ extension IngredientRepository: DependencyKey {
         if let categories = categories {
           queryItems = categories.map { URLQueryItem(name: "category", value: $0) }
         }
-        let responses: [IngredientResponse] = try await apiClient.request(
+        let response: BaseResponse<[IngredientResponse]> = try await apiClient.request(
           path: "/api/v1/catalog/ingredients",
           method: .get,
           queryItems: queryItems
         )
-        return responses.map { $0.toInventoryIngredientItem() }
+        guard let data = response.data else { throw APIError.decodingError("Missing data") }
+        return data.map { $0.toInventoryIngredientItem() }
       },
       fetchIngredientDetail: { id in
-        let response: IngredientDetailResponse = try await apiClient.request(
+        let response: BaseResponse<IngredientDetailResponse> = try await apiClient.request(
           path: "/api/v1/catalog/ingredients/\(id)",
           method: .get
         )
-        return response.toInventoryIngredientItem()
+        guard let data = response.data else { throw APIError.decodingError("Missing data") }
+        return data.toInventoryIngredientItem()
       },
       searchIngredients: { query in
-        let responses: [SearchMyIngredientsResponse] = try await apiClient.request(
+        let response: BaseResponse<[SearchMyIngredientsResponse]> = try await apiClient.request(
           path: "/api/v1/catalog/ingredients/search/my",
           method: .get,
           queryItems: [URLQueryItem(name: "keyword", value: query)]
         )
-        return responses
+        guard let data = response.data else { return [] }
+        return data
       },
       createIngredient: { request in
-        let response: IngredientResponse = try await apiClient.request(
+        let response: BaseResponse<IngredientResponse> = try await apiClient.request(
           path: "/api/v1/catalog/ingredients",
           method: .post,
           body: request
         )
-        return response
+        guard let data = response.data else { throw APIError.decodingError("Missing data") }
+        return data
       },
       updateIngredient: { id, request in
         try await apiClient.requestVoid(
@@ -107,11 +114,12 @@ extension IngredientRepository: DependencyKey {
         )
       },
       fetchPriceHistory: { id in
-        let responses: [PriceHistoryResponse] = try await apiClient.request(
+        let response: BaseResponse<[PriceHistoryResponse]> = try await apiClient.request(
           path: "/api/v1/catalog/ingredients/\(id)/price-history",
           method: .get
         )
-        return responses
+        guard let data = response.data else { return [] }
+        return data
       },
       checkDupName: { name in
         do {
@@ -124,6 +132,14 @@ extension IngredientRepository: DependencyKey {
         } catch {
           return true
         }
+      },
+      fetchIngredientCategories: {
+        let response: BaseResponse<[IngredientCategoryResponse]> = try await apiClient.request(
+          path: "/api/v1/catalog/ingredient-categories",
+          method: .get
+        )
+        guard let data = response.data else { return [] }
+        return data
       }
     )
   }()
@@ -150,7 +166,13 @@ extension IngredientRepository: DependencyKey {
     updateSupplier: { _, _ in },
     updateFavorite: { _, _ in },
     fetchPriceHistory: { _ in [] },
-    checkDupName: { _ in false }
+    checkDupName: { _ in false },
+    fetchIngredientCategories: {
+      return [
+        IngredientCategoryResponse(categoryCode: "INGREDIENTS", categoryName: "식재료", displayOrder: 1),
+        IngredientCategoryResponse(categoryCode: "MATERIALS", categoryName: "운영 재료", displayOrder: 2)
+      ]
+    }
   )
   
   public static let testValue = IngredientRepository(
@@ -163,7 +185,8 @@ extension IngredientRepository: DependencyKey {
     updateSupplier: { _, _ in },
     updateFavorite: { _, _ in },
     fetchPriceHistory: { _ in [] },
-    checkDupName: { _ in false }
+    checkDupName: { _ in false },
+    fetchIngredientCategories: { [] }
   )
 }
 

@@ -21,18 +21,20 @@ extension CategoryRepository: DependencyKey {
     
     return CategoryRepository(
       fetchMenuCategories: {
-        let responses: [MenuCategoryResponse] = try await apiClient.request(
+        let response: BaseResponse<[MenuCategoryResponse]> = try await apiClient.request(
           path: "/api/v1/catalog/menu-categories",
           method: .get
         )
-        return responses
+        guard let data = response.data else { return [] }
+        return data
       },
       fetchIngredientCategories: {
-        let responses: [IngredientCategoryResponse] = try await apiClient.request(
+        let response: BaseResponse<[IngredientCategoryResponse]> = try await apiClient.request(
           path: "/api/v1/catalog/ingredient-categories",
           method: .get
         )
-        return responses
+        guard let data = response.data else { return [] }
+        return data
       }
     )
   }()

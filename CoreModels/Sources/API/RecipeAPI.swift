@@ -39,10 +39,10 @@ public struct RecipeListResponse: Codable, Equatable {
 }
 
 public struct RecipeCreateRequest: Codable, Equatable {
-  public let ingredientId: Int?
+  public let ingredientId: Int
   public let amount: Double
   
-  public init(ingredientId: Int?, amount: Double) {
+  public init(ingredientId: Int, amount: Double) {
     self.ingredientId = ingredientId
     self.amount = amount
   }

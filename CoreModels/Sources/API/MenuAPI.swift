@@ -76,16 +76,16 @@ public struct MenuCreateRequest: Codable, Equatable {
   public let menuName: String
   public let sellingPrice: Double
   public let workTime: Int
-  public let recipes: [RecipeCreateRequest]?
-  public let newRecipes: [NewRecipeCreateRequest]?
+  public let recipes: [RecipeCreateRequest]
+  public let newRecipes: [NewRecipeCreateRequest]
   
   public init(
     menuCategoryCode: String,
     menuName: String,
     sellingPrice: Double,
     workTime: Int,
-    recipes: [RecipeCreateRequest]? = nil,
-    newRecipes: [NewRecipeCreateRequest]? = nil
+    recipes: [RecipeCreateRequest] = [],
+    newRecipes: [NewRecipeCreateRequest] = []
   ) {
     self.menuCategoryCode = menuCategoryCode
     self.menuName = menuName

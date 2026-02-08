@@ -30,11 +30,12 @@ extension RecipeRepository: DependencyKey {
     
     return RecipeRepository(
       fetchRecipes: { menuId in
-        let response: RecipeListResponse = try await apiClient.request(
+        let response: BaseResponse<RecipeListResponse> = try await apiClient.request(
           path: "/api/v1/catalog/menus/\(menuId)/recipes",
           method: .get
         )
-        return response
+        guard let data = response.data else { throw APIError.decodingError("Missing data") }
+        return data
       },
       createRecipeWithExisting: { menuId, request in
         try await apiClient.requestVoid(
