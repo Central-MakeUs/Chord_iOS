@@ -13,7 +13,21 @@ struct FeatureOnboardingDemoApp: App {
               SplashView()
             }
             NavigationLink("로그인") {
-              LoginView()
+              LoginView(
+                store: Store(initialState: LoginFeature.State()) {
+                  LoginFeature()
+                }
+              )
+            }
+            NavigationLink("회원가입") {
+              SignUpView(
+                store: Store(initialState: SignUpFeature.State()) {
+                  SignUpFeature()
+                }
+              )
+            }
+            NavigationLink("가입완료") {
+              SignUpCompleteView()
             }
           }
           Section("Onboarding") {

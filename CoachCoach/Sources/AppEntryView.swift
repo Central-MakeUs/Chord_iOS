@@ -8,25 +8,22 @@ struct AppEntryView: View {
 
   var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
-      if !viewStore.hasCompletedOnboarding {
-        OnboardingView(
-          store: store.scope(state: \.onboarding, action: \.onboarding)
-        )
-      } else if !viewStore.hasSeenMenuRegistrationStart {
-        if viewStore.isShowingMenuRegistration {
-          MenuRegistrationView(
-            store: store.scope(state: \.menuRegistration, action: \.menuRegistration)
-          )
-        } else {
-          MenuRegistrationStartView(
-            store: store.scope(
-              state: \.menuRegistrationStart,
-              action: \.menuRegistrationStart
-            )
-          )
+      Group {
+        switch viewStore.status {
+        case .loading:
+          SplashView()
+        case .unauthenticated:
+          LoginView(store: store.scope(state: \.login, action: \.login))
+        case .onboarding:
+          OnboardingView(store: store.scope(state: \.onboarding, action: \.onboarding))
+        case .menuRegistration:
+          MenuRegistrationView(store: store.scope(state: \.menuRegistration, action: \.menuRegistration))
+        case .authenticated:
+          MainView(store: store.scope(state: \.main, action: \.main))
         }
-      } else {
-        MainView(store: store.scope(state: \.main, action: \.main))
+      }
+      .onAppear {
+        viewStore.send(.onAppear)
       }
     }
   }

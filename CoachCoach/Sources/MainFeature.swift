@@ -4,16 +4,17 @@ import FeatureAICoach
 import FeatureHome
 import FeatureIngredients
 import FeatureMenu
+import SwiftUI
 
 @Reducer
 struct MainFeature {
   struct State: Equatable {
     var selectedTab: AppTab = .home
+    var path = NavigationPath()
     var home: HomeFeature.State?
     var menu: MenuFeature.State?
     var ingredients: IngredientsFeature.State?
     var aiCoach: AICoachFeature.State?
-
 
     init() {
       print("🔵 MainFeature.State init - creating home state only")
@@ -23,14 +24,38 @@ struct MainFeature {
       self.aiCoach = nil
       print("🔵 MainFeature.State init - done")
     }
+    
+    static func == (lhs: State, rhs: State) -> Bool {
+      lhs.selectedTab == rhs.selectedTab &&
+      lhs.home == rhs.home &&
+      lhs.menu == rhs.menu &&
+      lhs.ingredients == rhs.ingredients &&
+      lhs.aiCoach == rhs.aiCoach &&
+      lhs.path.count == rhs.path.count
+    }
   }
 
   enum Action: Equatable {
     case selectedTabChanged(AppTab)
+    case pathChanged(NavigationPath)
+    case logoutTapped
     case home(HomeFeature.Action)
     case menu(MenuFeature.Action)
     case ingredients(IngredientsFeature.Action)
     case aiCoach(AICoachFeature.Action)
+    
+    static func == (lhs: Action, rhs: Action) -> Bool {
+      switch (lhs, rhs) {
+      case let (.selectedTabChanged(l), .selectedTabChanged(r)): return l == r
+      case (.pathChanged, .pathChanged): return true // NavigationPath 비교 어려움
+      case (.logoutTapped, .logoutTapped): return true
+      case (.home(let l), .home(let r)): return l == r
+      case (.menu(let l), .menu(let r)): return l == r
+      case (.ingredients(let l), .ingredients(let r)): return l == r
+      case (.aiCoach(let l), .aiCoach(let r)): return l == r
+      default: return false
+      }
+    }
   }
 
   var body: some ReducerOf<Self> {
@@ -65,17 +90,44 @@ struct MainFeature {
           }
         }
         return .none
+        
+      case let .pathChanged(path):
+        state.path = path
+        return .none
+
+      case .logoutTapped:
+        return .none
+        
       case .home:
-        print("🔵 Home action received")
         return .none
+        
+      case .menu(.navigateTo(let route)):
+        state.path.append(route)
+        return .none
+        
+      case .menu(.addMenuTapped):
+        state.path.append(MenuRoute.add)
+        return .none
+        
+      case .menu(.popToRoot):
+        state.path = NavigationPath()
+        return .none
+        
       case .menu:
-        print("🔵 Menu action received")
         return .none
+        
+      case .ingredients(.searchButtonTapped):
+        state.path.append(IngredientsRoute.search)
+        return .none
+        
+      case .ingredients(.addIngredientTapped):
+        state.path.append(IngredientsRoute.add)
+        return .none
+        
       case .ingredients:
-        print("🔵 Ingredients action received")
         return .none
+        
       case .aiCoach:
-        print("🔵 AICoach action received")
         return .none
       }
     }

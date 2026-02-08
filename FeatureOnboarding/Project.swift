@@ -24,7 +24,10 @@ let demoInfoPlist: InfoPlist = .extendingDefault(with: [
       ]
     ]
   ],
-  "UILaunchStoryboardName": "LaunchScreen"
+  "UILaunchStoryboardName": "LaunchScreen",
+  "NSAppTransportSecurity": [
+    "NSAllowsArbitraryLoads": true
+  ]
 ])
 
 
@@ -47,6 +50,7 @@ let project = Project(
       sources: ["Sources/**"],
       dependencies: [
         .project(target: "DesignSystem", path: "../DesignSystem"),
+        .project(target: "DataLayer", path: "../DataLayer"),
         .external(name: "ComposableArchitecture")
       ],
       settings: .settings(

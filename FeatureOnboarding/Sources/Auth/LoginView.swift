@@ -1,31 +1,39 @@
 import SwiftUI
+import ComposableArchitecture
 import DesignSystem
 
 public struct LoginView: View {
-  @State private var id: String = ""
-  @State private var password: String = ""
+  @Bindable var store: StoreOf<LoginFeature>
   
-  public init() {}
+  public init(store: StoreOf<LoginFeature>) {
+    self.store = store
+  }
   
   public var body: some View {
     VStack(spacing: 0) {
       Spacer()
         .frame(height: 100)
       
-      Text("코치코치")
-        .font(.pretendardDisplay1)
-        .foregroundColor(AppColor.primaryBlue500)
+      Image("CoachCoachLogo", bundle: .main)
+        .resizable()
+        .scaledToFit()
+        .frame(width: 120, height: 33)
         .padding(.bottom, 60)
       
-      VStack(spacing: 24) {
+      VStack(spacing: 32) {
         UnderlinedTextField(
-          text: $id,
-          placeholder: "아이디를 입력해주세요"
+          text: $store.id,
+          title: "아이디",
+          titleColor: AppColor.grayscale900,
+          showFocusHighlight: false
         )
         
-        SecureUnderlinedTextField(
-          text: $password,
-          placeholder: "비밀번호를 입력해주세요"
+        UnderlinedTextField(
+          text: $store.password,
+          title: "비밀번호",
+          titleColor: AppColor.grayscale900,
+          showFocusHighlight: false,
+          isSecure: true
         )
       }
       .padding(.horizontal, 20)
@@ -33,25 +41,30 @@ public struct LoginView: View {
       
       BottomButton(
         title: "로그인",
-        style: isFormValid ? .primary : .secondary
+        style: store.isFormValid ? .primary : .secondary
       ) {
+        store.send(.loginTapped)
       }
-      .disabled(!isFormValid)
+      .disabled(!store.isFormValid)
       .padding(.horizontal, 20)
       .padding(.bottom, 20)
       
-      HStack(spacing: 12) {
-        Button(action: {}) {
-          Text("아이디/비밀번호 찾기")
-            .font(.pretendardCaption1)
-            .foregroundColor(AppColor.grayscale600)
-        }
+      HStack(spacing: 8) {
+          
+          //TODO: 추후 추가
+//        Button(action: {}) {
+//          Text("아이디, 비밀번호 찾기")
+//            .font(.pretendardCaption1)
+//            .foregroundColor(AppColor.grayscale600)
+//        }
         
-        Rectangle()
-          .fill(AppColor.grayscale300)
-          .frame(width: 1, height: 12)
+//        Text("|")
+//          .font(.pretendardCaption1)
+//          .foregroundColor(AppColor.grayscale300)
         
-        Button(action: {}) {
+        Button {
+          store.send(.signUpTapped)
+        } label: {
           Text("회원가입")
             .font(.pretendardCaption1)
             .foregroundColor(AppColor.grayscale600)
@@ -62,40 +75,30 @@ public struct LoginView: View {
       Spacer()
     }
     .background(Color.white.ignoresSafeArea())
-  }
-  
-  private var isFormValid: Bool {
-    !id.isEmpty && !password.isEmpty
-  }
-}
-
-private struct SecureUnderlinedTextField: View {
-  @Binding var text: String
-  let placeholder: String
-  @FocusState private var isFocused: Bool
-  
-  var body: some View {
-    VStack(alignment: .leading, spacing: 8) {
-      SecureField(
-        "",
-        text: $text,
-        prompt: Text(placeholder)
-          .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale400)
+    .fullScreenCover(
+      isPresented: $store.showSignUp,
+      onDismiss: { store.send(.signUpDismissed) }
+    ) {
+      SignUpView(
+        store: store.scope(state: \.signUp, action: \.signUp)
       )
-      .font(.pretendardBody2)
-      .foregroundColor(AppColor.grayscale900)
-      .focused($isFocused)
-      .textInputAutocapitalization(.never)
-      .disableAutocorrection(true)
-      
-      Rectangle()
-        .fill(isFocused ? AppColor.primaryBlue500 : AppColor.grayscale300)
-        .frame(height: 1)
     }
+    .coachCoachAlert(
+      isPresented: $store.isErrorAlertPresented,
+      title: store.errorMessage,
+      alertType: .oneButton,
+      rightButtonTitle: "확인",
+      rightButtonAction: {
+        store.send(.errorAlertDismissed)
+      }
+    )
   }
 }
 
 #Preview {
-  LoginView()
+  LoginView(
+    store: Store(initialState: LoginFeature.State()) {
+      LoginFeature()
+    }
+  )
 }
