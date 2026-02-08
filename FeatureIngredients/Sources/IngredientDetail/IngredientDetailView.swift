@@ -6,15 +6,8 @@ import DesignSystem
 public struct IngredientDetailView: View {
   let store: StoreOf<IngredientDetailFeature>
   @Environment(\.dismiss) private var dismiss
-  private let usedMenus = ["아메리카노", "카페라떼", "돌체라떼", "아인슈페너"]
-  private let historyItems = [
-    IngredientHistoryItem(date: "25.11.12", price: "5,000원/100g"),
-    IngredientHistoryItem(date: "25.11.09", price: "5,000원/100g"),
-    IngredientHistoryItem(date: "25.10.11", price: "5,000원/100g"),
-    IngredientHistoryItem(date: "25.09.08", price: "4,800원/100g")
-  ]
 
-  init(store: StoreOf<IngredientDetailFeature>) {
+  public init(store: StoreOf<IngredientDetailFeature>) {
     self.store = store
   }
 
@@ -22,12 +15,32 @@ public struct IngredientDetailView: View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
         NavigationTopBar(
-          onBackTap: {
-            viewStore.send(.backTapped)
-            dismiss()
+          leading: {
+            Button {
+              viewStore.send(.backTapped)
+              dismiss()
+            } label: {
+              Image.arrowLeftIcon
+                .renderingMode(.template)
+                .foregroundColor(AppColor.grayscale900)
+                .frame(width: 20, height: 20)
+            }
+            .buttonStyle(.plain)
           },
-          title: "",
-          trailing: .icon(Image.starIcon, action: {})
+          trailing: {
+            HStack {
+              Spacer()
+              Button {
+                viewStore.send(.favoriteTapped)
+              } label: {
+                Image(systemName: viewStore.item.isFavorite ? "star.fill" : "star")
+                  .resizable()
+                  .frame(width: 24, height: 24)
+                  .foregroundColor(viewStore.item.isFavorite ? .yellow : AppColor.grayscale400)
+              }
+              .buttonStyle(.plain)
+            }
+          }
         )
         
         ScrollView {
@@ -41,12 +54,12 @@ public struct IngredientDetailView: View {
               onTap: { viewStore.send(.editPresented(true)) },
               onSupplierTap: { viewStore.send(.supplierPresented(true)) }
             )
-            usageSection
+            usageSection(menus: viewStore.item.usedMenus)
             Rectangle()
               .fill(AppColor.grayscale200)
               .frame(height: 10)
               .padding(.horizontal, -20)
-            historySection
+            historySection(viewStore: viewStore)
             Spacer(minLength: 24)
           }
           .padding(.horizontal, 20)
@@ -55,13 +68,14 @@ public struct IngredientDetailView: View {
         }
         
         VStack(spacing: 0) {
-          BottomButton(title: "재료 삭제", style: .tertiary) {}
+          BottomButton(title: "재료 삭제", style: .tertiary) {
+            viewStore.send(.deleteTapped)
+          }
         }
         .padding(.horizontal, 20)
         .padding(.top, 10)
-        .padding(.bottom, 24)
+        .padding(.bottom, 34)
         .background(AppColor.grayscale100)
-        .shadow(color: .black.opacity(0.2), radius: 5, x: 0, y: 4)
 
       }
       .navigationBarBackButtonHidden(true)
@@ -108,6 +122,39 @@ public struct IngredientDetailView: View {
         .presentationDetents([.height(296)])
         .presentationDragIndicator(.hidden)
       }
+      .alert(store: store.scope(state: \.$alert, action: { .alert($0) }))
+      .coachCoachAlert(
+        isPresented: viewStore.binding(
+          get: \.showDeleteAlert,
+          send: { _ in IngredientDetailFeature.Action.deleteAlertCancelled }
+        ),
+        title: "재료를 삭제하시겠어요?",
+        alertType: .twoButton,
+        rightButtonTitle: "삭제하기",
+        leftButtonAction: {
+          viewStore.send(.deleteAlertCancelled)
+        },
+        rightButtonAction: {
+          viewStore.send(.deleteAlertConfirmed)
+        }
+      )
+      .onChange(of: viewStore.isDeleted) { isDeleted in
+        if isDeleted {
+          dismiss()
+        }
+      }
+      .onAppear {
+        print("👀 IngredientDetailView onAppear triggered")
+        viewStore.send(.onAppear)
+      }
+      .ignoresSafeArea(edges: .bottom)
+      .toastBanner(
+        isPresented: viewStore.binding(
+          get: \.showToast,
+          send: { _ in .toastDismissed }
+        ),
+        message: "수정이 반영되었어요!"
+      )
     }
   }
 
@@ -163,9 +210,9 @@ public struct IngredientDetailView: View {
         
         Spacer()
         
-        Text(supplierName.isEmpty ? "쿠팡" : supplierName)
+        Text(supplierName.isEmpty ? "미등록" : supplierName)
           .font(.pretendardBody2)
-          .foregroundColor(AppColor.grayscale700)
+          .foregroundColor(supplierName.isEmpty ? AppColor.grayscale400 : AppColor.grayscale700)
         
         Image.chevronRightOutlineIcon
           .renderingMode(.template)
@@ -176,39 +223,57 @@ public struct IngredientDetailView: View {
     .buttonStyle(.plain)
   }
 
-  private var usageSection: some View {
+  private func usageSection(menus: [UsedMenuInfo]) -> some View {
     VStack(alignment: .leading, spacing: 12) {
       HStack(spacing: 0) {
         Text("사용중인 메뉴 ")
           .font(.pretendardSubtitle3)
           .foregroundColor(AppColor.grayscale900)
-        Text("\(usedMenus.count)")
+        Text("\(menus.count)")
           .font(.pretendardSubtitle3)
           .foregroundColor(AppColor.primaryBlue500)
       }
       
-      HStack(spacing: 8) {
-        ForEach(usedMenus.prefix(3), id: \.self) { menu in
-          UsageMenuCard(menuName: menu, amount: "100g")
+      if menus.isEmpty {
+        Text("사용중인 메뉴가 없습니다.")
+          .font(.pretendardBody2)
+          .foregroundColor(AppColor.grayscale500)
+          .padding(.vertical, 12)
+      } else {
+        HStack(spacing: 8) {
+          ForEach(Array(menus.prefix(3)), id: \.menuName) { menu in
+            let unit = menu.unitCode.displayUnit
+            UsageMenuCard(
+              menuName: menu.menuName,
+              amount: "\(Int(menu.amount))\(unit)"
+            )
+          }
         }
       }
     }
   }
 
-  private var historySection: some View {
+  private func historySection(viewStore: ViewStoreOf<IngredientDetailFeature>) -> some View {
     VStack(alignment: .leading, spacing: 12) {
       Text("변동 이력")
         .font(.pretendardSubtitle3)
         .foregroundColor(AppColor.grayscale900)
 
-      ZStack(alignment: .topLeading) {
-        TimelineLine()
-        VStack(spacing: 16) {
-          ForEach(historyItems, id: \.self) { item in
-            HistoryRow(item: item)
+      if !viewStore.priceHistory.isEmpty {
+        ZStack(alignment: .topLeading) {
+          TimelineLine()
+          VStack(spacing: 16) {
+            ForEach(viewStore.priceHistory) { item in
+              HistoryRow(item: item)
+            }
           }
+          .padding(.bottom, TimelineStyle.tailLength)
         }
-        .padding(.bottom, TimelineStyle.tailLength)
+      } else {
+        Text("변동 이력이 없습니다.")
+          .font(.pretendardBody2)
+          .foregroundColor(AppColor.grayscale500)
+          .padding(.vertical, 20)
       }
     }
   }
@@ -240,13 +305,25 @@ private struct UsageMenuCard: View {
   }
 }
 
-private struct IngredientHistoryItem: Hashable {
-  let date: String
-  let price: String
-}
-
 private struct HistoryRow: View {
-  let item: IngredientHistoryItem
+  let item: PriceHistoryResponse
+  
+  var formattedDate: String {
+    let datePart = item.changeDate.prefix(10) // "2026-02-03"
+    let components = datePart.split(separator: "-")
+    if components.count == 3 {
+      let year = components[0].suffix(2)
+      return "\(year).\(components[1]).\(components[2])"
+    }
+    return String(datePart)
+  }
+  
+  var formattedPrice: String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    let price = formatter.string(from: NSNumber(value: item.unitPrice)) ?? "\(Int(item.unitPrice))"
+    return "\(price)원/\(item.baseQuantity)\(item.unitCode)"
+  }
 
   var body: some View {
     HStack(alignment: .top, spacing: 12) {
@@ -256,10 +333,10 @@ private struct HistoryRow: View {
         .frame(width: TimelineStyle.circleSize, height: TimelineStyle.circleSize)
 
       VStack(alignment: .leading, spacing: 4) {
-        Text(item.date)
+        Text(formattedDate)
           .font(.pretendardBody2)
           .foregroundColor(AppColor.grayscale500)
-        Text(item.price)
+        Text(formattedPrice)
           .font(.pretendardBody2)
           .foregroundColor(AppColor.grayscale900)
         Spacer().frame(height: 16)
@@ -301,4 +378,13 @@ private struct TimelineLine: View {
     }
   )
   .environment(\.colorScheme, .light)
+}
+
+private extension String {
+  var displayUnit: String {
+    self
+      .replacingOccurrences(of: "G", with: "g")
+      .replacingOccurrences(of: "ML", with: "ml")
+      .replacingOccurrences(of: "EA", with: "개")
+  }
 }

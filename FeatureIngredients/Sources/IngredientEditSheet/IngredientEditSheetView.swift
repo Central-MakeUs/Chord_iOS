@@ -20,10 +20,7 @@ public struct IngredientEditSheetView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        Capsule()
-          .fill(AppColor.grayscale300)
-          .frame(width: 60, height: 6)
-          .padding(.top, 12)
+        SheetDragHandle()
 
         VStack(alignment: .leading, spacing: 20) {
           VStack(alignment: .leading, spacing: 8) {
@@ -80,6 +77,7 @@ public struct IngredientEditSheetView: View {
       .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
       .background(AppColor.grayscale100)
     }
+    .presentationCornerRadius(24)
   }
 }
 
@@ -196,9 +194,9 @@ private struct UnderlinedFieldWithDropdown: View {
         }
         .background(AppColor.grayscale200)
         .cornerRadius(8)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 4)
         .frame(maxWidth: 80)
-        .offset(y: 0)
+        .offset(y: 52)
       }
     }
     .zIndex(isExpanded ? 1000 : 0)
