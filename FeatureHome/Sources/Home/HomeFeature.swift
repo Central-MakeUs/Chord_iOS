@@ -4,7 +4,6 @@ import DataLayer
 @Reducer
 public struct HomeFeature {
   public struct State: Equatable {
-    var path: [HomeRoute] = []
     var dashboardStats: DashboardStats?
     var strategyGuides: [StrategyGuideItem] = []
     var isLoading = false
@@ -15,14 +14,12 @@ public struct HomeFeature {
 
   public enum Action: Equatable {
     case onAppear
-    case pathChanged([HomeRoute])
     case dashboardStatsLoaded(Result<DashboardStats, Error>)
     case strategyGuidesLoaded(Result<[StrategyGuideItem], Error>)
     
     public static func == (lhs: Action, rhs: Action) -> Bool {
       switch (lhs, rhs) {
       case (.onAppear, .onAppear): return true
-      case let (.pathChanged(l), .pathChanged(r)): return l == r
       case (.dashboardStatsLoaded(.success(let l)), .dashboardStatsLoaded(.success(let r))): return l == r
       case (.dashboardStatsLoaded(.failure), .dashboardStatsLoaded(.failure)): return true
       case (.strategyGuidesLoaded(.success(let l)), .strategyGuidesLoaded(.success(let r))): return l == r
@@ -65,10 +62,6 @@ public struct HomeFeature {
         
       case let .strategyGuidesLoaded(.failure(error)):
         state.error = error.localizedDescription
-        return .none
-        
-      case let .pathChanged(path):
-        state.path = path
         return .none
       }
     }
