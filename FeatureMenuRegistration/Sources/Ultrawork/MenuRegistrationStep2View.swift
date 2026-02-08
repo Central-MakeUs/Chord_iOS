@@ -2,9 +2,11 @@ import SwiftUI
 import ComposableArchitecture
 import CoreModels
 import DesignSystem
+import UIKit
 
 public struct MenuRegistrationStep2View: View {
   let store: StoreOf<MenuRegistrationFeature>
+  @FocusState private var isInputFocused: Bool
 
   public init(store: StoreOf<MenuRegistrationFeature>) {
     self.store = store
@@ -27,10 +29,6 @@ public struct MenuRegistrationStep2View: View {
             inputSection(viewStore: viewStore)
             
             addedListSection(viewStore: viewStore)
-
-            if !viewStore.templateIngredients.isEmpty {
-              templateListSection(viewStore: viewStore)
-            }
           }
           .padding(.horizontal, 20)
           .padding(.top, 20)
@@ -40,6 +38,12 @@ public struct MenuRegistrationStep2View: View {
         bottomButtons(viewStore: viewStore)
       }
       .background(Color.white.ignoresSafeArea())
+      .contentShape(Rectangle())
+      .simultaneousGesture(
+        TapGesture().onEnded {
+          dismissKeyboard()
+        }
+      )
       .sheet(
         isPresented: viewStore.binding(
           get: \.showIngredientDetailSheet,
@@ -51,10 +55,43 @@ public struct MenuRegistrationStep2View: View {
           let ingredient = viewStore.addedIngredients[index]
           IngredientDetailSheet(ingredient: ingredient)
             .presentationDetents([.large])
+            .presentationDragIndicator(.hidden)
         }
+      }
+      .sheet(
+        isPresented: viewStore.binding(
+          get: \.showIngredientAddSheet,
+          send: MenuRegistrationFeature.Action.showIngredientAddSheetChanged
+        )
+      ) {
+        IngredientAddSheet(store: store)
+          .presentationDetents([.large])
+          .presentationCornerRadius(24)
+          .presentationDragIndicator(.hidden)
+          .presentationBackground(Color.white)
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
+      .toastBanner(
+        isPresented: viewStore.binding(
+          get: \.isToastPresented,
+          send: MenuRegistrationFeature.Action.showToastChanged
+        ),
+        message: "재료 추가가 완료되었어요!",
+        duration: 1.0
+      )
+      .coachCoachAlert(
+        isPresented: viewStore.binding(
+          get: \.showIngredientDupAlert,
+          send: { _ in .ingredientDupAlertCancelled }
+        ),
+        title: "동일한 재료명이 이미 존재합니다.\n해당 재료를 추가하시겠습니까?",
+        alertType: .twoButton,
+        leftButtonTitle: "네",
+        rightButtonTitle: "아니오",
+        leftButtonAction: { viewStore.send(.ingredientDupAlertConfirmed) },
+        rightButtonAction: { viewStore.send(.ingredientDupAlertCancelled) }
+      )
     }
   }
 
@@ -85,16 +122,6 @@ public struct MenuRegistrationStep2View: View {
           )
       }
       .frame(width: 80)
-      
-      VStack(alignment: .leading, spacing: 4) {
-        Text("재료 추가")
-          .font(.pretendardSubtitle2)
-          .foregroundColor(AppColor.grayscale900)
-        
-        Text("메뉴에 필요한 재료를 추가해주세요")
-          .font(.pretendardCaption1)
-          .foregroundColor(AppColor.grayscale600)
-      }
     }
   }
 
@@ -102,69 +129,83 @@ public struct MenuRegistrationStep2View: View {
     VStack(alignment: .leading, spacing: 16) {
       VStack(alignment: .leading, spacing: 8) {
         Text("재료명")
-          .font(.pretendardSubtitle2)
+          .font(.pretendardCaption1)
           .foregroundColor(AppColor.grayscale900)
 
-        UnderlinedTextField(
-          text: viewStore.binding(
-            get: \.ingredientInput,
-            send: MenuRegistrationFeature.Action.ingredientInputChanged
-          ),
-          title: nil,
-          placeholder: "추가할 재료명을 입력해주세요",
-          placeholderColor: AppColor.grayscale400,
-          accentColor: AppColor.primaryBlue500,
-          trailingIcon: !viewStore.ingredientInput.isEmpty ? Image.cancelRoundedIcon : nil,
-          onTrailingTap: {
-            viewStore.send(.ingredientInputChanged(""))
-          }
-        )
-      }
-      
-      if !viewStore.ingredientInput.isEmpty {
-        Button(action: {
-          viewStore.send(.addIngredientTapped)
-        }) {
-          HStack {
-            Image.plusIcon
-              .renderingMode(.template)
-              .foregroundColor(AppColor.primaryBlue500)
-              .frame(width: 20, height: 20)
+        VStack(spacing: 8) {
+          HStack(alignment: .bottom, spacing: 8) {
+            TextField(
+              "",
+              text: viewStore.binding(
+                get: \.ingredientInput,
+                send: MenuRegistrationFeature.Action.ingredientInputChanged
+              ),
+              prompt: Text("추가할 재료명을 입력해주세요")
+                .font(.pretendardBody2)
+                .foregroundColor(AppColor.grayscale400)
+            )
+            .font(.pretendardBody2)
+            .foregroundColor(AppColor.grayscale900)
+            .focused($isInputFocused)
+            .textInputAutocapitalization(.never)
+            .disableAutocorrection(true)
+            .frame(height: 24)
+
+            if !viewStore.ingredientInput.isEmpty {
+              Button(action: {
+                viewStore.send(.ingredientInputChanged(""))
+              }) {
+                Image.cancelRoundedIcon
+                  .renderingMode(.template)
+                  .foregroundColor(AppColor.grayscale500)
+                  .frame(width: 20, height: 20)
+              }
+              .buttonStyle(.plain)
+            }
             
-            Text("재료 추가")
-              .font(.pretendardBody2)
-              .foregroundColor(AppColor.primaryBlue500)
+            Button(action: {
+              viewStore.send(.addIngredientTapped)
+            }) {
+              Image.plusCircleBlueIcon
+                .resizable()
+                .frame(width: 24, height: 24)
+            }
           }
-          .padding(.horizontal, 16)
-          .padding(.vertical, 12)
-          .background(AppColor.primaryBlue100)
-          .cornerRadius(8)
+          
+          Rectangle()
+            .fill(isInputFocused ? AppColor.primaryBlue500 : AppColor.grayscale300)
+            .frame(height: 1)
         }
-        .transition(.opacity.combined(with: .move(edge: .top)))
       }
     }
     .animation(.easeInOut(duration: 0.2), value: viewStore.ingredientInput.isEmpty)
   }
 
   private func addedListSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    VStack(alignment: .leading, spacing: 16) {
+    VStack(alignment: .leading, spacing: 0) {
       HStack {
         Text("재료 리스트")
-          .font(.pretendardSubtitle2)
-          .foregroundColor(AppColor.grayscale900)
+          .font(.pretendardSubtitle3)
+          .foregroundColor(AppColor.grayscale700)
 
         Spacer()
 
         if !viewStore.addedIngredients.isEmpty {
-          Text("\(viewStore.addedIngredients.count)개")
-            .font(.pretendardCaption1)
-            .foregroundColor(AppColor.primaryBlue500)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 4)
-            .background(AppColor.primaryBlue100)
-            .cornerRadius(12)
+          Button(action: {}) {
+            Text("선택")
+              .font(.pretendardCaption1)
+              .foregroundColor(AppColor.grayscale600)
+              .padding(.horizontal, 10)
+              .padding(.vertical, 4)
+              .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                  .stroke(AppColor.grayscale300, lineWidth: 1)
+              )
+          }
+          .buttonStyle(.plain)
         }
       }
+      .padding(.bottom, 16)
 
       if viewStore.addedIngredients.isEmpty {
         VStack(spacing: 8) {
@@ -172,143 +213,54 @@ public struct MenuRegistrationStep2View: View {
             .renderingMode(.template)
             .foregroundColor(AppColor.grayscale300)
             .frame(width: 48, height: 48)
-          
+
           Text("추가된 재료가 없습니다")
             .font(.pretendardBody2)
             .foregroundColor(AppColor.grayscale500)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 40)
-        .background(Color.white)
-        .cornerRadius(12)
       } else {
         VStack(spacing: 0) {
           ForEach(Array(viewStore.addedIngredients.enumerated()), id: \.element.id) { index, item in
-            Button(action: {
-              viewStore.send(.ingredientTapped(index))
-            }) {
-              HStack(spacing: 12) {
-                VStack(alignment: .leading, spacing: 4) {
-                  Text(item.name)
-                    .font(.pretendardSubtitle3)
-                    .foregroundColor(AppColor.grayscale900)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                  
-                  Text(item.formattedAmount)
-                    .font(.pretendardCaption2)
-                    .foregroundColor(AppColor.grayscale500)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                }
+            VStack(spacing: 0) {
+              HStack {
+                Text(item.name)
+                  .font(.pretendardSubtitle3)
+                  .foregroundColor(AppColor.grayscale900)
 
-                VStack(alignment: .trailing, spacing: 4) {
+                Spacer()
+
+                HStack(spacing: 8) {
+                  Text(item.formattedAmount)
+                    .font(.pretendardBody2)
+                    .foregroundColor(AppColor.grayscale500)
+
                   Text(item.formattedPrice)
-                    .font(.pretendardSubtitle3)
-                    .foregroundColor(AppColor.grayscale900)
-                  
-                  Text("단위당")
-                    .font(.pretendardCaption2)
+                    .font(.pretendardBody2)
                     .foregroundColor(AppColor.grayscale500)
                 }
-                
-                Image.chevronRightOutlineIcon
-                  .renderingMode(.template)
-                  .foregroundColor(AppColor.grayscale400)
-                  .frame(width: 16, height: 16)
               }
               .padding(.vertical, 16)
-              .padding(.horizontal, 16)
-              .background(Color.white)
-              .cornerRadius(12)
-            }
-            .buttonStyle(PlainButtonStyle())
-            
-            if index < viewStore.addedIngredients.count - 1 {
-              Spacer().frame(height: 8)
-            }
-          }
-        }
 
-        if !viewStore.addedIngredients.isEmpty {
-          HStack {
-            Spacer()
-            VStack(alignment: .trailing, spacing: 4) {
-              Text("총 재료비")
-                .font(.pretendardCaption2)
-                .foregroundColor(AppColor.grayscale600)
-              Text(viewStore.formattedTotalCost)
-                .font(.pretendardTitle2)
-                .foregroundColor(AppColor.primaryBlue600)
+              Rectangle()
+                .fill(AppColor.grayscale200)
+                .frame(height: 1)
             }
           }
-          .padding(.top, 16)
-          .padding(.horizontal, 16)
-          .padding(.vertical, 16)
-          .background(AppColor.primaryBlue100)
-          .cornerRadius(12)
         }
       }
     }
   }
 
-  private func templateListSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    VStack(alignment: .leading, spacing: 16) {
-      HStack {
-        Text("템플릿 재료")
-          .font(.pretendardSubtitle2)
-          .foregroundColor(AppColor.grayscale900)
-        
-        Spacer()
-        
-        Text("추천")
-          .font(.pretendardCaption2)
-          .foregroundColor(Color.orange)
-          .padding(.horizontal, 8)
-          .padding(.vertical, 4)
-          .background(Color.orange.opacity(0.1))
-          .cornerRadius(8)
-      }
-
-      VStack(spacing: 8) {
-        ForEach(Array(viewStore.templateIngredients.enumerated()), id: \.offset) { index, item in
-          Button(action: {
-            viewStore.send(.templateIngredientTapped(index))
-          }) {
-            HStack(spacing: 12) {
-              VStack(alignment: .leading, spacing: 4) {
-                Text(item.ingredientName)
-                  .font(.pretendardSubtitle3)
-                  .foregroundColor(AppColor.grayscale900)
-                  .frame(maxWidth: .infinity, alignment: .leading)
-                
-
-              }
-
-              Spacer()
-
-              VStack(spacing: 4) {
-                Image.plusCircleBlueIcon
-                  .renderingMode(.template)
-                  .foregroundColor(AppColor.primaryBlue500)
-                  .frame(width: 24, height: 24)
-                
-                Text("추가")
-                  .font(.pretendardCaption2)
-                  .foregroundColor(AppColor.primaryBlue500)
-              }
-            }
-            .padding(.vertical, 16)
-            .padding(.horizontal, 16)
-            .background(Color.white)
-            .cornerRadius(12)
-            .overlay(
-              RoundedRectangle(cornerRadius: 12)
-                .stroke(Color.orange.opacity(0.3), lineWidth: 1)
-            )
-          }
-          .buttonStyle(PlainButtonStyle())
-        }
-      }
-    }
+  private func dismissKeyboard() {
+    isInputFocused = false
+    UIApplication.shared.sendAction(
+      #selector(UIResponder.resignFirstResponder),
+      to: nil,
+      from: nil,
+      for: nil
+    )
   }
 
   private func bottomButtons(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
@@ -329,7 +281,7 @@ public struct MenuRegistrationStep2View: View {
           style: viewStore.addedIngredients.isEmpty ? .secondary : .primary
         ) {
           if !viewStore.addedIngredients.isEmpty {
-            viewStore.send(.completeTapped)
+            viewStore.send(.finalCompleteTapped)
           }
         }
       }

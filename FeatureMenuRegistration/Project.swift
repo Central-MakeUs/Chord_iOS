@@ -24,7 +24,10 @@ let demoInfoPlist: InfoPlist = .extendingDefault(with: [
       ]
     ]
   ],
-  "UILaunchStoryboardName": "LaunchScreen"
+  "UILaunchStoryboardName": "LaunchScreen",
+  "NSAppTransportSecurity": [
+    "NSAllowsArbitraryLoads": true
+  ]
 ])
 
 
@@ -72,6 +75,7 @@ let project = Project(
       ],
       dependencies: [
         .target(name: "FeatureMenuRegistration"),
+        .project(target: "DataLayer", path: "../DataLayer"),
         .external(name: "ComposableArchitecture")
       ],
       settings: .settings(

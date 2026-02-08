@@ -1,6 +1,7 @@
 import SwiftUI
 import ComposableArchitecture
 import FeatureMenuRegistration
+import DataLayer
 
 @main
 struct FeatureMenuRegistrationDemoApp: App {
@@ -30,6 +31,15 @@ struct FeatureMenuRegistrationDemoApp: App {
         .navigationTitle("Menu Registration Demo")
       }
       .environment(\.colorScheme, .light)
+      .task {
+        do {
+          print("🔑 [Demo] Attempting Developer Login...")
+          try await AuthRepository.liveValue.login("user1", "password123@")
+          print("✅ [Demo] Developer Login Successful")
+        } catch {
+          print("❌ [Demo] Developer Login Failed: \(error)")
+        }
+      }
     }
   }
 }

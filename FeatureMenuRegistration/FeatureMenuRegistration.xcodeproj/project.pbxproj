@@ -10,6 +10,7 @@
 		06E6ABD5FE217A04A35D1AFA /* FeatureMenuRegistrationDemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2B73E5FF1CB395AC2616BC45 /* FeatureMenuRegistrationDemoApp.swift */; };
 		0841E5510FAF2E0A160BADC9 /* Pretendard-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4F88BF4C981198BB44A940B5 /* Pretendard-SemiBold.otf */; };
 		08B6333988550687CB56EB36 /* Pretendard-Thin.otf in Resources */ = {isa = PBXBuildFile; fileRef = 837E86A7C639583B790E109A /* Pretendard-Thin.otf */; };
+		09315B40B3E9AED7BA440178 /* MenuRegistrationConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D932B5B6E0EEEE26EE8685A9 /* MenuRegistrationConfirmationView.swift */; };
 		0ECF82EBDBF48197C034CE5D /* IssueReportingPackageSupport.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D35E36A070E4924E76FA9410 /* IssueReportingPackageSupport.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		1547DDB763B2622178DE405C /* CombineSchedulers.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 108EA496EBFFAE8FCB19A72D /* CombineSchedulers.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		175F970581A4484E257DD5A5 /* TuistAssets+FeatureMenuRegistrationDemo.swift in Sources */ = {isa = PBXBuildFile; fileRef = F17A687285A13B4DC9BBF3D0 /* TuistAssets+FeatureMenuRegistrationDemo.swift */; };
@@ -21,6 +22,7 @@
 		3D5B11182DD2D9CCC75C46F3 /* XCTestDynamicOverlay.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2E3157441E2807DE4679D763 /* XCTestDynamicOverlay.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		43802917D5B42C228E103001 /* Pretendard-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 9F1993D0AC496BD1B4694890 /* Pretendard-Regular.otf */; };
 		50FCFE16F2B20FC55CC7FD4C /* Pretendard-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = AAF168D5F8AC4F80115B6BF4 /* Pretendard-Bold.otf */; };
+		5247CE245706FB0AB3C0D415 /* DataLayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6E5BE447B7B809861D472BA7 /* DataLayer.framework */; };
 		5A82AA86642581A4429F1F39 /* SwiftUINavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 83CA5C5FE55BA0E390CCC3B8 /* SwiftUINavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5EC7ACA47017EB7125D7E366 /* Sharing2.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F8B58E20BEA9EED51F2309E4 /* Sharing2.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		5F0A8E33B0EBD6025DFB7F73 /* Dependencies.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D7E473617165CC2ED63DBF3D /* Dependencies.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -28,13 +30,12 @@
 		64D956090471B96F1EF761DC /* ComposableArchitecture.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4AFA6015B86E743C87A1CB76 /* ComposableArchitecture.framework */; };
 		70C8435680D6CD1E7F49BE00 /* MenuRegistrationStep2View.swift in Sources */ = {isa = PBXBuildFile; fileRef = AEA6A33D8B69324E6063EB39 /* MenuRegistrationStep2View.swift */; };
 		74B4C2D40302DB1ECC49A854 /* Pretendard-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = F63D76670EC85C5B720B414E /* Pretendard-ExtraLight.otf */; };
+		7654E7794FE701143EB58BAC /* IngredientAddSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1BAD2C8E742E33C3F6314800 /* IngredientAddSheet.swift */; };
 		7B5A1214760C986023FF0BD3 /* PretendardVariable.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4FB0A2FADB35EF66BF43C92B /* PretendardVariable.ttf */; };
 		7DCF237FC1DDF025A9BC8A8E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1DFD02D4E4DBF5E463AEF9C2 /* Assets.xcassets */; };
 		8076CF22EB0D47EA43BA8041 /* DesignSystem.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 1DB9E44101BC25F2D0E51DFF /* DesignSystem.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		82ACB6817A8FBD2C716BF9F2 /* MenuRegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B27AA8A287FC5A7A88B67293 /* MenuRegistrationView.swift */; };
-		842E35A1487DEDB7CBEF3DB9 /* MenuRegistrationStartFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8FE6D452A78CC62FE9931D5 /* MenuRegistrationStartFeature.swift */; };
 		8431F07E32123827578E2522 /* Pretendard-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = C175BF4E172656BFBF217456 /* Pretendard-Medium.otf */; };
-		85D8FA62497664855F50336B /* MenuRegistrationStartView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 509ED58A0521D6ADCD866F02 /* MenuRegistrationStartView.swift */; };
 		92384FEB5B2686073F4AAE23 /* TemplateApplySheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0C0B9C2D4DEF71152E91050D /* TemplateApplySheet.swift */; };
 		97501CB5560B295810C4B640 /* CoreModels.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 90E4675C99CF8A8DB37933AA /* CoreModels.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		A08E52B0C93D40D714B5B282 /* FeatureMenuRegistration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 212CBFE2FBB91967DBD12D34 /* FeatureMenuRegistration.framework */; };
@@ -131,6 +132,7 @@
 		0496E77B42CD9F1E8BF05BA1 /* TuistFonts+FeatureMenuRegistrationDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistFonts+FeatureMenuRegistrationDemo.swift"; sourceTree = "<group>"; };
 		0C0B9C2D4DEF71152E91050D /* TemplateApplySheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateApplySheet.swift; sourceTree = "<group>"; };
 		108EA496EBFFAE8FCB19A72D /* CombineSchedulers.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CombineSchedulers.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BAD2C8E742E33C3F6314800 /* IngredientAddSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientAddSheet.swift; sourceTree = "<group>"; };
 		1D2820FA42D53875E4480936 /* IdentifiedCollections.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IdentifiedCollections.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DB9E44101BC25F2D0E51DFF /* DesignSystem.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DesignSystem.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1DFD02D4E4DBF5E463AEF9C2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -148,7 +150,6 @@
 		4D2D50B9F299CB0E27B92AEF /* CasePathsCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CasePathsCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4F88BF4C981198BB44A940B5 /* Pretendard-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-SemiBold.otf"; sourceTree = "<group>"; };
 		4FB0A2FADB35EF66BF43C92B /* PretendardVariable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = PretendardVariable.ttf; sourceTree = "<group>"; };
-		509ED58A0521D6ADCD866F02 /* MenuRegistrationStartView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuRegistrationStartView.swift; sourceTree = "<group>"; };
 		5D03631DC78A110476C96314 /* Perception.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Perception.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		611C67BA476197BBEB6AA70C /* Pretendard-Light.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-Light.otf"; sourceTree = "<group>"; };
 		6CD31E50B5DE586CF537D619 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -173,12 +174,12 @@
 		C81A7A7F262296DFF511ADCA /* TuistBundle+FeatureMenuRegistrationDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistBundle+FeatureMenuRegistrationDemo.swift"; sourceTree = "<group>"; };
 		D35E36A070E4924E76FA9410 /* IssueReportingPackageSupport.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IssueReportingPackageSupport.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D7E473617165CC2ED63DBF3D /* Dependencies.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Dependencies.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D932B5B6E0EEEE26EE8685A9 /* MenuRegistrationConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuRegistrationConfirmationView.swift; sourceTree = "<group>"; };
 		DA2E4336509F53A9D3B9471C /* Sharing1.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sharing1.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F132D0074DEB1367FE0239F8 /* CasePaths.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CasePaths.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		F17A687285A13B4DC9BBF3D0 /* TuistAssets+FeatureMenuRegistrationDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistAssets+FeatureMenuRegistrationDemo.swift"; sourceTree = "<group>"; };
 		F63D76670EC85C5B720B414E /* Pretendard-ExtraLight.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraLight.otf"; sourceTree = "<group>"; };
 		F8B58E20BEA9EED51F2309E4 /* Sharing2.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Sharing2.framework; sourceTree = BUILT_PRODUCTS_DIR; };
-		F8FE6D452A78CC62FE9931D5 /* MenuRegistrationStartFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuRegistrationStartFeature.swift; sourceTree = "<group>"; };
 		F9E2F37F8DB34D34DC291BD7 /* MenuRegistrationFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuRegistrationFeature.swift; sourceTree = "<group>"; };
 		FD46F2F4A2A7C3970D9E982E /* IssueReporting.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IssueReporting.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -200,6 +201,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F61206F0B3A159C67C4AC6CB /* ComposableArchitecture.framework in Frameworks */,
+				5247CE245706FB0AB3C0D415 /* DataLayer.framework in Frameworks */,
 				A08E52B0C93D40D714B5B282 /* FeatureMenuRegistration.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -276,15 +278,6 @@
 			);
 			sourceTree = "<group>";
 		};
-		5AA516122C559C0A6EED637B /* MenuRegistrationStart */ = {
-			isa = PBXGroup;
-			children = (
-				F8FE6D452A78CC62FE9931D5 /* MenuRegistrationStartFeature.swift */,
-				509ED58A0521D6ADCD866F02 /* MenuRegistrationStartView.swift */,
-			);
-			path = MenuRegistrationStart;
-			sourceTree = "<group>";
-		};
 		6E6FA30F70D91D79672FDEED /* Demo */ = {
 			isa = PBXGroup;
 			children = (
@@ -305,7 +298,6 @@
 			isa = PBXGroup;
 			children = (
 				2741A755C577F8607F9F0F0B /* MenuRegistration */,
-				5AA516122C559C0A6EED637B /* MenuRegistrationStart */,
 				B6DBE70ACA7A7D436B3A8E82 /* Ultrawork */,
 			);
 			path = Sources;
@@ -335,7 +327,9 @@
 		B6DBE70ACA7A7D436B3A8E82 /* Ultrawork */ = {
 			isa = PBXGroup;
 			children = (
+				1BAD2C8E742E33C3F6314800 /* IngredientAddSheet.swift */,
 				8C48CB3B2C6AD07C2108D179 /* IngredientDetailSheet.swift */,
+				D932B5B6E0EEEE26EE8685A9 /* MenuRegistrationConfirmationView.swift */,
 				93235782BF19BA9D560C8DBA /* MenuRegistrationStep1View.swift */,
 				AEA6A33D8B69324E6063EB39 /* MenuRegistrationStep2View.swift */,
 				0C0B9C2D4DEF71152E91050D /* TemplateApplySheet.swift */,
@@ -490,9 +484,9 @@
 			files = (
 				B851B9E84F20509E35468EB6 /* MenuRegistrationFeature.swift in Sources */,
 				82ACB6817A8FBD2C716BF9F2 /* MenuRegistrationView.swift in Sources */,
-				842E35A1487DEDB7CBEF3DB9 /* MenuRegistrationStartFeature.swift in Sources */,
-				85D8FA62497664855F50336B /* MenuRegistrationStartView.swift in Sources */,
+				7654E7794FE701143EB58BAC /* IngredientAddSheet.swift in Sources */,
 				B5D1028D1633CBA920D16836 /* IngredientDetailSheet.swift in Sources */,
+				09315B40B3E9AED7BA440178 /* MenuRegistrationConfirmationView.swift in Sources */,
 				F2F1A67F4F44D7D954788317 /* MenuRegistrationStep1View.swift in Sources */,
 				70C8435680D6CD1E7F49BE00 /* MenuRegistrationStep2View.swift in Sources */,
 				92384FEB5B2686073F4AAE23 /* TemplateApplySheet.swift in Sources */,

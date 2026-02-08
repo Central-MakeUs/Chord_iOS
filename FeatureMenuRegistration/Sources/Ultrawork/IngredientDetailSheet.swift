@@ -11,6 +11,8 @@ public struct IngredientDetailSheet: View {
 
   public var body: some View {
     VStack(spacing: 0) {
+      SheetDragHandle()
+
       NavigationTopBar(
         onBackTap: { dismiss() },
         title: "재료 상세",

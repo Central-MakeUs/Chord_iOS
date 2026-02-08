@@ -2,9 +2,11 @@ import SwiftUI
 import ComposableArchitecture
 import CoreModels
 import DesignSystem
+import UIKit
 
 public struct MenuRegistrationStep1View: View {
   let store: StoreOf<MenuRegistrationFeature>
+  @Environment(\.dismiss) private var dismiss
 
   public init(store: StoreOf<MenuRegistrationFeature>) {
     self.store = store
@@ -13,7 +15,10 @@ public struct MenuRegistrationStep1View: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        NavigationTopBar(onBackTap: { viewStore.send(.backTapped) })
+        NavigationTopBar(onBackTap: {
+          viewStore.send(.backTapped)
+          dismiss()
+        })
 
         HStack {
           stepIndicator
@@ -31,17 +36,14 @@ public struct MenuRegistrationStep1View: View {
         } else {
           ScrollView {
             VStack(spacing: 0) {
-              if viewStore.isTemplateApplied || !viewStore.menuName.isEmpty {
+              if !viewStore.price.isEmpty {
                 filledContentSection(viewStore: viewStore)
               }
             }
+            .animation(.easeInOut(duration: 1), value: viewStore.price.isEmpty)
           }
           
           VStack(spacing: 20) {
-            if viewStore.isTemplateApplied {
-              templateAppliedBanner
-            }
-            
             bottomButtons(viewStore: viewStore)
           }
           .padding(.horizontal, 20)
@@ -49,6 +51,20 @@ public struct MenuRegistrationStep1View: View {
         }
       }
       .background(Color.white.ignoresSafeArea())
+      .contentShape(Rectangle())
+      .simultaneousGesture(
+        TapGesture().onEnded {
+          dismissKeyboard()
+        }
+      )
+      .toastBanner(
+        isPresented: viewStore.binding(
+          get: \.showTemplateAppliedBanner,
+          send: MenuRegistrationFeature.Action.showTemplateAppliedBannerChanged
+        ),
+        message: "템플릿이 적용됐어요",
+        duration: 1.0
+      )
       .sheet(
         isPresented: viewStore.binding(
           get: \.showTemplateSheet,
@@ -61,11 +77,46 @@ public struct MenuRegistrationStep1View: View {
           onCancel: { viewStore.send(.cancelTemplateTapped) }
         )
         .presentationDetents([.height(280)])
+        .presentationCornerRadius(24)
+        .presentationDragIndicator(.hidden)
         .presentationBackground(Color.white)
+      }
+      .sheet(
+        isPresented: viewStore.binding(
+          get: \.isTimePickerPresented,
+          send: MenuRegistrationFeature.Action.showTimePickerChanged
+        )
+      ) {
+        PrepareTimeSheetView(
+          store: Store(
+            initialState: PrepareTimeSheetFeature.State(
+              minutes: viewStore.workTimeMinutes,
+              seconds: viewStore.workTimeSeconds
+            )
+          ) {
+            PrepareTimeSheetFeature()
+          },
+          onComplete: { minutes, seconds in
+            viewStore.send(.workTimeUpdated(minutes: minutes, seconds: seconds))
+            viewStore.send(.showTimePickerChanged(false))
+          }
+        )
+        .presentationDetents([.height(360)])
+        .presentationCornerRadius(24)
+        .presentationDragIndicator(.hidden)
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
     }
+  }
+
+  private func dismissKeyboard() {
+    UIApplication.shared.sendAction(
+      #selector(UIResponder.resignFirstResponder),
+      to: nil,
+      from: nil,
+      for: nil
+    )
   }
 
   private var stepIndicator: some View {
@@ -111,15 +162,26 @@ public struct MenuRegistrationStep1View: View {
         }
       )
       
-      UnderlinedTextField(
-        text: viewStore.binding(
-          get: \.price,
-          send: MenuRegistrationFeature.Action.priceChanged
-        ),
-        title: "가격",
-        placeholder: "가격을 입력해주세요",
-        keyboardType: .numberPad
-      )
+      if viewStore.menuName.isEmpty {
+        HStack(spacing: 0) {
+          Spacer(minLength: 0)
+          SpeechBubbleBanner(text: "등록하실 메뉴명을 입력해주세요")
+        }
+        .padding(.top, -12)
+        .transition(.opacity)
+      }
+      
+      if viewStore.isTemplateApplied || !viewStore.menuName.isEmpty && !viewStore.showSuggestions {
+        UnderlinedTextField(
+          text: viewStore.binding(
+            get: \.price,
+            send: MenuRegistrationFeature.Action.priceChanged
+          ),
+          title: "가격",
+          placeholder: "가격을 입력해주세요",
+          keyboardType: .numberPad
+        )
+      }
     }
   }
 
@@ -149,24 +211,29 @@ public struct MenuRegistrationStep1View: View {
         }
         .padding(.top, 24)
 
-        HStack {
-          Text("제조시간")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale900)
-          Spacer()
-          HStack(spacing: 4) {
-            Text(viewStore.workTimeText)
+        Button(action: {
+          viewStore.send(.showTimePickerChanged(true))
+        }) {
+          HStack {
+            Text("제조시간")
               .font(.pretendardBody2)
               .foregroundColor(AppColor.grayscale900)
-            Image.chevronRightOutlineIcon
-              .renderingMode(.template)
-              .foregroundColor(AppColor.grayscale500)
+            Spacer()
+            HStack(spacing: 4) {
+              Text(viewStore.workTimeText)
+                .font(.pretendardBody2)
+                .foregroundColor(AppColor.grayscale900)
+              Image.chevronRightOutlineIcon
+                .renderingMode(.template)
+                .foregroundColor(AppColor.grayscale500)
+            }
           }
+          .padding(16)
+          .background(Color(uiColor: .systemGray6))
+          .cornerRadius(12)
+          .padding(.top, 8)
         }
-        .padding(16)
-        .background(Color(uiColor: .systemGray6))
-        .cornerRadius(12)
-        .padding(.top, 8)
+        .buttonStyle(.plain)
       }
       .padding(.horizontal, 20)
     }
@@ -195,29 +262,7 @@ public struct MenuRegistrationStep1View: View {
     .buttonStyle(.plain)
   }
   
-  private var templateAppliedBanner: some View {
-    HStack(spacing: 8) {
-      ZStack {
-        Circle()
-          .fill(AppColor.primaryBlue500)
-          .frame(width: 20, height: 20)
-        
-        Image(systemName: "checkmark")
-          .font(.system(size: 10, weight: .bold))
-          .foregroundColor(.white)
-      }
-      
-      Text("템플릿이 적용됐어요")
-        .font(.pretendardBody2)
-        .foregroundColor(.white)
-      
-      Spacer()
-    }
-    .padding(.horizontal, 16)
-    .padding(.vertical, 14)
-    .background(AppColor.grayscale700)
-    .cornerRadius(12)
-  }
+
 
   private func suggestionList(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     VStack(spacing: 0) {
@@ -226,25 +271,29 @@ public struct MenuRegistrationStep1View: View {
       ScrollView {
         VStack(spacing: 0) {
           if viewStore.searchResults.isEmpty {
-            HStack {
-              Image.searchIcon
-                .renderingMode(.template)
-                .foregroundColor(AppColor.grayscale400)
-              Text("검색 결과가 없습니다")
+            VStack(spacing: 8) {
+              Text("찾으시는 메뉴가 없나요?")
                 .font(.pretendardBody2)
                 .foregroundColor(AppColor.grayscale500)
-              Spacer()
+              
+              Button(action: {
+                viewStore.send(.directInputTapped)
+              }) {
+                Text("'\(viewStore.menuName)' 직접 입력")
+                  .font(.pretendardBody2)
+                  .foregroundColor(AppColor.primaryBlue500)
+                  .underline()
+              }
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 32)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 60)
           } else {
             ForEach(viewStore.searchResults, id: \.templateId) { item in
               Button(action: {
                 viewStore.send(.templateSelected(item))
               }) {
                 HStack(spacing: 8) {
-                  highlightedText(for: item.menuName, query: viewStore.menuName)
-                    .font(.pretendardBody2)
+                  highlightedText(fullText: item.menuName, searchText: viewStore.menuName)
 
                   Spacer()
 
@@ -258,9 +307,6 @@ public struct MenuRegistrationStep1View: View {
               }
               .buttonStyle(.plain)
 
-              if item.templateId != viewStore.searchResults.last?.templateId {
-                Divider().padding(.horizontal, 20)
-              }
             }
           }
         }
@@ -270,7 +316,11 @@ public struct MenuRegistrationStep1View: View {
   }
 
   private func bottomButtons(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    HStack(spacing: 8) {
+    let isNextEnabled = !viewStore.menuName
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+      .isEmpty
+
+      return HStack(spacing: 8) {
       BottomButton(
         title: "이전",
         style: .secondary
@@ -280,24 +330,43 @@ public struct MenuRegistrationStep1View: View {
 
       BottomButton(
         title: "다음",
-        style: .primary
+        style: isNextEnabled ? .primary : .secondary
       ) {
         viewStore.send(.nextStepTapped)
       }
+      .disabled(!isNextEnabled)
     }
   }
 
-  private func highlightedText(for text: String, query: String) -> Text {
-    guard query.count > 0, text.hasPrefix(query) else {
-      return Text(text).foregroundColor(AppColor.grayscale900)
+  private func highlightedText(fullText: String, searchText: String) -> Text {
+    let trimmed = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty else {
+      return Text(fullText)
+        .font(.pretendardBody2)
+        .foregroundColor(AppColor.grayscale900)
     }
 
-    let matchedPart = String(text.prefix(query.count))
-    let remainingPart = String(text.dropFirst(query.count))
+    var result = Text("")
+    var cursor = fullText.startIndex
+    let end = fullText.endIndex
 
-    return Text(matchedPart)
-      .foregroundColor(AppColor.grayscale500)
-      + Text(remainingPart)
-      .foregroundColor(AppColor.grayscale900)
+    while let range = fullText.range(of: trimmed, options: .caseInsensitive, range: cursor..<end) {
+      let before = String(fullText[cursor..<range.lowerBound])
+      if !before.isEmpty {
+        result = result + Text(before).foregroundColor(AppColor.grayscale900)
+      }
+
+      let match = String(fullText[range])
+      result = result + Text(match).foregroundColor(AppColor.grayscale500)
+
+      cursor = range.upperBound
+    }
+
+    let tail = String(fullText[cursor..<end])
+    if !tail.isEmpty {
+      result = result + Text(tail).foregroundColor(AppColor.grayscale900)
+    }
+
+    return result.font(.pretendardBody2)
   }
 }
