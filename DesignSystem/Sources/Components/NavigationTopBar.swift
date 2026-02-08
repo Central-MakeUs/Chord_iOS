@@ -98,6 +98,19 @@ public struct NavigationTopBar: View {
   }
 }
 
+public struct SheetDragHandle: View {
+  public init() {}
+
+  public var body: some View {
+    RoundedRectangle(cornerRadius: 20, style: .continuous)
+      .fill(AppColor.grayscale300)
+      .frame(width: 60, height: 7)
+      .frame(maxWidth: .infinity)
+      .padding(.top, 20)
+      .accessibilityHidden(true)
+  }
+}
+
 #Preview {
   VStack(spacing: 20) {
     NavigationTopBar(onBackTap: {})
@@ -110,7 +123,7 @@ public struct NavigationTopBar: View {
     NavigationTopBar(
       onBackTap: {},
       title: "재료",
-      trailing: .icon(Image.starIcon, action: {})
+      trailing: .icon(Image.starIcon.resizable().frame(width: 32,height: 32) as! Image, action: {})
     )
     
     NavigationTopBar(

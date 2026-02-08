@@ -33,4 +33,6 @@ public extension Image {
   static let starIcon = Image("StarIcon", bundle: designSystemBundle)
   static let pencleIcon = Image("PencleIcon", bundle: designSystemBundle)
   static let checkmarkIcon = Image("CheckmarkIcon", bundle: Bundle.main)
+  static let trashIcon = Image("TrashIcon", bundle: Bundle.main)
+  static let speechBubbleTail = Image("SpeechBubbleTail", bundle: Bundle.main)
 }

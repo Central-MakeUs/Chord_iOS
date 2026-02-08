@@ -72,6 +72,7 @@ public struct BottomButton: View {
           RoundedRectangle(cornerRadius: 12)
             .stroke(style.borderColor ?? .clear, lineWidth: 1)
         )
+        .contentShape(Rectangle())
     }
     .buttonStyle(.plain)
   }

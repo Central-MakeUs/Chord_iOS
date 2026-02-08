@@ -4,12 +4,16 @@ public struct UnderlinedTextField: View {
   @Binding public var text: String
   public let title: String?
   public let placeholder: String
+  public let errorMessage: String?
   public let titleColor: Color
   public let textColor: Color
   public let placeholderColor: Color
   public let underlineColor: Color
   public let accentColor: Color
+  public let errorColor: Color
+  public let showFocusHighlight: Bool
   public let keyboardType: UIKeyboardType
+  public let isSecure: Bool
   public let trailingIcon: Image?
   public let onTrailingTap: (() -> Void)?
 
@@ -18,27 +22,53 @@ public struct UnderlinedTextField: View {
   public init(
     text: Binding<String>,
     title: String? = nil,
-    placeholder: String,
-    titleColor: Color = AppColor.grayscale700,
+    placeholder: String = "",
+    errorMessage: String? = nil,
+    titleColor: Color = AppColor.grayscale900,
     textColor: Color = AppColor.grayscale900,
-    placeholderColor: Color = AppColor.grayscale400,
+    placeholderColor: Color = AppColor.grayscale500,
     underlineColor: Color = AppColor.grayscale300,
     accentColor: Color = AppColor.primaryBlue500,
+    errorColor: Color = AppColor.error,
+    showFocusHighlight: Bool = true,
     keyboardType: UIKeyboardType = .default,
+    isSecure: Bool = false,
     trailingIcon: Image? = nil,
     onTrailingTap: (() -> Void)? = nil
   ) {
     _text = text
     self.title = title
     self.placeholder = placeholder
+    self.errorMessage = errorMessage
     self.titleColor = titleColor
     self.textColor = textColor
     self.placeholderColor = placeholderColor
     self.underlineColor = underlineColor
     self.accentColor = accentColor
+    self.errorColor = errorColor
+    self.showFocusHighlight = showFocusHighlight
     self.keyboardType = keyboardType
+    self.isSecure = isSecure
     self.trailingIcon = trailingIcon
     self.onTrailingTap = onTrailingTap
+  }
+  
+  private var hasError: Bool {
+    errorMessage != nil
+  }
+  
+  private var currentTextColor: Color {
+    hasError ? errorColor : textColor
+  }
+  
+  private var currentUnderlineColor: Color {
+    if hasError {
+      return errorColor
+    }
+    if showFocusHighlight && isFocused {
+      return accentColor
+    }
+    return underlineColor
   }
 
   public var body: some View {
@@ -50,19 +80,34 @@ public struct UnderlinedTextField: View {
       }
 
       HStack(spacing: 8) {
-        TextField(
-          "",
-          text: $text,
-          prompt: Text(placeholder)
-            .font(.pretendardBody2)
-            .foregroundColor(placeholderColor)
-        )
-        .font(.pretendardBody2)
-        .foregroundColor(textColor)
-        .keyboardType(keyboardType)
-        .focused($isFocused)
-        .textInputAutocapitalization(.never)
-        .disableAutocorrection(true)
+        if isSecure {
+          SecureField(
+            "",
+            text: $text,
+            prompt: Text(placeholder)
+              .font(.pretendardSubtitle2)
+              .foregroundColor(placeholderColor)
+          )
+          .font(.pretendardSubtitle2)
+          .foregroundColor(currentTextColor)
+          .focused($isFocused)
+          .textInputAutocapitalization(.never)
+          .disableAutocorrection(true)
+        } else {
+          TextField(
+            "",
+            text: $text,
+            prompt: Text(placeholder)
+              .font(.pretendardSubtitle2)
+              .foregroundColor(placeholderColor)
+          )
+          .font(.pretendardSubtitle2)
+          .foregroundColor(currentTextColor)
+          .keyboardType(keyboardType)
+          .focused($isFocused)
+          .textInputAutocapitalization(.never)
+          .disableAutocorrection(true)
+        }
 
         if let trailingIcon {
           if let onTrailingTap {
@@ -83,8 +128,14 @@ public struct UnderlinedTextField: View {
       }
 
       Rectangle()
-        .fill(isFocused ? accentColor : underlineColor)
+        .fill(currentUnderlineColor)
         .frame(height: 1)
+      
+      if let errorMessage {
+        Text(errorMessage)
+          .font(.pretendardCaption2)
+          .foregroundColor(errorColor)
+      }
     }
   }
 }

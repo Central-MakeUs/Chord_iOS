@@ -40,7 +40,7 @@ public struct CoachCoachAlert: View {
       VStack(spacing: 32) {
         VStack(spacing: 8) {
           Text(title)
-            .font(.pretendardSubtitle1)
+            .font(.pretendardBody3)
             .foregroundColor(AppColor.grayscale900)
             .multilineTextAlignment(.center)
           
@@ -51,8 +51,8 @@ public struct CoachCoachAlert: View {
               .multilineTextAlignment(.center)
           }
         }
-        .padding(.top, 40)
-        .padding(.horizontal, 24)
+        .padding(.top, 20)
+        .padding(.horizontal, 40)
         
         HStack(spacing: 12) {
           if alertType == .twoButton, let leftTitle = leftButtonTitle {
@@ -60,7 +60,7 @@ public struct CoachCoachAlert: View {
               leftButtonAction?()
             } label: {
               Text(leftTitle)
-                .font(.pretendardSubtitle2)
+                .font(.pretendardCTA)
                 .foregroundColor(AppColor.grayscale600)
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
@@ -73,7 +73,7 @@ public struct CoachCoachAlert: View {
             rightButtonAction()
           } label: {
             Text(rightButtonTitle)
-              .font(.pretendardSubtitle2)
+              .font(.pretendardCTA)
               .foregroundColor(.white)
               .frame(maxWidth: .infinity)
               .frame(height: 52)
@@ -82,9 +82,9 @@ public struct CoachCoachAlert: View {
           }
         }
         .padding(.horizontal, 24)
-        .padding(.bottom, 24)
+        .padding(.bottom, 20)
       }
-      .frame(width: 300)
+      .frame(width: 316)
       .background(Color.white)
       .cornerRadius(20)
       .shadow(color: .black.opacity(0.1), radius: 20, x: 0, y: 4)
@@ -124,25 +124,60 @@ public extension View {
   }
 }
 
-#Preview {
-  ZStack {
-    Color.gray.ignoresSafeArea()
-    
-    VStack(spacing: 20) {
-      CoachCoachAlert(
-        title: "메뉴를 삭제하시겠어요?",
-        alertType: .twoButton,
-        rightButtonTitle: "삭제하기",
-        leftButtonAction: {},
-        rightButtonAction: {}
-      )
+
+public struct ToastView: View {
+  let message: String
+  
+  public init(message: String) {
+    self.message = message
+  }
+  
+  public var body: some View {
+    Text(message)
+      .font(.system(size: 14))
+      .foregroundColor(.white)
+      .padding(.horizontal, 16)
+      .padding(.vertical, 12)
+      .background(Color.black.opacity(0.8))
+      .cornerRadius(24)
+      .padding(.bottom, 40)
+  }
+}
+
+public struct ToastModifier: ViewModifier {
+  @Binding var isPresented: Bool
+  let message: String
+  let duration: TimeInterval
+  
+  public init(isPresented: Binding<Bool>, message: String, duration: TimeInterval = 2.0) {
+    self._isPresented = isPresented
+    self.message = message
+    self.duration = duration
+  }
+  
+  public func body(content: Content) -> some View {
+    ZStack(alignment: .bottom) {
+      content
       
-      CoachCoachAlert(
-        title: "메뉴가 삭제 됐어요",
-        alertType: .oneButton,
-        rightButtonTitle: "확인",
-        rightButtonAction: {}
-      )
+      if isPresented {
+        ToastView(message: message)
+          .transition(.move(edge: .bottom).combined(with: .opacity))
+          .onAppear {
+            DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+              withAnimation {
+                isPresented = false
+              }
+            }
+          }
+          .zIndex(100)
+      }
     }
+    .animation(.easeInOut, value: isPresented)
+  }
+}
+
+public extension View {
+  func toast(isPresented: Binding<Bool>, message: String, duration: TimeInterval = 2.0) -> some View {
+    self.modifier(ToastModifier(isPresented: isPresented, message: message, duration: duration))
   }
 }
