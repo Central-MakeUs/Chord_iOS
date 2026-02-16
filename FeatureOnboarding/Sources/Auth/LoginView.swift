@@ -14,7 +14,7 @@ public struct LoginView: View {
       Spacer()
         .frame(height: 100)
       
-      Image("CoachCoachLogo", bundle: .main)
+      Image("LoginLogo", bundle: .main)
         .resizable()
         .scaledToFit()
         .frame(width: 120, height: 33)

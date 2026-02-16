@@ -20,7 +20,7 @@ public struct MenuPriceEditSheetView: View {
         SheetDragHandle()
 
         VStack(alignment: .leading, spacing: 24) {
-          Text("가격을 입력해주세요")
+          Text("메뉴 가격 입력")
             .font(.pretendardTitle1)
             .foregroundColor(AppColor.grayscale900)
 

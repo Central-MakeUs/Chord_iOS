@@ -42,7 +42,7 @@ public struct IngredientDetailFeature {
     case priceHistoryResponse(TaskResult<[PriceHistoryResponse]>)
     case editPresented(Bool)
     case supplierPresented(Bool)
-    case editCompleted(price: String, usage: String, unit: IngredientUnit)
+    case editCompleted(price: String, usage: String, unit: IngredientUnit, category: String)
     case supplierCompleted(String)
     case backTapped
     case favoriteTapped
@@ -65,7 +65,8 @@ public struct IngredientDetailFeature {
       case (.priceHistoryResponse(.failure), .priceHistoryResponse(.failure)): return true
       case let (.editPresented(l), .editPresented(r)): return l == r
       case let (.supplierPresented(l), .supplierPresented(r)): return l == r
-      case let (.editCompleted(p1, u1, un1), .editCompleted(p2, u2, un2)): return p1 == p2 && u1 == u2 && un1 == un2
+      case let (.editCompleted(p1, u1, un1, c1), .editCompleted(p2, u2, un2, c2)):
+        return p1 == p2 && u1 == u2 && un1 == un2 && c1 == c2
       case let (.supplierCompleted(l), .supplierCompleted(r)): return l == r
       case (.backTapped, .backTapped): return true
       case (.favoriteTapped, .favoriteTapped): return true
@@ -89,22 +90,38 @@ public struct IngredientDetailFeature {
     Reduce { state, action in
       switch action {
       case .onAppear:
-        print("👀 IngredientDetail OnAppear. apiId: \(String(describing: state.item.apiId))")
+        print(
+          "👀 [IngredientDetail] onAppear name=\(state.item.name) apiId=\(String(describing: state.item.apiId)) category=\(state.item.category) amount=\(state.item.amount) price=\(state.item.price)"
+        )
         guard let apiId = state.item.apiId else { 
-          print("❌ apiId is nil")
+          print("❌ [IngredientDetail] apiId is nil - cannot fetch detail")
           return .none 
         }
         return .merge(
           .run { send in
-            
             await send(.detailResponse(TaskResult {
-              
-              try await ingredientRepository.fetchIngredientDetail(apiId)
+              do {
+                print("📡 [IngredientDetail] fetch detail start id=\(apiId)")
+                let detail = try await ingredientRepository.fetchIngredientDetail(apiId)
+                print("✅ [IngredientDetail] fetch detail success id=\(apiId)")
+                return detail
+              } catch {
+                print("❌ [IngredientDetail] fetch detail failed id=\(apiId) error=\(Self.errorDebugString(error))")
+                throw error
+              }
             }))
           },
           .run { send in
             await send(.priceHistoryResponse(TaskResult {
-              try await ingredientRepository.fetchPriceHistory(apiId)
+              do {
+                print("📡 [IngredientDetail] fetch price history start id=\(apiId)")
+                let history = try await ingredientRepository.fetchPriceHistory(apiId)
+                print("✅ [IngredientDetail] fetch price history success id=\(apiId) count=\(history.count)")
+                return history
+              } catch {
+                print("❌ [IngredientDetail] fetch price history failed id=\(apiId) error=\(Self.errorDebugString(error))")
+                throw error
+              }
             }))
           }
         )
@@ -139,6 +156,7 @@ public struct IngredientDetailFeature {
         return .none
         
       case let .detailResponse(.failure(error)):
+        print("❌ [IngredientDetail] detailResponse failure: \(Self.errorDebugString(error))")
         state.alert = AlertState { TextState("재료 상세 정보 로드 실패") } message: { TextState(error.localizedDescription) }
         return .none
         
@@ -148,6 +166,12 @@ public struct IngredientDetailFeature {
         return .none
         
       case let .priceHistoryResponse(.failure(error)):
+        if Self.isNotFoundError(error) {
+          state.priceHistory = []
+          return .none
+        }
+
+        print("❌ [IngredientDetail] priceHistoryResponse failure: \(Self.errorDebugString(error))")
         state.alert = AlertState { TextState("가격 변동 이력 로드 실패") } message: { TextState(error.localizedDescription) }
         return .none
         
@@ -159,10 +183,21 @@ public struct IngredientDetailFeature {
         state.isSupplierPresented = isPresented
         return .none
         
-      case let .editCompleted(price, usage, unit):
+      case let .editCompleted(price, usage, unit, category):
         state.priceText = price
         state.usageText = usage
         state.unit = unit
+        state.item = InventoryIngredientItem(
+          id: state.item.id,
+          apiId: state.item.apiId,
+          name: state.item.name,
+          amount: state.item.amount,
+          price: state.item.price,
+          category: category,
+          supplier: state.item.supplier,
+          usedMenus: state.item.usedMenus,
+          isFavorite: state.item.isFavorite
+        )
         state.isEditPresented = false
         state.showToast = true
         
@@ -172,7 +207,7 @@ public struct IngredientDetailFeature {
               let amountValue = Double(usage) else { return .none }
               
         let request = IngredientUpdateRequest(
-          category: state.item.category,
+          category: category,
           price: priceValue,
           amount: amountValue,
           unitCode: unit.serverCode
@@ -250,6 +285,26 @@ public struct IngredientDetailFeature {
 }
 
 private extension IngredientDetailFeature {
+  static func errorDebugString(_ error: Error) -> String {
+    if let apiError = error as? APIError {
+      switch apiError {
+      case .invalidURL:
+        return "APIError.invalidURL"
+      case let .networkError(message):
+        return "APIError.networkError(message: \(message))"
+      case let .decodingError(message):
+        return "APIError.decodingError(message: \(message))"
+      case let .serverError(code, message):
+        return "APIError.serverError(code: \(code), message: \(message))"
+      case .unknown:
+        return "APIError.unknown"
+      }
+    }
+
+    let nsError = error as NSError
+    return "\(type(of: error)): \(error.localizedDescription) domain=\(nsError.domain) code=\(nsError.code) userInfo=\(nsError.userInfo)"
+  }
+
   static func formattedNumber(from value: String) -> String {
     guard let number = Int64(value) else { return "" }
     let formatter = NumberFormatter()
@@ -262,5 +317,17 @@ private extension IngredientDetailFeature {
     let unitText = value.filter { !$0.isNumber }
     let unit = IngredientUnit.from(unitText)
     return (digits.isEmpty ? value : digits, unit)
+  }
+
+  static func isNotFoundError(_ error: Error) -> Bool {
+    guard let apiError = error as? APIError else {
+      return false
+    }
+
+    guard case let .serverError(code, _) = apiError else {
+      return false
+    }
+
+    return code == 404
   }
 }

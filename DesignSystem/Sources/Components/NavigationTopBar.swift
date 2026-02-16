@@ -3,18 +3,30 @@ import SwiftUI
 public struct NavigationTopBar: View {
   private let leadingContent: AnyView
   private let trailingContent: AnyView
+  private let horizontalPadding: CGFloat
+  private let verticalPadding: CGFloat
+  private let barHeight: CGFloat
+  private let backgroundColor: Color
   
   public init(
     onBackTap: @escaping () -> Void,
     title: String? = nil,
-    trailing: TrailingAction? = nil
+    trailing: TrailingAction? = nil,
+    verticalPadding: CGFloat = 12,
+    barHeight: CGFloat = 50,
+    backgroundColor: Color = .white
   ) {
+    self.horizontalPadding = 20
+    self.verticalPadding = verticalPadding
+    self.barHeight = barHeight
+    self.backgroundColor = backgroundColor
+
     self.leadingContent = AnyView(
       Button(action: onBackTap) {
         Image.arrowLeftIcon
           .renderingMode(.template)
           .foregroundColor(AppColor.grayscale900)
-          .frame(width: 20, height: 20)
+          .frame(width: 24, height: 24)
       }
       .buttonStyle(.plain)
     )
@@ -53,7 +65,7 @@ public struct NavigationTopBar: View {
               image
                 .renderingMode(.template)
                 .foregroundColor(AppColor.grayscale600)
-                .frame(width: 20, height: 20)
+                .frame(width: 24, height: 24)
             }
             .buttonStyle(.plain)
           }
@@ -76,8 +88,17 @@ public struct NavigationTopBar: View {
   
   public init<Leading: View, Trailing: View>(
     @ViewBuilder leading: () -> Leading,
-    @ViewBuilder trailing: () -> Trailing
+    @ViewBuilder trailing: () -> Trailing,
+    horizontalPadding: CGFloat = 24,
+    verticalPadding: CGFloat = 12,
+    barHeight: CGFloat = 48,
+    backgroundColor: Color = .white
   ) {
+    self.horizontalPadding = horizontalPadding
+    self.verticalPadding = verticalPadding
+    self.barHeight = barHeight
+    self.backgroundColor = backgroundColor
+
     self.leadingContent = AnyView(leading())
     self.trailingContent = AnyView(trailing())
   }
@@ -87,9 +108,10 @@ public struct NavigationTopBar: View {
       leadingContent
       trailingContent
     }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 12)
-    .background(Color.white)
+    .padding(.horizontal, horizontalPadding)
+    .padding(.vertical, verticalPadding)
+    .frame(height: barHeight)
+    .background(backgroundColor)
   }
   
   public enum TrailingAction {

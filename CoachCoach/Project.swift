@@ -5,7 +5,9 @@ let project = Project(
   organizationName: "CoachCoach",
   settings: .settings(
     base: [
-      "SWIFT_VERSION": "5.9"
+      "SWIFT_VERSION": "5.9",
+      "MARKETING_VERSION": "0.0.1",
+      "CURRENT_PROJECT_VERSION": "1"
     ]
   ),
   targets: [
@@ -13,12 +15,13 @@ let project = Project(
       name: "CoachCoach",
       destinations: [.iPhone],
       product: .app,
-      bundleId: "com.seungwan.CoachCoach",
+      bundleId: "com.seungwan.coachcoach",
       deploymentTargets: .iOS("17.0"),
       infoPlist: .file(path: "Info.plist"),
       sources: ["Sources/**"],
       resources: [
         "Assets.xcassets",
+        "Resources/App.config",
         "Resources/Assets.xcassets",
         "Resources/Fonts/**",
         "Resources/LaunchScreen.storyboard"
@@ -34,7 +37,33 @@ let project = Project(
         .project(target: "FeatureMenuRegistration", path: "../FeatureMenuRegistration"),
         .project(target: "FeatureOnboarding", path: "../FeatureOnboarding"),
         .external(name: "ComposableArchitecture")
-      ]
+      ],
+      settings: .settings(
+        configurations: [
+          .debug(
+            name: .debug,
+            settings: [
+              "DEVELOPMENT_TEAM": "YH4A87H8M4",
+              "CODE_SIGN_STYLE": "Automatic",
+              "CODE_SIGN_IDENTITY": "Apple Development",
+              "PROVISIONING_PROFILE_SPECIFIER": "",
+              "INFOPLIST_KEY_CFBundlePackageType": "APPL",
+              "PRODUCT_BUNDLE_IDENTIFIER": "com.seungwan.coachcoach"
+            ]
+          ),
+          .release(
+            name: .release,
+            settings: [
+              "DEVELOPMENT_TEAM": "YH4A87H8M4",
+              "CODE_SIGN_STYLE": "Manual",
+              "CODE_SIGN_IDENTITY": "Apple Distribution",
+              "PROVISIONING_PROFILE_SPECIFIER": "CoachCoach AppStore (Manual)",
+              "INFOPLIST_KEY_CFBundlePackageType": "APPL",
+              "PRODUCT_BUNDLE_IDENTIFIER": "com.seungwan.coachcoach"
+            ]
+          )
+        ]
+      )
     ),
     .target(
       name: "CoachCoachTests",
@@ -44,7 +73,29 @@ let project = Project(
       deploymentTargets: .iOS("17.0"),
       infoPlist: .default,
       sources: ["../CoachCoachTests/**"],
-      dependencies: [.target(name: "CoachCoach")]
+      dependencies: [.target(name: "CoachCoach")],
+      settings: .settings(
+        configurations: [
+          .debug(
+            name: .debug,
+            settings: [
+              "DEVELOPMENT_TEAM": "YH4A87H8M4",
+              "CODE_SIGN_STYLE": "Automatic",
+              "CODE_SIGN_IDENTITY": "Apple Development",
+              "PROVISIONING_PROFILE_SPECIFIER": ""
+            ]
+          ),
+          .release(
+            name: .release,
+            settings: [
+              "DEVELOPMENT_TEAM": "YH4A87H8M4",
+              "CODE_SIGN_STYLE": "Automatic",
+              "CODE_SIGN_IDENTITY": "Apple Development",
+              "PROVISIONING_PROFILE_SPECIFIER": ""
+            ]
+          )
+        ]
+      )
     ),
     .target(
       name: "CoachCoachUITests",
@@ -54,7 +105,29 @@ let project = Project(
       deploymentTargets: .iOS("17.0"),
       infoPlist: .default,
       sources: ["../CoachCoachUITests/**"],
-      dependencies: [.target(name: "CoachCoach")]
+      dependencies: [.target(name: "CoachCoach")],
+      settings: .settings(
+        configurations: [
+          .debug(
+            name: .debug,
+            settings: [
+              "DEVELOPMENT_TEAM": "YH4A87H8M4",
+              "CODE_SIGN_STYLE": "Automatic",
+              "CODE_SIGN_IDENTITY": "Apple Development",
+              "PROVISIONING_PROFILE_SPECIFIER": ""
+            ]
+          ),
+          .release(
+            name: .release,
+            settings: [
+              "DEVELOPMENT_TEAM": "YH4A87H8M4",
+              "CODE_SIGN_STYLE": "Automatic",
+              "CODE_SIGN_IDENTITY": "Apple Development",
+              "PROVISIONING_PROFILE_SPECIFIER": ""
+            ]
+          )
+        ]
+      )
     )
   ]
 )

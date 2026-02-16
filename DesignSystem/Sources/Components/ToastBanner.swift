@@ -36,6 +36,8 @@ public struct ToastBannerModifier: ViewModifier {
   @Binding var isPresented: Bool
   let message: String
   let duration: TimeInterval
+  let bottomPadding: CGFloat
+  @State private var dismissTask: Task<Void, Never>?
   
   public func body(content: Content) -> some View {
     content
@@ -43,24 +45,45 @@ public struct ToastBannerModifier: ViewModifier {
         if isPresented {
           ToastBanner(message: message)
             .padding(.horizontal, 20)
-            .padding(.bottom, 100)
+            .padding(.bottom, bottomPadding)
             .transition(.move(edge: .bottom).combined(with: .opacity))
             .onAppear {
-              DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+              dismissTask?.cancel()
+              dismissTask = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: UInt64(duration * 1_000_000_000))
+                guard !Task.isCancelled else { return }
                 withAnimation(.easeOut(duration: 0.3)) {
                   isPresented = false
                 }
               }
             }
+            .onDisappear {
+              dismissTask?.cancel()
+            }
         }
+      }
+      .onDisappear {
+        dismissTask?.cancel()
       }
       .animation(.easeInOut(duration: 0.3), value: isPresented)
   }
 }
 
 public extension View {
-  func toastBanner(isPresented: Binding<Bool>, message: String, duration: TimeInterval = 1.0) -> some View {
-    modifier(ToastBannerModifier(isPresented: isPresented, message: message, duration: duration))
+  func toastBanner(
+    isPresented: Binding<Bool>,
+    message: String,
+    duration: TimeInterval = 1.0,
+    bottomPadding: CGFloat = 24
+  ) -> some View {
+    modifier(
+      ToastBannerModifier(
+        isPresented: isPresented,
+        message: message,
+        duration: duration,
+        bottomPadding: bottomPadding
+      )
+    )
   }
 }
 
@@ -78,7 +101,7 @@ public struct SpeechBubbleBanner: View {
         .renderingMode(.template)
         .resizable()
         .scaledToFit()
-        .frame(width: 10, height: 10)
+        .frame(width: 12, height: 12)
         .foregroundColor(AppColor.grayscale800)
         .padding(.trailing, tailTrailingPadding)
         .padding(.bottom, -2)

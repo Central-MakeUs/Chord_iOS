@@ -1,4 +1,5 @@
 import SwiftUI
+import Foundation
 
 public struct PriceInputField: View {
   @Binding public var text: String
@@ -35,10 +36,25 @@ public struct PriceInputField: View {
       .focused($isFocused)
       .textInputAutocapitalization(.never)
       .disableAutocorrection(true)
+      .onAppear {
+        let digits = digitsOnly(from: text)
+        let normalized = formattedDigits(digits)
+        if text != normalized {
+          text = normalized
+        }
+      }
+      .onChange(of: isFocused) { focused in
+        let digits = digitsOnly(from: text)
+        let normalized = focused ? digits : formattedDigits(digits)
+        if text != normalized {
+          text = normalized
+        }
+      }
       .onChange(of: text) { newValue in
-        let filtered = newValue.filter { $0.isNumber || $0 == "," }
-        if filtered != newValue {
-          text = filtered
+        let digits = digitsOnly(from: newValue)
+        let normalized = isFocused ? digits : formattedDigits(digits)
+        if normalized != newValue {
+          text = normalized
         }
       }
 
@@ -82,6 +98,17 @@ public struct PriceInputField: View {
       return AppColor.grayscale900
     }
     return text.isEmpty ? AppColor.grayscale400 : AppColor.grayscale700
+  }
+
+  private func digitsOnly(from value: String) -> String {
+    value.filter { $0.isNumber }
+  }
+
+  private func formattedDigits(_ digits: String) -> String {
+    guard let number = Int64(digits), !digits.isEmpty else { return "" }
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    return formatter.string(from: NSNumber(value: number)) ?? digits
   }
 }
 

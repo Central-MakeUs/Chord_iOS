@@ -55,6 +55,20 @@ public struct MenuEditFeature {
       }
       return seconds
     }
+
+    public var hasPendingChanges: Bool {
+      let normalizedName = menuName.trimmingCharacters(in: .whitespacesAndNewlines)
+      let originalName = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+      let currentPrice = MenuEditFeature.digitsOnly(menuPrice)
+      let originalPrice = MenuEditFeature.digitsOnly(MenuEditFeature.formattedPrice(from: item.price))
+      let currentWorkTime = prepareTimeMinutes * 60 + prepareTimeSeconds
+      let originalCategory = item.category == .all ? MenuCategory.beverage : item.category
+
+      return normalizedName != originalName
+        || currentPrice != originalPrice
+        || currentWorkTime != item.workTime
+        || selectedCategory != originalCategory
+    }
   }
 
   public enum Action: Equatable {
@@ -63,9 +77,11 @@ public struct MenuEditFeature {
     case prepareTimePresented(Bool)
     case menuNameUpdated(String)
     case menuPriceUpdated(String)
+    case menuPriceFieldTapped
     case prepareTimeUpdated(minutes: Int, seconds: Int)
     case prepareTimeTapped
     case categorySelected(MenuCategory)
+    case completeEditTapped
     case deleteTapped
     case deleteConfirmTapped
     case deleteCancelTapped
@@ -87,9 +103,11 @@ public struct MenuEditFeature {
       case let (.prepareTimePresented(l), .prepareTimePresented(r)): return l == r
       case let (.menuNameUpdated(l), .menuNameUpdated(r)): return l == r
       case let (.menuPriceUpdated(l), .menuPriceUpdated(r)): return l == r
+      case (.menuPriceFieldTapped, .menuPriceFieldTapped): return true
       case let (.prepareTimeUpdated(lm, ls), .prepareTimeUpdated(rm, rs)): return lm == rm && ls == rs
       case (.prepareTimeTapped, .prepareTimeTapped): return true
       case let (.categorySelected(l), .categorySelected(r)): return l == r
+      case (.completeEditTapped, .completeEditTapped): return true
       case (.deleteTapped, .deleteTapped): return true
       case (.deleteConfirmTapped, .deleteConfirmTapped): return true
       case (.deleteCancelTapped, .deleteCancelTapped): return true
@@ -123,67 +141,81 @@ public struct MenuEditFeature {
       case let .menuNameUpdated(name):
         state.menuName = name
         state.isNameEditPresented = false
-        
-        guard name != state.item.name else { return .none }
-        guard let apiId = state.item.apiId else { return .none }
-        
-        state.isUpdating = true
-        let request = MenuNameUpdateRequest(menuName: name)
-        return .run { send in
-          let result = await Result { try await menuRepository.updateMenuName(apiId, request) }
-          await send(.updateResponse(result))
-        }
+        return .none
+
       case let .menuPriceUpdated(price):
-        state.menuPrice = price
+        let digits = Self.digitsOnly(price)
+        state.menuPrice = digits
         state.isPriceEditPresented = false
-        
-        let originalPrice = Self.formattedPrice(from: state.item.price)
-        guard price != originalPrice else { return .none }
-        guard let apiId = state.item.apiId else { return .none }
-        
-        let numericPrice = price.replacingOccurrences(of: ",", with: "")
-        guard let priceValue = Double(numericPrice) else { return .none }
-        
-        state.isUpdating = true
-        let request = MenuPriceUpdateRequest(sellingPrice: priceValue)
-        return .run { send in
-          let result = await Result { try await menuRepository.updateMenuPrice(apiId, request) }
-          await send(.updateResponse(result))
-        }
+        return .none
+
+      case .menuPriceFieldTapped:
+        state.menuPrice = Self.digitsOnly(state.menuPrice)
+        return .none
+
       case let .prepareTimeUpdated(minutes, seconds):
-        let newPrepareTime = "\(minutes)분 \(seconds)초"
-        state.prepareTime = newPrepareTime
+        state.prepareTime = "\(minutes)분 \(seconds)초"
         state.isPrepareTimePresented = false
-        
-        let totalSeconds = minutes * 60 + seconds
-        guard totalSeconds != state.item.workTime else { return .none }
-        guard let apiId = state.item.apiId else { return .none }
-        
-        state.isUpdating = true
-        let request = MenuWorktimeUpdateRequest(workTime: totalSeconds)
-        return .run { send in
-          let result = await Result { try await menuRepository.updateWorkTime(apiId, request) }
-          await send(.updateResponse(result))
-        }
+        return .none
+
       case .prepareTimeTapped:
         state.isPrepareTimePresented = true
         return .none
+
       case let .categorySelected(category):
-        guard category != state.item.category else {
-          state.selectedCategory = category
+        state.selectedCategory = category
+        return .none
+
+      case .completeEditTapped:
+        guard !state.isUpdating else { return .none }
+        guard state.hasPendingChanges else { return .none }
+        guard let apiId = state.item.apiId else { return .none }
+
+        let normalizedName = state.menuName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let originalName = state.item.name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let hasNameChanged = normalizedName != originalName && !normalizedName.isEmpty
+
+        let currentPriceDigits = Self.digitsOnly(state.menuPrice)
+        let originalPriceDigits = Self.digitsOnly(Self.formattedPrice(from: state.item.price))
+        let hasPriceChanged = currentPriceDigits != originalPriceDigits && !currentPriceDigits.isEmpty
+        let currentPriceValue = Double(currentPriceDigits)
+
+        let currentWorkTime = state.prepareTimeMinutes * 60 + state.prepareTimeSeconds
+        let hasWorkTimeChanged = currentWorkTime != state.item.workTime
+
+        let originalCategory = state.item.category == .all ? MenuCategory.beverage : state.item.category
+        let hasCategoryChanged = state.selectedCategory != originalCategory
+
+        if hasPriceChanged, currentPriceValue == nil {
           return .none
         }
-        
-        state.selectedCategory = category
+
         state.isUpdating = true
-        
-        guard let apiId = state.item.apiId else { return .none }
-        let categoryCode = categoryToCode(category)
-        let request = MenuCategoryUpdateRequest(category: categoryCode)
+        let selectedCategoryCode = hasCategoryChanged ? categoryToCode(state.selectedCategory) : nil
         return .run { send in
-          let result = await Result { try await menuRepository.updateMenuCategory(apiId, request) }
-          await send(.updateResponse(result))
+          do {
+            if hasNameChanged {
+              try await menuRepository.updateMenuName(apiId, MenuNameUpdateRequest(menuName: normalizedName))
+            }
+
+            if hasPriceChanged, let currentPriceValue {
+              try await menuRepository.updateMenuPrice(apiId, MenuPriceUpdateRequest(sellingPrice: currentPriceValue))
+            }
+
+            if let selectedCategoryCode {
+              try await menuRepository.updateMenuCategory(apiId, MenuCategoryUpdateRequest(category: selectedCategoryCode))
+            }
+
+            if hasWorkTimeChanged {
+              try await menuRepository.updateWorkTime(apiId, MenuWorktimeUpdateRequest(workTime: currentWorkTime))
+            }
+
+            await send(.updateResponse(.success(())))
+          } catch {
+            await send(.updateResponse(.failure(error)))
+          }
         }
+
       case .updateResponse(.success):
         state.isUpdating = false
         state.isUpdateSuccessPresented = true
@@ -242,6 +274,10 @@ private extension MenuEditFeature {
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
     return formatter.string(from: NSNumber(value: number)) ?? digits
+  }
+
+  static func digitsOnly(_ value: String) -> String {
+    value.filter { $0.isNumber }
   }
   
   func categoryToCode(_ category: MenuCategory) -> String {

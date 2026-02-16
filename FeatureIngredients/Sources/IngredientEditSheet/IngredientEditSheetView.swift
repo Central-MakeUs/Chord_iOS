@@ -5,13 +5,13 @@ import DesignSystem
 
 public struct IngredientEditSheetView: View {
   let store: StoreOf<IngredientEditSheetFeature>
-  let onComplete: (String, String, IngredientUnit) -> Void
+  let onComplete: (String, String, IngredientUnit, String) -> Void
 
   @State private var isDropdownExpanded = false
 
   public init(
     store: StoreOf<IngredientEditSheetFeature>,
-    onComplete: @escaping (String, String, IngredientUnit) -> Void
+    onComplete: @escaping (String, String, IngredientUnit, String) -> Void
   ) {
     self.store = store
     self.onComplete = onComplete
@@ -29,8 +29,16 @@ public struct IngredientEditSheetView: View {
               .foregroundColor(AppColor.grayscale900)
 
             HStack(spacing: 6) {
-              BadgeView(text: "식재료", style: .blue)
-              BadgeView(text: "본사 제공", style: .gray)
+              categoryTab(
+                text: "식재료",
+                isSelected: viewStore.draftCategory == "식재료",
+                action: { viewStore.send(.draftCategoryChanged("식재료")) }
+              )
+              categoryTab(
+                text: "운영 재료",
+                isSelected: viewStore.draftCategory == "운영 재료",
+                action: { viewStore.send(.draftCategoryChanged("운영 재료")) }
+              )
             }
           }
 
@@ -68,7 +76,7 @@ public struct IngredientEditSheetView: View {
         BottomButton(title: "수정", style: isEnabled ? .primary : .secondary) {
           guard isEnabled else { return }
           viewStore.send(.saveTapped)
-          onComplete(viewStore.cleanedPrice, viewStore.cleanedUsage, viewStore.draftUnit)
+          onComplete(viewStore.cleanedPrice, viewStore.cleanedUsage, viewStore.draftUnit, viewStore.draftCategory)
         }
         .disabled(!isEnabled)
         .padding(.horizontal, 20)
@@ -78,6 +86,21 @@ public struct IngredientEditSheetView: View {
       .background(AppColor.grayscale100)
     }
     .presentationCornerRadius(24)
+  }
+}
+
+private extension IngredientEditSheetView {
+  func categoryTab(text: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+    Button(action: action) {
+      Text(text)
+        .font(.pretendardCaption2)
+        .foregroundColor(isSelected ? AppColor.primaryBlue500 : AppColor.grayscale600)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
+        .background(isSelected ? AppColor.primaryBlue200 : AppColor.grayscale200)
+        .cornerRadius(8)
+    }
+    .buttonStyle(.plain)
   }
 }
 
@@ -203,34 +226,16 @@ private struct UnderlinedFieldWithDropdown: View {
   }
 }
 
-private struct BadgeView: View {
-  enum Style {
-    case blue
-    case gray
-  }
-
-  let text: String
-  let style: Style
-
-  var body: some View {
-    Text(text)
-      .font(.pretendardCaption2)
-      .foregroundColor(style == .blue ? AppColor.primaryBlue500 : AppColor.grayscale600)
-      .padding(.horizontal, 8)
-      .padding(.vertical, 4)
-      .background(style == .blue ? AppColor.primaryBlue100 : AppColor.grayscale200)
-      .cornerRadius(4)
-  }
-}
-
 #Preview {
   IngredientEditSheetView(
     store: Store(
       initialState: IngredientEditSheetFeature.State(
         name: "원두",
+        draftCategory: "식재료",
         draftPrice: "5,000",
         draftUsage: "100",
         draftUnit: .g,
+        initialCategory: "식재료",
         initialPrice: "5,000",
         initialUsage: "100",
         initialUnit: .g
@@ -238,7 +243,7 @@ private struct BadgeView: View {
     ) {
       IngredientEditSheetFeature()
     },
-    onComplete: { _, _, _ in }
+    onComplete: { _, _, _, _ in }
   )
   .environment(\.colorScheme, .light)
 }

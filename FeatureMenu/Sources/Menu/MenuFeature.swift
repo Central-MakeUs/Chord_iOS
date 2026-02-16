@@ -1,6 +1,7 @@
 import ComposableArchitecture
 import CoreModels
 import DataLayer
+import UIKit
 
 @Reducer
 public struct MenuFeature {
@@ -63,7 +64,7 @@ public struct MenuFeature {
         }
         .cancellable(id: CancelID.router)
         
-        guard state.menuItems.isEmpty && !state.isLoading else { return routerEffect }
+        guard !state.isLoading else { return routerEffect }
         
         state.isLoading = true
         let category = state.selectedCategory.serverCode
@@ -97,13 +98,15 @@ public struct MenuFeature {
         return .none
         
       case let .selectedCategoryChanged(category):
+        let shouldHaptic = state.selectedCategory != category
         state.selectedCategory = category
         state.isLoading = true
         let serverCode = category.serverCode
-        return .run { send in
+        let loadEffect: Effect<Action> = .run { send in
           let result = await Result { try await menuRepository.fetchMenuItems(serverCode) }
           await send(.menuItemsLoaded(result))
         }
+        return shouldHaptic ? .merge(loadEffect, selectionHaptic()) : loadEffect
         
       case let .isMenuManagePresentedChanged(isPresented):
         state.isMenuManagePresented = isPresented
@@ -112,6 +115,15 @@ public struct MenuFeature {
       case .addMenuTapped:
         state.isMenuManagePresented = false
         return .none
+      }
+    }
+  }
+
+  private func selectionHaptic() -> Effect<Action> {
+    .run { _ in
+      await MainActor.run {
+        let generator = UISelectionFeedbackGenerator()
+        generator.selectionChanged()
       }
     }
   }

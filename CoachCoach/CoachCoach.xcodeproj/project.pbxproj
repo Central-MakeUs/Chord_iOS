@@ -32,6 +32,7 @@
 		449BC1836FCA9E6A53838B89 /* DesignSystem.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = D1993A453C663D0E6B0527AC /* DesignSystem.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		474517CD425F81768309E5AA /* Pretendard-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 936C5340B7041FCF4F4201DB /* Pretendard-ExtraLight.otf */; };
 		4A0C7378789CE28B403F450E /* CoreCommon.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 481B14F92DAF0EC3F6034C08 /* CoreCommon.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		54F823B03DF17B6AAC4AA364 /* App.config in Resources */ = {isa = PBXBuildFile; fileRef = 1B76502E49C1B50EFC046C0A /* App.config */; };
 		58C4475AB7CF96059ECD4B7E /* AppEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 038DCD4AFDBF9D7B4D5B7B0A /* AppEntryView.swift */; };
 		65DBD6358A1E1931BB736D7E /* FeatureAICoach.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 9199B9B97033D70A716AE783 /* FeatureAICoach.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		679A0E73911E0526B35FDB24 /* FeatureMenuRegistration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4858EEB75235499546313863 /* FeatureMenuRegistration.framework */; };
@@ -168,6 +169,7 @@
 		1182C27673A82828BD539F8D /* SwiftNavigation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftNavigation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		18D57D61E15AF7EAB647FEA0 /* CoachCoach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CoachCoach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		1A5B4683130EB2DD0B738E57 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		1B76502E49C1B50EFC046C0A /* App.config */ = {isa = PBXFileReference; path = App.config; sourceTree = "<group>"; };
 		1FE4E74BC6E40AED83E93593 /* Pretendard-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-SemiBold.otf"; sourceTree = "<group>"; };
 		208F2AA081BC3CB2787CB6EB /* FeatureIngredients.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = FeatureIngredients.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		22F9A3989826625DED198C5C /* CustomDump.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CustomDump.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -311,6 +313,7 @@
 			isa = PBXGroup;
 			children = (
 				32E8C573AC0217A336122EB0 /* Fonts */,
+				1B76502E49C1B50EFC046C0A /* App.config */,
 				E2B8B9AC4B1DB4BB3DCA6474 /* Assets.xcassets */,
 				E19BAEBE0B956805B20DED29 /* LaunchScreen.storyboard */,
 			);
@@ -529,6 +532,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A55CB6E26C803D8F35E52544 /* Assets.xcassets in Resources */,
+				54F823B03DF17B6AAC4AA364 /* App.config in Resources */,
 				FF3DF49F165805591F34FC99 /* Assets.xcassets in Resources */,
 				15374AE58044FC1539D81921 /* Pretendard-Black.otf in Resources */,
 				703C448F3CC311E38E781D69 /* Pretendard-Bold.otf in Resources */,
@@ -610,7 +614,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YH4A87H8M4;
 				ENABLE_PREVIEWS = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -618,6 +624,7 @@
 					"$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundlePackageType = APPL;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -643,8 +650,9 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoach;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.coachcoach;
 				PRODUCT_NAME = CoachCoach;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -663,7 +671,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YH4A87H8M4;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../Tuist/.build/checkouts/swift-navigation/Sources/UIKitNavigationShim/include",
@@ -698,6 +708,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoachTests;
 				PRODUCT_NAME = CoachCoachTests;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -717,7 +728,9 @@
 		64334E96C180979BA689906F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YH4A87H8M4;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../Tuist/.build/checkouts/swift-navigation/Sources/UIKitNavigationShim/include",
@@ -752,6 +765,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoachUITests;
 				PRODUCT_NAME = CoachCoachUITests;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -770,7 +784,9 @@
 		710E110EAC8CA485E1BEF927 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YH4A87H8M4;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../Tuist/.build/checkouts/swift-navigation/Sources/UIKitNavigationShim/include",
@@ -805,6 +821,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoachUITests;
 				PRODUCT_NAME = CoachCoachUITests;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -851,6 +868,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
@@ -869,6 +887,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MARKETING_VERSION = 0.0.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -880,7 +899,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = YH4A87H8M4;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SRCROOT)/../Tuist/.build/checkouts/swift-navigation/Sources/UIKitNavigationShim/include",
@@ -915,6 +936,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoachTests;
 				PRODUCT_NAME = CoachCoachTests;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -932,7 +954,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = YH4A87H8M4;
 				ENABLE_PREVIEWS = YES;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
@@ -940,6 +964,7 @@
 					"$(SRCROOT)/../Tuist/.build/checkouts/swift-syntax/Sources/_SwiftSyntaxCShims/include",
 				);
 				INFOPLIST_FILE = Info.plist;
+				INFOPLIST_KEY_CFBundlePackageType = APPL;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -965,8 +990,9 @@
 					"-load-plugin-executable",
 					"$BUILD_DIR/Debug$EFFECTIVE_PLATFORM_NAME/PerceptionMacros#PerceptionMacros",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.CoachCoach;
+				PRODUCT_BUNDLE_IDENTIFIER = com.seungwan.coachcoach;
 				PRODUCT_NAME = CoachCoach;
+				PROVISIONING_PROFILE_SPECIFIER = "CoachCoach AppStore (Manual)";
 				SDKROOT = iphoneos;
 				SUPPORTS_MACCATALYST = NO;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
@@ -1012,6 +1038,7 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
@@ -1024,6 +1051,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				MARKETING_VERSION = 0.0.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.9;

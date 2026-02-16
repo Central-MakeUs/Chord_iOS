@@ -8,6 +8,7 @@ import DataLayer
 struct AppFeature {
   @Dependency(\.authRepository) var authRepository
   @Dependency(\.menuRepository) var menuRepository
+  @Dependency(\.userRepository) var userRepository
   
   struct State: Equatable {
     enum AppStatus: Equatable {
@@ -47,6 +48,8 @@ struct AppFeature {
     case autoLoginResult(Result<Void, Error>)
     case logout
     case logoutResult(Result<Void, Error>)
+    case withdrawal
+    case withdrawalResult(Result<Void, Error>)
     case login(LoginFeature.Action)
     case onboarding(OnboardingFeature.Action)
     case menuRegistration(MenuRegistrationFeature.Action)
@@ -62,6 +65,9 @@ struct AppFeature {
       case (.logout, .logout): return true
       case (.logoutResult(.success), .logoutResult(.success)): return true
       case (.logoutResult(.failure), .logoutResult(.failure)): return true
+      case (.withdrawal, .withdrawal): return true
+      case (.withdrawalResult(.success), .withdrawalResult(.success)): return true
+      case (.withdrawalResult(.failure), .withdrawalResult(.failure)): return true
       case let (.login(l), .login(r)): return l == r
       case let (.onboarding(l), .onboarding(r)): return l == r
       case let (.menuRegistration(l), .menuRegistration(r)): return l == r
@@ -152,6 +158,9 @@ struct AppFeature {
       case .main(.logoutTapped):
         return .send(.logout)
 
+      case .main(.withdrawalTapped):
+        return .send(.withdrawal)
+
       case .logout:
         return .run { send in
           do {
@@ -181,6 +190,25 @@ struct AppFeature {
         return .none
       
       case .logoutResult(.failure):
+        return .none
+
+      case .withdrawal:
+        return .run { send in
+          do {
+            try await userRepository.withdraw()
+            try await authRepository.logout()
+            print("✅ Withdrawal successful")
+            await send(.withdrawalResult(.success(())))
+          } catch {
+            print("❌ Withdrawal failed: \(error)")
+            await send(.withdrawalResult(.failure(error)))
+          }
+        }
+
+      case .withdrawalResult(.success):
+        return .send(.logoutResult(.success(())))
+
+      case .withdrawalResult(.failure):
         return .none
 
       case .menuCheckCompleted(let hasMenu):

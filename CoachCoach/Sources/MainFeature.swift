@@ -5,6 +5,7 @@ import FeatureHome
 import FeatureIngredients
 import FeatureMenu
 import SwiftUI
+import UIKit
 
 @Reducer
 struct MainFeature {
@@ -39,6 +40,7 @@ struct MainFeature {
     case selectedTabChanged(AppTab)
     case pathChanged(NavigationPath)
     case logoutTapped
+    case withdrawalTapped
     case home(HomeFeature.Action)
     case menu(MenuFeature.Action)
     case ingredients(IngredientsFeature.Action)
@@ -49,6 +51,7 @@ struct MainFeature {
       case let (.selectedTabChanged(l), .selectedTabChanged(r)): return l == r
       case (.pathChanged, .pathChanged): return true // NavigationPath 비교 어려움
       case (.logoutTapped, .logoutTapped): return true
+      case (.withdrawalTapped, .withdrawalTapped): return true
       case (.home(let l), .home(let r)): return l == r
       case (.menu(let l), .menu(let r)): return l == r
       case (.ingredients(let l), .ingredients(let r)): return l == r
@@ -64,6 +67,7 @@ struct MainFeature {
       switch action {
       case let .selectedTabChanged(tab):
         print("🔵 Tab changed to: \(tab)")
+        let previousTab = state.selectedTab
         state.selectedTab = tab
 
         // Lazy initialization when tab is selected
@@ -89,7 +93,7 @@ struct MainFeature {
             state.aiCoach = AICoachFeature.State()
           }
         }
-        return .none
+        return previousTab != tab ? selectionHaptic() : .none
         
       case let .pathChanged(path):
         state.path = path
@@ -97,6 +101,12 @@ struct MainFeature {
 
       case .logoutTapped:
         return .none
+
+      case .withdrawalTapped:
+        return .none
+
+      case .home(.delegate(.openAICoachTab)):
+        return .send(.selectedTabChanged(.aiCoach))
         
       case .home:
         return .none
@@ -121,7 +131,6 @@ struct MainFeature {
         return .none
         
       case .ingredients(.addIngredientTapped):
-        state.path.append(IngredientsRoute.add)
         return .none
         
       case .ingredients:
@@ -143,6 +152,15 @@ struct MainFeature {
     }
     .ifLet(\.aiCoach, action: \.aiCoach) {
       AICoachFeature()
+    }
+  }
+
+  private func selectionHaptic() -> Effect<Action> {
+    .run { _ in
+      await MainActor.run {
+        let generator = UISelectionFeedbackGenerator()
+        generator.selectionChanged()
+      }
     }
   }
 }

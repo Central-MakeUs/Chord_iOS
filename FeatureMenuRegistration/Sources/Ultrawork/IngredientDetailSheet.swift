@@ -66,10 +66,6 @@ public struct IngredientDetailSheet: View {
             .foregroundColor(AppColor.primaryBlue600)
         }
       }
-      
-      Divider()
-        .background(AppColor.grayscale200)
-      
       HStack {
         VStack(alignment: .leading, spacing: 4) {
           Text("사용량")
@@ -208,8 +204,6 @@ public struct IngredientDetailSheet: View {
   
   private var actionButtons: some View {
     VStack(spacing: 0) {
-      Divider()
-        .background(AppColor.grayscale200)
       
       HStack(spacing: 12) {
         BottomButton(
@@ -217,7 +211,6 @@ public struct IngredientDetailSheet: View {
           style: .secondary
         ) {
         }
-
         BottomButton(
           title: "수정",
           style: .primary

@@ -33,23 +33,19 @@ struct IngredientAddSheet: View {
               ),
               title: "가격",
               placeholder: "구매하신 가격을 입력해주세요",
-              accentColor: AppColor.grayscale300,
+              accentColor: AppColor.grayscale500,
               keyboardType: .numberPad
             )
+            .padding(.bottom, 12)
 
             purchaseAmountField(viewStore: viewStore)
+                  .padding(.bottom, 12)
 
-            UnderlinedTextField(
-              text: viewStore.binding(
-                get: \.ingredientAddUsageAmount,
-                send: MenuRegistrationFeature.Action.ingredientAddUsageAmountChanged
-              ),
-              title: "재료 사용량",
-              placeholder: "이 메뉴에서의 재료 사용량을 입력해주세요",
-              accentColor: AppColor.grayscale300,
-              keyboardType: .numberPad
-            )
+              
+            usageAmountField(viewStore: viewStore)
+                  .padding(.bottom, 12)
 
+              
             UnderlinedTextField(
               text: viewStore.binding(
                 get: \.ingredientAddSupplier,
@@ -107,7 +103,7 @@ struct IngredientAddSheet: View {
       Text(label)
         .font(.pretendardCaption1)
         .foregroundColor(isSelected ? .white : AppColor.grayscale600)
-        .frame(minWidth: 38, minHeight: 20)
+        .frame(minHeight: 20)
         .padding(.horizontal, 12)
         .padding(.vertical, 4)
         .background(
@@ -133,7 +129,7 @@ struct IngredientAddSheet: View {
           ),
           prompt: Text("구매하신 총 용량을 입력해주세요")
             .font(.pretendardSubtitle2)
-            .foregroundColor(AppColor.grayscale300)
+            .foregroundColor(AppColor.grayscale500)
         )
         .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
@@ -142,20 +138,30 @@ struct IngredientAddSheet: View {
         .disableAutocorrection(true)
 
         if !viewStore.ingredientAddPurchaseAmount.isEmpty {
-          Button {
-            isUnitDropdownExpanded.toggle()
-          } label: {
-            HStack(spacing: 4) {
-              Text(viewStore.ingredientAddUnit.title)
-                .font(.pretendardBody2)
-                .foregroundColor(AppColor.grayscale900)
-              Image.chevronDownOutlineIcon
-                .font(.system(size: 12))
-                .foregroundColor(AppColor.grayscale900)
-                .rotationEffect(.degrees(isUnitDropdownExpanded ? 180 : 0))
+          HStack(spacing: 8) {
+            Text("단위")
+              .font(.pretendardCaption1)
+              .foregroundColor(AppColor.grayscale500)
+
+            Rectangle()
+              .fill(AppColor.grayscale300)
+              .frame(width: 1, height: 14)
+
+            Button {
+              isUnitDropdownExpanded.toggle()
+            } label: {
+              HStack(spacing: 4) {
+                Text(viewStore.ingredientAddUnit.title)
+                  .font(.pretendardBody2)
+                  .foregroundColor(AppColor.grayscale900)
+                Image.chevronDownOutlineIcon
+                  .font(.system(size: 12))
+                  .foregroundColor(AppColor.grayscale900)
+                  .rotationEffect(.degrees(isUnitDropdownExpanded ? 180 : 0))
+              }
             }
+            .buttonStyle(.plain)
           }
-          .buttonStyle(.plain)
         }
       }
 
@@ -174,10 +180,9 @@ struct IngredientAddSheet: View {
               Text(unit.title)
                 .font(.pretendardSubtitle2)
                 .foregroundColor(AppColor.grayscale900)
-                .frame(width: 22, height: 27)
-                .padding(.leading, 35)
-                .padding(.trailing, 20)
-                .padding(.vertical, 4)
+                .frame(maxWidth: .infinity, alignment: .trailing)
+                .frame(height: 36)
+                .padding(.trailing, 12)
             }
             .buttonStyle(.plain)
 
@@ -191,7 +196,7 @@ struct IngredientAddSheet: View {
         .background(AppColor.grayscale200)
         .cornerRadius(8)
         .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 2)
-        .frame(maxWidth: 80)
+        .frame(width: 70)
         .offset(y: 50)
       }
     }
@@ -200,16 +205,63 @@ struct IngredientAddSheet: View {
     .animation(.easeInOut(duration: 0.2), value: viewStore.ingredientAddPurchaseAmount.isEmpty)
   }
 
+  private func usageAmountField(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text("재료 사용량")
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
+
+      HStack(spacing: 8) {
+        TextField(
+          "",
+          text: viewStore.binding(
+            get: \.ingredientAddUsageAmount,
+            send: MenuRegistrationFeature.Action.ingredientAddUsageAmountChanged
+          ),
+          prompt: Text("이 메뉴에서의 재료 사용량을 입력해주세요")
+            .font(.pretendardSubtitle2)
+            .foregroundColor(AppColor.grayscale500)
+        )
+        .font(.pretendardSubtitle2)
+        .foregroundColor(AppColor.grayscale900)
+        .keyboardType(.numberPad)
+        .textInputAutocapitalization(.never)
+        .disableAutocorrection(true)
+
+        if !viewStore.ingredientAddPurchaseAmount.isEmpty {
+          Text(viewStore.ingredientAddUnit.title)
+            .font(.pretendardSubtitle2)
+            .foregroundColor(AppColor.grayscale700)
+            .frame(minWidth: 20, alignment: .trailing)
+        }
+      }
+
+      Rectangle()
+        .fill(AppColor.grayscale300)
+        .frame(height: 1)
+    }
+  }
+
   private func addButton(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    VStack(spacing: 0) {
-      BottomButton(title: "추가하기", style: .primary) {
+    let isAddEnabled = isIngredientAddEnabled(viewStore)
+
+    return VStack(spacing: 0) {
+      BottomButton(title: "추가하기", style: isAddEnabled ? .primary : .secondary) {
         viewStore.send(.confirmAddIngredientTapped)
       }
+      .disabled(!isAddEnabled)
       .padding(.horizontal, 20)
       .padding(.top, 16)
       .padding(.bottom, 34)
       .background(Color.white)
     }
+  }
+
+  private func isIngredientAddEnabled(_ viewStore: ViewStoreOf<MenuRegistrationFeature>) -> Bool {
+    let price = Double(viewStore.ingredientAddPrice.replacingOccurrences(of: ",", with: "")) ?? 0
+    let purchaseAmount = Double(viewStore.ingredientAddPurchaseAmount.replacingOccurrences(of: ",", with: "")) ?? 0
+    let usageAmount = Double(viewStore.ingredientAddUsageAmount.replacingOccurrences(of: ",", with: "")) ?? 0
+    return price > 0 && purchaseAmount > 0 && usageAmount > 0
   }
 }
 

@@ -6,6 +6,8 @@ import DesignSystem
 public struct MenuEditView: View {
   let store: StoreOf<MenuEditFeature>
   @Environment(\.dismiss) private var dismiss
+  @State private var isCategorySheetPresented = false
+  @State private var selectedCategoryDraft: MenuCategory = .beverage
 
   public init(store: StoreOf<MenuEditFeature>) {
     self.store = store
@@ -24,33 +26,32 @@ public struct MenuEditView: View {
           )
 
           VStack(alignment: .leading, spacing: 24) {
+            menuNameSection(
+              name: viewStore.binding(
+                get: \.menuName,
+                send: MenuEditFeature.Action.menuNameUpdated
+              )
+            )
 
-          menuNameRow(name: viewStore.menuName) {
-            viewStore.send(.nameEditPresented(true))
-          }
+            priceSection(
+              viewStore: viewStore,
+              price: viewStore.binding(
+                get: \.menuPrice,
+                send: MenuEditFeature.Action.menuPriceUpdated
+              )
+            )
 
-          sectionDivider
+            categoryAndTimeSection(viewStore: viewStore)
 
-          priceSection(price: viewStore.menuPrice) {
-            viewStore.send(.priceEditPresented(true))
-          }
+            Spacer()
 
-          sectionDivider
-
-          prepareTimeSection(time: viewStore.prepareTime) {
-            viewStore.send(.prepareTimeTapped)
-          }
-          sectionDivider
-
-          categorySection(
-            categories: viewStore.categories,
-            selectedCategory: viewStore.selectedCategory,
-            onSelect: { viewStore.send(.categorySelected($0)) }
-          )
-          Spacer()
-          BottomButton(title: "메뉴 삭제", style: .tertiary) {
-            viewStore.send(.deleteTapped)
-          }
+            BottomButton(
+              title: "수정 완료",
+              style: viewStore.hasPendingChanges && !viewStore.isUpdating ? .primary : .secondary
+            ) {
+              viewStore.send(.completeEditTapped)
+            }
+            .disabled(!viewStore.hasPendingChanges || viewStore.isUpdating)
           }
           .padding(.horizontal, 20)
           .padding(.top, 12)
@@ -59,42 +60,6 @@ public struct MenuEditView: View {
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
-      .sheet(
-        isPresented: viewStore.binding(
-          get: \.isNameEditPresented,
-          send: MenuEditFeature.Action.nameEditPresented
-        )
-      ) {
-        MenuNameEditSheetView(
-          store: Store(
-            initialState: MenuNameEditSheetFeature.State(draftName: viewStore.menuName)
-          ) {
-            MenuNameEditSheetFeature()
-          },
-          onComplete: { viewStore.send(.menuNameUpdated($0)) }
-        )
-        .presentationDetents([.height(296)])
-        .presentationDragIndicator(.hidden)
-        .modifier(SheetCornerRadiusModifier(radius: 24))
-      }
-      .sheet(
-        isPresented: viewStore.binding(
-          get: \.isPriceEditPresented,
-          send: MenuEditFeature.Action.priceEditPresented
-        )
-      ) {
-        MenuPriceEditSheetView(
-          store: Store(
-            initialState: MenuPriceEditSheetFeature.State(draftPrice: viewStore.menuPrice)
-          ) {
-            MenuPriceEditSheetFeature()
-          },
-          onComplete: { viewStore.send(.menuPriceUpdated($0)) }
-        )
-        .presentationDetents([.height(296)])
-        .presentationDragIndicator(.hidden)
-        .modifier(SheetCornerRadiusModifier(radius: 24))
-      }
       .sheet(
         isPresented: viewStore.binding(
           get: \.isPrepareTimePresented,
@@ -117,6 +82,20 @@ public struct MenuEditView: View {
         .presentationDetents([.height(360)])
         .presentationDragIndicator(.hidden)
         .modifier(SheetCornerRadiusModifier(radius: 24))
+      }
+      .sheet(isPresented: $isCategorySheetPresented) {
+        MenuEditCategoryBottomSheet(
+          selectedCategory: $selectedCategoryDraft,
+          categories: viewStore.categories,
+          onConfirm: {
+            viewStore.send(.categorySelected(selectedCategoryDraft))
+            isCategorySheetPresented = false
+          }
+        )
+        .presentationDetents([.height(300)])
+        .presentationCornerRadius(24)
+        .presentationDragIndicator(.hidden)
+        .presentationBackground(Color.white)
       }
       .coachCoachAlert(
         isPresented: viewStore.binding(
@@ -147,108 +126,142 @@ public struct MenuEditView: View {
         ),
         message: "수정이 반영되었어요!"
       )
-    }
-  }
-
-  private func menuNameRow(name: String, onTap: @escaping () -> Void) -> some View {
-    HStack(spacing: 6) {
-      Text(name)
-        .font(.pretendardSubTitle)
-        .foregroundColor(AppColor.grayscale900)
-      Button(action: onTap) {
-        Image.pencleIcon
-          .foregroundColor(AppColor.grayscale600)
-          .frame(width: 16, height: 16)
+      .onChange(of: viewStore.isUpdateSuccessPresented) { isPresented in
+        guard isPresented else { return }
+        viewStore.send(.updateSuccessDismissed)
+        dismiss()
       }
-      .buttonStyle(.plain)
-      Spacer()
     }
   }
 
-  private func priceSection(price: String, onTap: @escaping () -> Void) -> some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text("가격")
-        .frame(height: 23)
-        .font(.pretendardBody3)
-        .foregroundColor(AppColor.grayscale700)
+  private func menuNameSection(name: Binding<String>) -> some View {
+    UnderlinedTextField(
+      text: name,
+      title: "메뉴명",
+      placeholder: "메뉴명 입력",
+      titleColor: AppColor.grayscale700,
+      placeholderColor: AppColor.grayscale400,
+      underlineColor: AppColor.grayscale300,
+      accentColor: AppColor.primaryBlue500
+    )
+  }
 
-      valueRow(value: "\(price)원", onTap: onTap)
-
+  private func priceSection(viewStore: ViewStoreOf<MenuEditFeature>, price: Binding<String>) -> some View {
+    UnderlinedTextField(
+      text: price,
+      title: "가격",
+      placeholder: "가격 입력",
+      titleColor: AppColor.grayscale700,
+      placeholderColor: AppColor.grayscale400,
+      underlineColor: AppColor.grayscale300,
+      accentColor: AppColor.primaryBlue500,
+      keyboardType: .numberPad
+    )
+    .contentShape(Rectangle())
+    .onTapGesture {
+      viewStore.send(.menuPriceFieldTapped)
     }
   }
 
-  private func prepareTimeSection(time: String, onTap: @escaping () -> Void) -> some View {
-    VStack(alignment: .leading, spacing: 4) {
-      Text("제조시간")
-        .frame(height: 23)
-        .font(.pretendardBody3)
-        .foregroundColor(AppColor.grayscale700)
+  private func categoryAndTimeSection(viewStore: ViewStoreOf<MenuEditFeature>) -> some View {
+    HStack(spacing: 8) {
+      infoSelectCard(
+        title: "카테고리",
+        value: viewStore.selectedCategory.title
+      ) {
+        selectedCategoryDraft = viewStore.selectedCategory
+        isCategorySheetPresented = true
+      }
 
-      valueRow(value: time, onTap: onTap)
-
+      infoSelectCard(
+        title: "제조시간",
+        value: viewStore.prepareTime
+      ) {
+        viewStore.send(.prepareTimeTapped)
+      }
     }
   }
 
-  private func valueRow(value: String, onTap: @escaping () -> Void) -> some View {
+  private func infoSelectCard(
+    title: String,
+    value: String,
+    onTap: @escaping () -> Void
+  ) -> some View {
     Button(action: onTap) {
-      HStack(spacing: 4) {
-        Text(value)
-          .font(.pretendardSubtitle2)
-          .foregroundColor(AppColor.grayscale900)
-        Image.chevronRightOutlineIcon
-          .renderingMode(.template)
-          .foregroundColor(AppColor.grayscale700)
-        Spacer()
+      VStack(alignment: .leading, spacing: 12) {
+        Text(title)
+          .frame(minHeight: 26)
+          .font(.pretendardBody2)
+          .foregroundColor(AppColor.grayscale600)
+
+        HStack(spacing: 4) {
+          Text(value)
+            .font(.pretendardSubtitle4)
+            .foregroundColor(AppColor.grayscale600)
+          Image.chevronRightOutlineIcon
+            .renderingMode(.template)
+            .foregroundColor(AppColor.grayscale500)
+        }
+        .frame(minHeight: 26)
       }
+      .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
+      .padding(12)
+      .background(AppColor.grayscale200)
+      .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
-    .frame(height: 26)
     .buttonStyle(.plain)
   }
 
-  private func categorySection(
-    categories: [MenuCategory],
-    selectedCategory: MenuCategory,
-    onSelect: @escaping (MenuCategory) -> Void
-  ) -> some View {
-    VStack(alignment: .leading, spacing: 8) {
-      Text("카테고리")
-        .frame(height: 26)
-        .font(.pretendardBody3)
-        .foregroundColor(AppColor.grayscale700)
-
-      VStack(alignment: .leading, spacing: 12) {
-        ForEach(categories, id: \.self) { category in
-          Button(action: { onSelect(category) }) {
-            HStack(spacing: 8) {
-              RadioIndicator(isSelected: selectedCategory == category)
-              Text(category.title)
-                .font(.pretendardSubtitle4)
-                .foregroundColor(selectedCategory == category ? AppColor.primaryBlue500 : AppColor.grayscale900)
-              Spacer()
-            }
-          }
-          .buttonStyle(.plain)
-        }
-      }
-    }
-  }
-
-  private var sectionDivider: some View {
-    Divider()
-      .background(AppColor.grayscale300)
-  }
 }
 
-private struct RadioIndicator: View {
-  let isSelected: Bool
+private struct MenuEditCategoryBottomSheet: View {
+  @Binding var selectedCategory: MenuCategory
+  let categories: [MenuCategory]
+  let onConfirm: () -> Void
 
   var body: some View {
-    if isSelected {
-      Image.radioIcon
-        .frame(width: 24, height: 24)
-    } else {
-      Image.radioUnselectedIcon
-        .frame(width: 24, height: 24)
+    ZStack {
+      Color.white
+        .ignoresSafeArea()
+
+      VStack(spacing: 0) {
+        Text("메뉴 카테고리")
+          .font(.pretendardSubtitle1)
+          .foregroundColor(AppColor.grayscale900)
+          .padding(.top, 20)
+          .padding(.bottom, 16)
+
+        VStack(alignment: .leading, spacing: 20) {
+          ForEach(categories, id: \.self) { category in
+            Button(action: { selectedCategory = category }) {
+              HStack(spacing: 8) {
+                Text(category.title)
+                  .font(.pretendardBody2)
+                  .foregroundColor(selectedCategory == category ? AppColor.primaryBlue500 : AppColor.grayscale900)
+
+                if selectedCategory == category {
+                  Image.checkmarkIcon
+                    .renderingMode(.template)
+                    .foregroundColor(AppColor.primaryBlue500)
+                    .frame(width: 16, height: 16)
+                }
+
+                Spacer()
+              }
+            }
+            .buttonStyle(.plain)
+          }
+        }
+        .padding(.horizontal, 24)
+
+        Spacer(minLength: 12)
+
+        BottomButton(title: "확인", style: .primary) {
+          onConfirm()
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 28)
+      }
     }
   }
 }

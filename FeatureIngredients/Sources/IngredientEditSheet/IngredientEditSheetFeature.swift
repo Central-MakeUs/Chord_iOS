@@ -5,26 +5,32 @@ import CoreModels
 public struct IngredientEditSheetFeature {
   public struct State: Equatable {
     let name: String
+    var draftCategory: String
     var draftPrice: String
     var draftUsage: String
     var draftUnit: IngredientUnit
+    let initialCategory: String
     let initialPrice: String
     let initialUsage: String
     let initialUnit: IngredientUnit
 
     public init(
       name: String,
+      draftCategory: String,
       draftPrice: String,
       draftUsage: String,
       draftUnit: IngredientUnit,
+      initialCategory: String,
       initialPrice: String,
       initialUsage: String,
       initialUnit: IngredientUnit
     ) {
       self.name = name
+      self.draftCategory = draftCategory
       self.draftPrice = draftPrice
       self.draftUsage = draftUsage
       self.draftUnit = draftUnit
+      self.initialCategory = initialCategory
       self.initialPrice = initialPrice
       self.initialUsage = initialUsage
       self.initialUnit = initialUnit
@@ -39,7 +45,8 @@ public struct IngredientEditSheetFeature {
     }
     
     public var isSaveEnabled: Bool {
-      let hasChanges = draftPrice != initialPrice ||
+      let hasChanges = draftCategory != initialCategory ||
+                       draftPrice != initialPrice ||
                        draftUsage != initialUsage ||
                        draftUnit != initialUnit
       let isNotEmpty = !draftPrice.isEmpty && !draftUsage.isEmpty
@@ -48,6 +55,7 @@ public struct IngredientEditSheetFeature {
   }
 
   public enum Action: Equatable {
+    case draftCategoryChanged(String)
     case draftPriceChanged(String)
     case draftUsageChanged(String)
     case unitSelected(IngredientUnit)
@@ -59,6 +67,9 @@ public struct IngredientEditSheetFeature {
   public var body: some ReducerOf<Self> {
     Reduce { state, action in
       switch action {
+      case let .draftCategoryChanged(category):
+        state.draftCategory = category
+        return .none
       case let .draftPriceChanged(price):
         state.draftPrice = price
         return .none

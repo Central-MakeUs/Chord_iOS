@@ -47,6 +47,7 @@ let project = Project(
       sources: ["Sources/**"],
       dependencies: [
         .project(target: "DesignSystem", path: "../DesignSystem"),
+        .project(target: "DataLayer", path: "../DataLayer"),
         .external(name: "ComposableArchitecture")
       ],
       settings: .settings(
@@ -70,6 +71,7 @@ let project = Project(
       ],
       dependencies: [
         .target(name: "FeatureAICoach"),
+        .project(target: "DataLayer", path: "../DataLayer"),
         .external(name: "ComposableArchitecture")
       ],
       settings: .settings(

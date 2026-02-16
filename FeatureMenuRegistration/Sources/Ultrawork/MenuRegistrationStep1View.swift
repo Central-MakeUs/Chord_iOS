@@ -7,6 +7,8 @@ import UIKit
 public struct MenuRegistrationStep1View: View {
   let store: StoreOf<MenuRegistrationFeature>
   @Environment(\.dismiss) private var dismiss
+  @State private var isCategorySheetPresented = false
+  @State private var selectedCategoryDraft = "음료"
 
   public init(store: StoreOf<MenuRegistrationFeature>) {
     self.store = store
@@ -25,7 +27,9 @@ public struct MenuRegistrationStep1View: View {
           Spacer()
         }
         .padding(.horizontal, 20)
-        .padding(.top, 24)
+        .padding(.top, 10)
+        .padding(.bottom, 24)
+
 
         nameInputSection(viewStore: viewStore)
           .padding(.horizontal, 20)
@@ -36,7 +40,7 @@ public struct MenuRegistrationStep1View: View {
         } else {
           ScrollView {
             VStack(spacing: 0) {
-              if !viewStore.price.isEmpty {
+              if !viewStore.menuName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewStore.isTemplateApplied {
                 filledContentSection(viewStore: viewStore)
               }
             }
@@ -98,12 +102,24 @@ public struct MenuRegistrationStep1View: View {
           },
           onComplete: { minutes, seconds in
             viewStore.send(.workTimeUpdated(minutes: minutes, seconds: seconds))
-            viewStore.send(.showTimePickerChanged(false))
           }
         )
         .presentationDetents([.height(360)])
         .presentationCornerRadius(24)
         .presentationDragIndicator(.hidden)
+      }
+      .sheet(isPresented: $isCategorySheetPresented) {
+        MenuCategoryBottomSheet(
+          selectedCategory: $selectedCategoryDraft,
+          onConfirm: {
+            viewStore.send(.categorySelected(selectedCategoryDraft))
+            isCategorySheetPresented = false
+          }
+        )
+        .presentationDetents([.height(300)])
+        .presentationCornerRadius(24)
+        .presentationDragIndicator(.hidden)
+        .presentationBackground(Color.white)
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
@@ -120,56 +136,21 @@ public struct MenuRegistrationStep1View: View {
   }
 
   private var stepIndicator: some View {
-    HStack(spacing: 2) {
-      Circle()
-        .fill(AppColor.primaryBlue500)
-        .overlay(
-          Text("1")
-            .font(.pretendardCaption2)
-            .foregroundColor(.white)
-        )
-        .frame(width: 24, height: 24)
-
-      Rectangle()
-        .fill(AppColor.grayscale300)
-        .frame(height: 2)
-
-      Circle()
-        .fill(AppColor.grayscale300)
-        .frame(width: 24, height: 24)
-        .overlay(
-          Text("2")
-            .font(.pretendardCaption2)
-            .foregroundColor(.white)
-        )
-    }
-    .frame(width: 70)
+    MenuRegistrationStepIndicator(phase: .step1)
   }
 
   private func nameInputSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     VStack(alignment: .leading, spacing: 24) {
-      UnderlinedTextField(
-        text: viewStore.binding(
-          get: \.menuName,
-          send: MenuRegistrationFeature.Action.menuNameChanged
-        ),
-        title: "메뉴명",
-        placeholder: "예)아메리카노",
-        titleColor: AppColor.grayscale900,
-        trailingIcon: !viewStore.menuName.isEmpty ? Image.cancelRoundedIcon : nil,
-        onTrailingTap: {
-          viewStore.send(.clearMenuNameTapped)
-        }
-      )
+      menuNameInputField(viewStore: viewStore)
       
-      if viewStore.menuName.isEmpty {
-        HStack(spacing: 0) {
-          Spacer(minLength: 0)
-          SpeechBubbleBanner(text: "등록하실 메뉴명을 입력해주세요")
-        }
-        .padding(.top, -12)
-        .transition(.opacity)
-      }
+//      if viewStore.menuName.isEmpty {
+//        HStack(spacing: 0) {
+//          Spacer(minLength: 0)
+//          SpeechBubbleBanner(text: "등록하실 메뉴명을 입력해주세요")
+//        }
+//        .padding(.top, -12)
+//        .transition(.opacity)
+//      }
       
       if viewStore.isTemplateApplied || !viewStore.menuName.isEmpty && !viewStore.showSuggestions {
         UnderlinedTextField(
@@ -185,108 +166,175 @@ public struct MenuRegistrationStep1View: View {
     }
   }
 
-  private func filledContentSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    VStack(alignment: .leading, spacing: 0) {
-      Color(uiColor: .systemGray6)
-        .frame(height: 8)
-        .padding(.top, 24)
-      
-      VStack(alignment: .leading, spacing: 24) {
-        VStack(alignment: .leading, spacing: 16) {
-          Text("카테고리")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale900)
+  private func menuNameInputField(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
+    let isDirectInputState = viewStore.showSuggestions
+      && viewStore.searchResults.isEmpty
+      && !viewStore.menuName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
 
-          VStack(alignment: .leading, spacing: 16) {
-            categoryRadioButton(label: "음료", isSelected: viewStore.selectedCategory == "음료") {
-              viewStore.send(.categorySelected("음료"))
-            }
-            categoryRadioButton(label: "디저트", isSelected: viewStore.selectedCategory == "디저트") {
-              viewStore.send(.categorySelected("디저트"))
-            }
-            categoryRadioButton(label: "푸드", isSelected: viewStore.selectedCategory == "푸드") {
-              viewStore.send(.categorySelected("푸드"))
-            }
-          }
-        }
-        .padding(.top, 24)
+    return VStack(alignment: .leading, spacing: 8) {
+      Text("메뉴명")
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
 
-        Button(action: {
-          viewStore.send(.showTimePickerChanged(true))
-        }) {
-          HStack {
-            Text("제조시간")
-              .font(.pretendardBody2)
-              .foregroundColor(AppColor.grayscale900)
-            Spacer()
-            HStack(spacing: 4) {
-              Text(viewStore.workTimeText)
-                .font(.pretendardBody2)
-                .foregroundColor(AppColor.grayscale900)
-              Image.chevronRightOutlineIcon
-                .renderingMode(.template)
-                .foregroundColor(AppColor.grayscale500)
+      HStack(spacing: 8) {
+        TextField(
+          "",
+          text: viewStore.binding(
+            get: \.menuName,
+            send: MenuRegistrationFeature.Action.menuNameChanged
+          ),
+          prompt: Text("예)아메리카노")
+            .font(.pretendardSubtitle2)
+            .foregroundColor(AppColor.grayscale500)
+        )
+        .font(.pretendardSubtitle2)
+        .foregroundColor(AppColor.grayscale900)
+        .textInputAutocapitalization(.never)
+        .disableAutocorrection(true)
+
+        if !viewStore.menuName.isEmpty {
+          Button(action: {
+            if isDirectInputState {
+              viewStore.send(.directInputTapped)
+            } else {
+              viewStore.send(.clearMenuNameTapped)
             }
+          }) {
+            Group {
+              if isDirectInputState {
+                Image.plusCircleBlueIcon
+                  .resizable()
+                  .scaledToFit()
+              } else {
+                Image.cancelRoundedIcon
+                  .renderingMode(.template)
+                  .foregroundColor(AppColor.grayscale500)
+              }
+            }
+            .frame(width: 20, height: 20)
           }
-          .padding(16)
-          .background(Color(uiColor: .systemGray6))
-          .cornerRadius(12)
-          .padding(.top, 8)
+          .buttonStyle(.plain)
         }
-        .buttonStyle(.plain)
       }
-      .padding(.horizontal, 20)
+
+      Rectangle()
+        .fill(AppColor.grayscale300)
+        .frame(height: 1)
     }
   }
-  
-  private func categoryRadioButton(label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
-    Button(action: action) {
-      HStack(spacing: 12) {
-        ZStack {
-          Circle()
-            .stroke(isSelected ? AppColor.primaryBlue500 : AppColor.grayscale300, lineWidth: 1.5)
-            .frame(width: 20, height: 20)
-          
-          if isSelected {
-            Circle()
-              .fill(AppColor.primaryBlue500)
-              .frame(width: 10, height: 10)
+
+  private func filledContentSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
+    VStack(alignment: .leading, spacing: 0) {
+      HStack(spacing: 8) {
+        infoSelectCard(
+          title: "카테고리",
+          value: viewStore.selectedCategory,
+          onTap: {
+            selectedCategoryDraft = viewStore.selectedCategory
+            isCategorySheetPresented = true
           }
-        }
-        
-        Text(label)
-          .font(.pretendardBody2)
-          .foregroundColor(isSelected ? AppColor.primaryBlue500 : AppColor.grayscale900)
+        )
+
+        infoSelectCard(
+          title: "제조시간",
+          value: viewStore.workTimeText,
+          onTap: {
+            viewStore.send(.showTimePickerChanged(true))
+          }
+        )
       }
+      .padding(.top, 24)
+      .padding(.horizontal, 20)
+
+        HStack {
+            Spacer()
+            workTimeHintBanner(text: "평균적인 \(viewStore.selectedCategory)의 제조시간이에요")
+              .padding(.top, 8)
+              .padding(.horizontal, 20)
+        }
+  
+    }
+  }
+
+  private func infoSelectCard(
+    title: String,
+    value: String,
+    onTap: @escaping () -> Void
+  ) -> some View {
+    Button(action: onTap) {
+      VStack(alignment: .leading, spacing: 12) {
+          Text(title)
+              .frame(minHeight: 26)
+              .font(.pretendardBody2)
+              .foregroundColor(AppColor.grayscale700)
+
+        HStack(spacing: 4) {
+          Text(value)
+            .font(.pretendardSubtitle4)
+            .foregroundColor(AppColor.grayscale600)
+          Image.chevronRightOutlineIcon
+            .renderingMode(.template)
+            .foregroundColor(AppColor.grayscale500)
+        }
+        .frame(minHeight: 26)
+
+      }
+      .frame(maxWidth: .infinity, minHeight: 60, alignment: .leading)
+      .padding(12)
+      .background(AppColor.grayscale200)
+      .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
     .buttonStyle(.plain)
+  }
+
+  private func workTimeHintBanner(text: String) -> some View {
+    VStack(alignment: .trailing, spacing: 0) {
+      Image.speechBubbleTail
+        .renderingMode(.template)
+        .resizable()
+        .scaledToFit()
+        .frame(width: 12, height: 12)
+        .foregroundColor(AppColor.grayscale800)
+        .padding(.trailing, 20)
+        .padding(.bottom, -2)
+
+      Text(text)
+        .font(.pretendardCaption1)
+        .foregroundColor(.white)
+        .padding(.horizontal, 8)
+        .padding(.vertical, 4)
+        .background(AppColor.grayscale800)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
   }
   
 
 
   private func suggestionList(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     VStack(spacing: 0) {
-      Divider()
-
       ScrollView {
         VStack(spacing: 0) {
           if viewStore.searchResults.isEmpty {
-            VStack(spacing: 8) {
-              Text("찾으시는 메뉴가 없나요?")
-                .font(.pretendardBody2)
-                .foregroundColor(AppColor.grayscale500)
-              
-              Button(action: {
-                viewStore.send(.directInputTapped)
-              }) {
-                Text("'\(viewStore.menuName)' 직접 입력")
-                  .font(.pretendardBody2)
-                  .foregroundColor(AppColor.primaryBlue500)
-                  .underline()
+            VStack(alignment: .leading, spacing: 12) {
+              Text("메뉴 템플릿")
+                .font(.pretendardCaption1)
+                .foregroundColor(AppColor.grayscale600)
+
+              VStack(spacing: 0) {
+                Text("해당 메뉴의\n템플릿이 없어요")
+                  .font(.pretendardCaption1)
+                  .foregroundColor(AppColor.grayscale500)
+                  .multilineTextAlignment(.center)
+                  .lineSpacing(2)
+                  .frame(maxWidth: .infinity)
+                  .padding(.vertical, 20)
               }
+              .frame(maxWidth: .infinity, maxHeight: .infinity)
+              .background(AppColor.grayscale200)
+              .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
-            .frame(maxWidth: .infinity)
-            .padding(.top, 60)
+            .padding(.horizontal, 20)
+            .padding(.top, 24)
           } else {
             ForEach(viewStore.searchResults, id: \.templateId) { item in
               Button(action: {
@@ -320,22 +368,15 @@ public struct MenuRegistrationStep1View: View {
       .trimmingCharacters(in: .whitespacesAndNewlines)
       .isEmpty
 
-      return HStack(spacing: 8) {
-      BottomButton(
-        title: "이전",
-        style: .secondary
-      ) {
-        viewStore.send(.previousStepTapped)
-      }
-
-      BottomButton(
-        title: "다음",
-        style: isNextEnabled ? .primary : .secondary
-      ) {
+    return BottomButton(
+      title: "다음",
+      style: isNextEnabled ? .primary : .secondary
+    ) {
+      if isNextEnabled {
         viewStore.send(.nextStepTapped)
       }
-      .disabled(!isNextEnabled)
     }
+    .disabled(!isNextEnabled)
   }
 
   private func highlightedText(fullText: String, searchText: String) -> Text {
@@ -368,5 +409,58 @@ public struct MenuRegistrationStep1View: View {
     }
 
     return result.font(.pretendardBody2)
+  }
+}
+
+private struct MenuCategoryBottomSheet: View {
+  @Binding var selectedCategory: String
+  let onConfirm: () -> Void
+
+  private let categories = ["음료", "디저트", "푸드"]
+
+  var body: some View {
+    ZStack {
+      Color.white
+        .ignoresSafeArea()
+
+      VStack(spacing: 0) {
+        Text("메뉴 카테고리")
+          .font(.pretendardSubtitle1)
+          .foregroundColor(AppColor.grayscale900)
+          .padding(.top, 20)
+          .padding(.bottom, 16)
+
+        VStack(alignment: .leading, spacing: 20) {
+          ForEach(categories, id: \.self) { category in
+            Button(action: { selectedCategory = category }) {
+              HStack(spacing: 8) {
+                Text(category)
+                  .font(.pretendardBody2)
+                  .foregroundColor(selectedCategory == category ? AppColor.primaryBlue500 : AppColor.grayscale900)
+
+                if selectedCategory == category {
+                  Image.checkmarkIcon
+                    .renderingMode(.template)
+                    .foregroundColor(AppColor.primaryBlue500)
+                    .frame(width: 16, height: 16)
+                }
+
+                Spacer()
+              }
+            }
+            .buttonStyle(.plain)
+          }
+        }
+        .padding(.horizontal, 24)
+
+        Spacer(minLength: 12)
+
+        BottomButton(title: "확인", style: .primary) {
+          onConfirm()
+        }
+        .padding(.horizontal, 20)
+        .padding(.bottom, 28)
+      }
+    }
   }
 }

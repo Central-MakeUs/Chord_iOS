@@ -55,7 +55,7 @@ public struct IngredientSearchFeature {
         
         state.isSearching = true
         return .run { send in
-          let results = try await ingredientRepository.searchIngredients(text)
+          let results = try await ingredientRepository.searchIngredientsInCatalog(text)
           await send(.searchResultsLoaded(results))
         } catch: { error, send in
           await send(.searchResultsLoaded([]))

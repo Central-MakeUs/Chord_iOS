@@ -17,11 +17,11 @@ public struct TemplateApplySheet: View {
       SheetDragHandle()
 
       VStack(spacing: 0) {
-        VStack(spacing: 4) {
+          VStack(alignment: .leading, spacing: 4) {
           Text("템플릿을 적용할까요?")
             .font(.pretendardHeadline2)
             .foregroundColor(AppColor.grayscale900)
-            .multilineTextAlignment(.center)
+            .multilineTextAlignment(.leading)
           
           VStack(spacing: 4) {
             Text("메뉴 구성과 재료 항목이 자동으로 채워져요")
@@ -32,7 +32,7 @@ public struct TemplateApplySheet: View {
               .font(.pretendardBody2)
               .foregroundColor(AppColor.grayscale700)
           }
-          .multilineTextAlignment(.center)
+          .multilineTextAlignment(.leading)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 20)

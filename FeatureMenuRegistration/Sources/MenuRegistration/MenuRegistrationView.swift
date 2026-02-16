@@ -4,18 +4,25 @@ import DesignSystem
 
 public struct MenuRegistrationView: View {
   let store: StoreOf<MenuRegistrationFeature>
+  let onMenuCreated: () -> Void
 
-  public init(store: StoreOf<MenuRegistrationFeature>) {
+  public init(
+    store: StoreOf<MenuRegistrationFeature>,
+    onMenuCreated: @escaping () -> Void = {}
+  ) {
     self.store = store
+    self.onMenuCreated = onMenuCreated
   }
 
   private struct ViewState: Equatable {
     let currentStep: MenuRegistrationFeature.Step
     let isNavigatingForward: Bool
+    let isMenuCreated: Bool
     
     init(state: MenuRegistrationFeature.State) {
       self.currentStep = state.currentStep
       self.isNavigatingForward = state.isNavigatingForward
+      self.isMenuCreated = state.isMenuCreated
     }
   }
 
@@ -45,8 +52,13 @@ public struct MenuRegistrationView: View {
         }
       }
       .animation(.easeInOut(duration: 0.3), value: viewStore.currentStep)
+      .onChange(of: viewStore.isMenuCreated) { _, isCreated in
+        guard isCreated else { return }
+        onMenuCreated()
+        viewStore.send(.menuCreatedHandled)
+      }
       .alert(store: store.scope(state: \.$alert, action: { .alert($0) }))
-      .hideTabBar(true)
+      .toolbar(.hidden, for: .tabBar)
     }
   }
 }

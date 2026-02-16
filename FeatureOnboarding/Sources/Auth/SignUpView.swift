@@ -119,7 +119,7 @@ public struct SignUpView: View {
               text: $store.password,
               prompt: Text("비밀번호 입력")
                 .font(.pretendardSubtitle2)
-                .foregroundColor(AppColor.grayscale400)
+                .foregroundColor(AppColor.grayscale500)
             )
           } else {
             SecureField(
@@ -127,7 +127,7 @@ public struct SignUpView: View {
               text: $store.password,
               prompt: Text("비밀번호 입력")
                 .font(.pretendardSubtitle2)
-                .foregroundColor(AppColor.grayscale400)
+                .foregroundColor(AppColor.grayscale500)
             )
           }
         }
@@ -178,7 +178,7 @@ public struct SignUpView: View {
               ),
               prompt: Text("비밀번호 재입력")
                 .font(.pretendardSubtitle2)
-                .foregroundColor(AppColor.grayscale400)
+                .foregroundColor(AppColor.grayscale500)
             )
           } else {
             SecureField(
@@ -189,7 +189,7 @@ public struct SignUpView: View {
               ),
               prompt: Text("비밀번호 재입력")
                 .font(.pretendardSubtitle2)
-                .foregroundColor(AppColor.grayscale400)
+                .foregroundColor(AppColor.grayscale500)
             )
           }
         }

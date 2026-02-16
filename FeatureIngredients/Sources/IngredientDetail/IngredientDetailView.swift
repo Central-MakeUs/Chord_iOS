@@ -33,10 +33,18 @@ public struct IngredientDetailView: View {
               Button {
                 viewStore.send(.favoriteTapped)
               } label: {
-                Image(systemName: viewStore.item.isFavorite ? "star.fill" : "star")
-                  .resizable()
-                  .frame(width: 24, height: 24)
-                  .foregroundColor(viewStore.item.isFavorite ? .yellow : AppColor.grayscale400)
+                if viewStore.item.isFavorite {
+                  Image.starFilledIcon
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 24, height: 24)
+                } else {
+                  Image.starIcon
+                    .resizable()
+                    .renderingMode(.template)
+                    .foregroundColor(AppColor.grayscale400)
+                    .frame(width: 24, height: 24)
+                }
               }
               .buttonStyle(.plain)
             }
@@ -46,6 +54,7 @@ public struct IngredientDetailView: View {
         ScrollView {
           VStack(alignment: .leading, spacing: 16) {
             titleSection(
+              category: displayCategoryName(from: viewStore.item.category),
               name: viewStore.item.name,
               priceText: viewStore.priceText,
               usageText: viewStore.usageText,
@@ -90,9 +99,11 @@ public struct IngredientDetailView: View {
           store: Store(
             initialState: IngredientEditSheetFeature.State(
               name: viewStore.item.name,
+              draftCategory: displayCategoryName(from: viewStore.item.category),
               draftPrice: viewStore.priceText,
               draftUsage: viewStore.usageText,
               draftUnit: viewStore.unit,
+              initialCategory: displayCategoryName(from: viewStore.item.category),
               initialPrice: viewStore.priceText,
               initialUsage: viewStore.usageText,
               initialUnit: viewStore.unit
@@ -100,8 +111,15 @@ public struct IngredientDetailView: View {
           ) {
             IngredientEditSheetFeature()
           },
-          onComplete: { price, usage, unit in
-            viewStore.send(.editCompleted(price: price, usage: usage, unit: unit))
+          onComplete: { price, usage, unit, category in
+            viewStore.send(
+              .editCompleted(
+                price: price,
+                usage: usage,
+                unit: unit,
+                category: categoryCode(from: category)
+              )
+            )
           }
         )
         .presentationDetents([.height(420)])
@@ -158,7 +176,30 @@ public struct IngredientDetailView: View {
     }
   }
 
+  private func displayCategoryName(from value: String) -> String {
+    switch value {
+    case "INGREDIENTS":
+      return "식재료"
+    case "MATERIALS":
+      return "운영 재료"
+    default:
+      return value
+    }
+  }
+
+  private func categoryCode(from value: String) -> String {
+    switch value {
+    case "식재료":
+      return "INGREDIENTS"
+    case "운영 재료":
+      return "MATERIALS"
+    default:
+      return value
+    }
+  }
+
   private func titleSection(
+    category: String,
     name: String,
     priceText: String,
     usageText: String,
@@ -169,7 +210,7 @@ public struct IngredientDetailView: View {
   ) -> some View {
     VStack(alignment: .leading, spacing: 16) {
       VStack(alignment: .leading, spacing: 8) {
-        Text("식재료")
+        Text(category)
           .font(.pretendardCaption2)
           .foregroundColor(AppColor.grayscale600)
         

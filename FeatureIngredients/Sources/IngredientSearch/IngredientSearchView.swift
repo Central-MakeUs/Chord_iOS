@@ -60,7 +60,7 @@ public struct IngredientSearchView: View {
             HStack(spacing: 8) {
                 Image.searchIcon
                     .renderingMode(.template)
-                    .foregroundColor(AppColor.grayscale500)
+                    .foregroundColor(AppColor.grayscale700)
                     .frame(width: 16, height: 16)
                 
                 TextField(
@@ -80,7 +80,7 @@ public struct IngredientSearchView: View {
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 10)
-            .background(AppColor.grayscale200)
+            .background(AppColor.grayscale300)
             .clipShape(RoundedRectangle(cornerRadius: 8))
             
             Button(action: { dismiss() }) {

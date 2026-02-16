@@ -157,7 +157,7 @@ public struct MenuIngredientsFeature {
         
       case let .deleteRecipesResponse(.failure(error)):
         state.isLoading = false
-        state.alert = AlertState { TextState("삭제 실패") } message: { TextState(error.localizedDescription) }
+        state.alert = AlertState { TextState("삭제 실패") } message: { TextState(errorMessage(from: error)) }
         return .none
         
       case .deleteAlertCancelled:
@@ -190,6 +190,7 @@ public struct MenuIngredientsFeature {
           
           let request = NewRecipeCreateRequest(
             amount: amount,
+            usageAmount: amount,
             price: price,
             unitCode: unitCode,
             ingredientCategoryCode: "INGREDIENTS",
@@ -206,7 +207,7 @@ public struct MenuIngredientsFeature {
         
       case let .addRecipeResponse(.failure(error)):
         state.isLoading = false
-        state.alert = AlertState { TextState("재료 추가 실패") } message: { TextState(error.localizedDescription) }
+        state.alert = AlertState { TextState("재료 추가 실패") } message: { TextState(errorMessage(from: error)) }
         return .none
         
       case .reloadRecipes:
@@ -232,7 +233,7 @@ public struct MenuIngredientsFeature {
         
       case let .recipesReloaded(.failure(error)):
         state.isLoading = false
-        state.alert = AlertState { TextState("재료 목록 새로고침 실패") } message: { TextState(error.localizedDescription) }
+        state.alert = AlertState { TextState("재료 목록 새로고침 실패") } message: { TextState(errorMessage(from: error)) }
         return .none
         
       case .alert:
@@ -250,5 +251,12 @@ public struct MenuIngredientsFeature {
     case "ea", "개": return "EA"
     default: return "G"
     }
+  }
+
+  private func errorMessage(from error: Error) -> String {
+    if let apiError = error as? APIError {
+      return apiError.message
+    }
+    return error.localizedDescription
   }
 }

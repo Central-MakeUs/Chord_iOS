@@ -15,6 +15,7 @@
 		2306258E17C03EC184B789C7 /* PerceptionCore.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 2DA137EFEF0B1700F18C3CB9 /* PerceptionCore.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		28DF259E4B94CD599FC48D81 /* ComposableArchitecture.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1BFA4A77E37604B677B76543 /* ComposableArchitecture.framework */; };
 		37CB660BF9A39C1BEA623FFB /* Clocks.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 5EECCCBC4E719ED61067A1E1 /* Clocks.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		3AA067F70A989370D9671D0E /* DataLayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70F31F65C50DB6C5BACE0C85 /* DataLayer.framework */; };
 		3BC326559F18400A6468C2EF /* Pretendard-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = 977C5F45917BD3E53FF9C51A /* Pretendard-Medium.otf */; };
 		3EF3654E4BD620A5411437FF /* IssueReportingPackageSupport.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 665C6395BD280ABE3EF0F978 /* IssueReportingPackageSupport.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		46C15B07445CA68F429ABE01 /* Sharing.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = F9855D9180E4EF966EBFE147 /* Sharing.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -25,6 +26,7 @@
 		611F3879DF72970476A789C6 /* Pretendard-ExtraLight.otf in Resources */ = {isa = PBXBuildFile; fileRef = 4603FB2DBEC4E9645B7453D5 /* Pretendard-ExtraLight.otf */; };
 		612FDD04C57D5CC487AD6805 /* Pretendard-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = 66D9B9175D8E5A051F07D8BF /* Pretendard-SemiBold.otf */; };
 		64128356A38D59516A23A69A /* Dependencies.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 515692A9CC1E5308A577824D /* Dependencies.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		6C59880C8F63B110F44F9BCE /* CoreModels.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 148D4FA3E037255CE43353C0 /* CoreModels.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6D74635497B129F24C6CFF67 /* InternalCollectionsUtilities.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B822EC89EFA92B042EC4FD41 /* InternalCollectionsUtilities.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		6FC6F8B601F6604D24011A6C /* SwiftUINavigation.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6B2B9E8DC28E5F270116294E /* SwiftUINavigation.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		732D45C52E9E04E81303E63C /* AICoachView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E500D462D4BDDDE789520754 /* AICoachView.swift */; };
@@ -44,12 +46,14 @@
 		CB67E2612D8AD5F57F475C4D /* Pretendard-Light.otf in Resources */ = {isa = PBXBuildFile; fileRef = EF04BE525579798D6694627D /* Pretendard-Light.otf */; };
 		D3344C2D61F936D5B10B472B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 83E4E1F5B2A614DB7A8D9C5B /* Assets.xcassets */; };
 		D69134CD61D496DCD60ABF32 /* UIKitNavigationShim.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 09A28DE6FF36D178E171519F /* UIKitNavigationShim.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		D74FC4B0E8182F3E2DA8F3CE /* DataLayer.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 70F31F65C50DB6C5BACE0C85 /* DataLayer.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		DBBA926F7EE5C6F78D769A09 /* Pretendard-Bold.otf in Resources */ = {isa = PBXBuildFile; fileRef = CA984D1C5E278FC8116C7D5E /* Pretendard-Bold.otf */; };
 		DE67E19DF60E56EB0D6CB46E /* AICoachFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 681AE1638CD4CCB993CF4324 /* AICoachFeature.swift */; };
 		DE891D2BCF6A253D9571689C /* DesignSystem.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 727B9E89A7628EACC014F7A1 /* DesignSystem.framework */; };
 		E88247E8A31F89301159DFF2 /* CombineSchedulers.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 6783EA82FBED0C84F0A913AF /* CombineSchedulers.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		ECE0C1189997511F7176294D /* Pretendard-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = 3E3BFB7DC42A9D109A8855AB /* Pretendard-Regular.otf */; };
 		ED29DC432C12EAA91F1DA80B /* Perception.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = ED17DD99FF98AAEBE1185F26 /* Perception.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		ED4AA23B92232C91CD357C82 /* DataLayer.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 70F31F65C50DB6C5BACE0C85 /* DataLayer.framework */; };
 		F010D82C55FA86F5258DFE62 /* FeatureAICoach.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = B4A74ED80B096637F64D86C3 /* FeatureAICoach.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F279A4491F99C8AC4B78CA98 /* OrderedCollections.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E6E52E13521EE7433DA5BA3B /* OrderedCollections.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		F98EB8CE16E6C5683798A395 /* DesignSystem.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 727B9E89A7628EACC014F7A1 /* DesignSystem.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
@@ -79,7 +83,9 @@
 				E88247E8A31F89301159DFF2 /* CombineSchedulers.framework in Embed Frameworks */,
 				4CDBCD5FC888B5F4D0057BFF /* ComposableArchitecture.framework in Embed Frameworks */,
 				FF752B75309498D76C17C269 /* ConcurrencyExtras.framework in Embed Frameworks */,
+				6C59880C8F63B110F44F9BCE /* CoreModels.framework in Embed Frameworks */,
 				7791995A94ACDAD67DFC7183 /* CustomDump.framework in Embed Frameworks */,
+				D74FC4B0E8182F3E2DA8F3CE /* DataLayer.framework in Embed Frameworks */,
 				64128356A38D59516A23A69A /* Dependencies.framework in Embed Frameworks */,
 				F98EB8CE16E6C5683798A395 /* DesignSystem.framework in Embed Frameworks */,
 				F010D82C55FA86F5258DFE62 /* FeatureAICoach.framework in Embed Frameworks */,
@@ -120,6 +126,7 @@
 		09A28DE6FF36D178E171519F /* UIKitNavigationShim.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = UIKitNavigationShim.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0D4D57EF3B2E4D8725142409 /* PretendardVariable.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = PretendardVariable.ttf; sourceTree = "<group>"; };
 		1129EAC0E85ECB70B164E036 /* FeatureAICoachDemoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureAICoachDemoApp.swift; sourceTree = "<group>"; };
+		148D4FA3E037255CE43353C0 /* CoreModels.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = CoreModels.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1BFA4A77E37604B677B76543 /* ComposableArchitecture.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ComposableArchitecture.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		1FF804D37139F82B257B3A4A /* SwiftNavigation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftNavigation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2DA137EFEF0B1700F18C3CB9 /* PerceptionCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = PerceptionCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -137,6 +144,7 @@
 		688054EFC4D9AB066A9D5BAE /* IssueReporting.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = IssueReporting.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		6ABAEB1BBC6B82C2699A64A5 /* TuistBundle+FeatureAICoachDemo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "TuistBundle+FeatureAICoachDemo.swift"; sourceTree = "<group>"; };
 		6B2B9E8DC28E5F270116294E /* SwiftUINavigation.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SwiftUINavigation.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		70F31F65C50DB6C5BACE0C85 /* DataLayer.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DataLayer.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		727B9E89A7628EACC014F7A1 /* DesignSystem.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = DesignSystem.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		790C85C336469022ED4DF80A /* FeatureAICoach-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "FeatureAICoach-Info.plist"; sourceTree = "<group>"; };
 		7B794CAB397653F10B8C52FB /* Pretendard-ExtraBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Pretendard-ExtraBold.otf"; sourceTree = "<group>"; };
@@ -169,6 +177,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9CE62B836152BAABA40312AE /* ComposableArchitecture.framework in Frameworks */,
+				3AA067F70A989370D9671D0E /* DataLayer.framework in Frameworks */,
 				DE891D2BCF6A253D9571689C /* DesignSystem.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -178,6 +187,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				28DF259E4B94CD599FC48D81 /* ComposableArchitecture.framework in Frameworks */,
+				ED4AA23B92232C91CD357C82 /* DataLayer.framework in Frameworks */,
 				A7FD04C7AF1C6F7C02FA04DC /* FeatureAICoach.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -203,7 +213,9 @@
 				6783EA82FBED0C84F0A913AF /* CombineSchedulers.framework */,
 				1BFA4A77E37604B677B76543 /* ComposableArchitecture.framework */,
 				023740642B57D1ECFCB4EF83 /* ConcurrencyExtras.framework */,
+				148D4FA3E037255CE43353C0 /* CoreModels.framework */,
 				DCD4843A194E9EA83CBCCD08 /* CustomDump.framework */,
+				70F31F65C50DB6C5BACE0C85 /* DataLayer.framework */,
 				515692A9CC1E5308A577824D /* Dependencies.framework */,
 				727B9E89A7628EACC014F7A1 /* DesignSystem.framework */,
 				B4A74ED80B096637F64D86C3 /* FeatureAICoach.framework */,

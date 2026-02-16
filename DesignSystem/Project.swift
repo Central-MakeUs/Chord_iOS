@@ -22,7 +22,9 @@ let project = Project(
         "../CoachCoach/Assets.xcassets",
         "../CoachCoach/Resources/Assets.xcassets"
       ],
-      dependencies: []
+      dependencies: [
+        .project(target: "CoreModels", path: "../CoreModels")
+      ]
     )
   ]
 )

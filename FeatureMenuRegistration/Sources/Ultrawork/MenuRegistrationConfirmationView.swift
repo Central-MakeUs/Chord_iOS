@@ -42,10 +42,10 @@ public struct MenuRegistrationConfirmationView: View {
         ),
         title: "동일한 메뉴명이 이미 존재합니다.\n해당 메뉴를 추가하시겠습니까?",
         alertType: .twoButton,
-        leftButtonTitle: "네",
-        rightButtonTitle: "아니오",
-        leftButtonAction: { viewStore.send(.dupMenuAlertConfirmed) },
-        rightButtonAction: { viewStore.send(.dupMenuAlertCancelled) }
+        leftButtonTitle: "아니오",
+        rightButtonTitle: "네",
+        leftButtonAction: { viewStore.send(.dupMenuAlertCancelled) },
+        rightButtonAction: { viewStore.send(.dupMenuAlertConfirmed) }
       )
       .coachCoachAlert(
         isPresented: viewStore.binding(
@@ -54,10 +54,10 @@ public struct MenuRegistrationConfirmationView: View {
         ),
         title: "동일한 재료명이 이미 존재합니다.\n해당 재료를 추가하시겠습니까?",
         alertType: .twoButton,
-        leftButtonTitle: "네",
-        rightButtonTitle: "아니오",
-        leftButtonAction: { viewStore.send(.dupIngredientAlertConfirmed) },
-        rightButtonAction: { viewStore.send(.dupIngredientAlertCancelled) }
+        leftButtonTitle: "아니오",
+        rightButtonTitle: "네",
+        leftButtonAction: { viewStore.send(.dupIngredientAlertCancelled) },
+        rightButtonAction: { viewStore.send(.dupIngredientAlertConfirmed) }
       )
     }
   }

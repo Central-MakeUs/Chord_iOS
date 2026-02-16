@@ -8,6 +8,7 @@
 import SwiftUI
 import ComposableArchitecture
 import DesignSystem
+import UIKit
 
 @main
 struct CoachCoachApp: App {
@@ -17,6 +18,15 @@ struct CoachCoachApp: App {
   
   init() {
     Pretendard.registerFonts()
+
+    let tabBarAppearance = UITabBarAppearance()
+    tabBarAppearance.configureWithDefaultBackground()
+    tabBarAppearance.backgroundColor = .white
+
+    UITabBar.appearance().standardAppearance = tabBarAppearance
+    if #available(iOS 15.0, *) {
+      UITabBar.appearance().scrollEdgeAppearance = tabBarAppearance
+    }
   }
   
   var body: some Scene {

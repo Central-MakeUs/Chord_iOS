@@ -95,8 +95,8 @@ public struct MenuIngredientsView: View {
         AddIngredientSheet { newIngredient in
           viewStore.send(.ingredientAdded(newIngredient))
         }
-        .presentationDetents([.height(600)])
         .presentationDragIndicator(.hidden)
+        .presentationCornerRadius(24)
       }
       .alert(store: store.scope(state: \.$alert, action: { .alert($0) }))
       .overlay {
@@ -117,19 +117,12 @@ public struct MenuIngredientsView: View {
               Button {
                 viewStore.send(.addTapped)
               } label: {
-                HStack(spacing: 4) {
-                  Text("추가")
-                    .font(.pretendardBody3)
-                    .foregroundColor(AppColor.grayscale900)
-                  Image.plusIcon
-                    .resizable()
-                    .renderingMode(.template)
-                    .frame(width: 16, height: 16)
-                    .foregroundColor(AppColor.grayscale900)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                Text("추가")
+                  .font(.pretendardBody3)
+                  .foregroundColor(AppColor.grayscale900)
+                  .frame(maxWidth: .infinity, maxHeight: .infinity)
               }
+              .frame(height: 40)
               .buttonStyle(.plain)
               
               Divider()
@@ -138,24 +131,17 @@ public struct MenuIngredientsView: View {
               Button {
                 viewStore.send(.deleteTapped)
               } label: {
-                HStack(spacing: 4) {
-                  Text("삭제")
-                    .font(.pretendardBody3)
-                    .foregroundColor(AppColor.grayscale900)
-                  Image.trashIcon
-                    .resizable()
-                    .renderingMode(.template)
-                    .frame(width: 16, height: 16)
-                    .foregroundColor(AppColor.grayscale900)
-                }
-                .frame(maxWidth: .infinity)
-                .padding(.vertical, 12)
+                Text("삭제")
+                  .font(.pretendardBody3)
+                  .foregroundColor(AppColor.semanticWarningText)
+                  .frame(maxWidth: .infinity, maxHeight: .infinity)
               }
+              .frame(height: 40)
               .buttonStyle(.plain)
             }
-            .frame(width: 100)
+            .frame(width: 76, height: 80)
             .background(Color.white)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .clipShape(RoundedRectangle(cornerRadius: 8))
             .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
             .padding(.top, 50)
             .padding(.trailing, 20)

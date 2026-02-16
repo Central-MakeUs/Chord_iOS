@@ -19,7 +19,7 @@ public struct MenuView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     menuHeader(
                         count: viewStore.menuItems.count,
-                        onManage: { viewStore.send(.isMenuManagePresentedChanged(true)) }
+                        onAdd: { viewStore.send(.addMenuTapped) }
                     )
                     
                     MenuTabs(selected: viewStore.selectedCategory) { category in
@@ -62,46 +62,10 @@ public struct MenuView: View {
             .onAppear {
                 viewStore.send(.onAppear)
             }
-            .overlay(alignment: .topTrailing) {
-                if viewStore.isMenuManagePresented {
-                    ZStack(alignment: .topTrailing) {
-                        Color.black.opacity(0.001)
-                            .ignoresSafeArea()
-                            .onTapGesture {
-                                viewStore.send(.isMenuManagePresentedChanged(false))
-                            }
-                        
-                        Button {
-                            viewStore.send(.addMenuTapped)
-                        } label: {
-                            HStack(spacing: 4) {
-                                Text("메뉴 추가")
-                                    .font(.pretendardBody3)
-                                    .foregroundColor(AppColor.grayscale900)
-                                    .frame(width: 60, height: 26)
-                                
-                                Image.plusIcon
-                                    .resizable()
-                                    .renderingMode(.template)
-                                    .frame(width: 16, height: 16)
-                                    .foregroundColor(AppColor.grayscale900)
-                            }
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 6)
-                            .background(Color.white)
-                            .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
-                        }
-                        .buttonStyle(.plain)
-                        .padding(.top, 44)
-                        .padding(.trailing, 20)
-                    }
-                }
-            }
         }
     }
     
-    private func menuHeader(count: Int, onManage: @escaping () -> Void) -> some View {
+    private func menuHeader(count: Int, onAdd: @escaping () -> Void) -> some View {
         HStack {
             HStack(spacing: 6) {
                 Text("메뉴")
@@ -114,8 +78,10 @@ public struct MenuView: View {
             
             Spacer()
             
-            Button(action: onManage) {
-                Image.meatballIcon
+            Button(action: onAdd) {
+                Image.plusIcon
+                    .renderingMode(.template)
+                    .foregroundColor(AppColor.grayscale900)
                     .frame(width: 24, height: 24)
             }
         }
@@ -134,25 +100,6 @@ public struct MenuView: View {
         }
     }
     
-}
-
-private extension MenuStatus {
-    var color: Color {
-        switch self {
-        case .safe: return AppColor.semanticSafeText
-        case .normal: return AppColor.primaryBlue500
-        case .warning: return AppColor.semanticCautionText
-        case .danger: return AppColor.semanticWarningText
-        }
-    }
-    
-    var badgeBackgroundColor: Color {
-        color.opacity(0.15)
-    }
-    
-    var badgeTextColor: Color {
-        color
-    }
 }
 
 private struct MenuTabs: View {
@@ -192,15 +139,7 @@ struct MenuBadge: View {
     let status: MenuStatus
     
     var body: some View {
-        Text(status.text)
-            .font(.pretendardCaption)
-            .foregroundColor(status.badgeTextColor)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 4)
-                    .fill(status.badgeBackgroundColor)
-            )
+        MenuStatusBadge(status: status)
     }
 }
 

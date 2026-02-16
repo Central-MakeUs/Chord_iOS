@@ -76,11 +76,11 @@ public struct MenuDetailView: View {
 
       
       HStack(alignment: .center) {
-        VStack(alignment: .center, spacing: 4) {
+        VStack(alignment: .leading, spacing: 4) {
           Text(item.name)
             .font(.pretendardSubtitle4)
             .foregroundColor(AppColor.grayscale900)
-          Text(item.price)
+          Text(formattedMenuPrice(item.price))
             .font(.pretendardHeadline2)
             .foregroundColor(AppColor.grayscale900)
         }
@@ -114,7 +114,7 @@ public struct MenuDetailView: View {
   private func marginInfoCard(status: MenuStatus, item: MenuItem) -> some View {
     VStack(alignment: .leading, spacing: 16) {
       HStack(spacing: 8) {
-        Text("마진등급")
+        Text("수익등급")
           .font(.pretendardCTA)
           .foregroundColor(AppColor.grayscale700)
         
@@ -184,6 +184,15 @@ public struct MenuDetailView: View {
   private func formattedRecommendedPrice(_ price: String) -> String {
     let cleaned = price.replacingOccurrences(of: "원", with: "")
                        .replacingOccurrences(of: ",", with: "")
+    guard let number = Int(cleaned) else { return price }
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    return "\(formatter.string(from: NSNumber(value: number)) ?? "\(number)")원"
+  }
+
+  private func formattedMenuPrice(_ price: String) -> String {
+    let cleaned = price.replacingOccurrences(of: "원", with: "")
+      .replacingOccurrences(of: ",", with: "")
     guard let number = Int(cleaned) else { return price }
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal

@@ -8,18 +8,11 @@ public struct SplashView: View {
     ZStack {
       Color.white
         .ignoresSafeArea()
-      
-      VStack(spacing: 16) {
-        Image("AppLogo", bundle: .main)
-          .resizable()
-          .scaledToFit()
-          .frame(width: 82, height: 82)
-        
-        Image("CoachCoachLogo", bundle: .main)
-          .resizable()
-          .scaledToFit()
-          .frame(width: 120, height: 33)
-      }
+
+      Image("SplashCenterLogo", bundle: .main)
+        .resizable()
+        .scaledToFit()
+        .frame(width: 172, height: 178)
     }
   }
 }

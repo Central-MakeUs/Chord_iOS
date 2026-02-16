@@ -2,6 +2,7 @@ import ComposableArchitecture
 import CoreModels
 import DataLayer
 import Foundation
+import UIKit
 
 @Reducer
 public struct IngredientsFeature {
@@ -19,8 +20,22 @@ public struct IngredientsFeature {
     var showToast = false
     var toastMessage: String = ""
     var hasLoadedOnce = false
+    var showAddIngredientSheet = false
+    var addIngredientName = ""
+    var showDupNameHint = false
+    var showAddIngredientDetailSheet = false
+    var addIngredientCategory = "식재료"
+    var addIngredientPrice = ""
+    var addIngredientAmount = ""
+    var addIngredientSupplier = ""
+    var addIngredientUnit: IngredientUnit = .g
+    var isCreatingIngredient = false
 
     public init() {}
+
+    public var isDeleteModeActive: Bool {
+      isDeleteMode
+    }
     
     public var filteredIngredients: [InventoryIngredientItem] {
       return ingredients
@@ -45,6 +60,18 @@ public struct IngredientsFeature {
     case manageMenuTapped
     case manageMenuDismissed
     case addIngredientTapped
+    case showAddIngredientSheetChanged(Bool)
+    case addIngredientNameChanged(String)
+    case addIngredientDupChecked(String, Bool)
+    case addIngredientConfirmTapped
+    case showAddIngredientDetailSheetChanged(Bool)
+    case addIngredientCategorySelected(String)
+    case addIngredientPriceChanged(String)
+    case addIngredientAmountChanged(String)
+    case addIngredientSupplierChanged(String)
+    case addIngredientUnitSelected(IngredientUnit)
+    case createIngredientTapped
+    case createIngredientResponse(Result<IngredientResponse, Error>)
     case deleteModeTapped
     case ingredientSelectedForDeletion(UUID)
     case deleteButtonTapped
@@ -67,6 +94,19 @@ public struct IngredientsFeature {
       case (.manageMenuTapped, .manageMenuTapped): return true
       case (.manageMenuDismissed, .manageMenuDismissed): return true
       case (.addIngredientTapped, .addIngredientTapped): return true
+      case let (.showAddIngredientSheetChanged(l), .showAddIngredientSheetChanged(r)): return l == r
+      case let (.addIngredientNameChanged(l), .addIngredientNameChanged(r)): return l == r
+      case let (.addIngredientDupChecked(lk, ld), .addIngredientDupChecked(rk, rd)): return lk == rk && ld == rd
+      case (.addIngredientConfirmTapped, .addIngredientConfirmTapped): return true
+      case let (.showAddIngredientDetailSheetChanged(l), .showAddIngredientDetailSheetChanged(r)): return l == r
+      case let (.addIngredientCategorySelected(l), .addIngredientCategorySelected(r)): return l == r
+      case let (.addIngredientPriceChanged(l), .addIngredientPriceChanged(r)): return l == r
+      case let (.addIngredientAmountChanged(l), .addIngredientAmountChanged(r)): return l == r
+      case let (.addIngredientSupplierChanged(l), .addIngredientSupplierChanged(r)): return l == r
+      case let (.addIngredientUnitSelected(l), .addIngredientUnitSelected(r)): return l == r
+      case (.createIngredientTapped, .createIngredientTapped): return true
+      case (.createIngredientResponse(.success(let l)), .createIngredientResponse(.success(let r))): return l == r
+      case (.createIngredientResponse(.failure), .createIngredientResponse(.failure)): return true
       case (.deleteModeTapped, .deleteModeTapped): return true
       case let (.ingredientSelectedForDeletion(l), .ingredientSelectedForDeletion(r)): return l == r
       case (.deleteButtonTapped, .deleteButtonTapped): return true
@@ -83,7 +123,10 @@ public struct IngredientsFeature {
   @Dependency(\.ingredientRepository) var ingredientRepository
   @Dependency(\.menuRepository) var menuRepository
 
-  private enum CancelID { case delete }
+  private enum CancelID {
+    case delete
+    case checkDupName
+  }
 
   public var body: some ReducerOf<Self> {
     Reduce { state, action in
@@ -171,6 +214,7 @@ public struct IngredientsFeature {
         return .none
         
       case let .searchChipTapped(keyword):
+        let hapticEffect = selectionHaptic()
         if state.selectedCategories.contains(keyword) {
           state.selectedCategories.remove(keyword)
         } else {
@@ -180,35 +224,41 @@ public struct IngredientsFeature {
         let selected = state.selectedCategories
         if selected.isEmpty {
           state.isLoading = true
-          return .run { send in
-            let result = await Result { try await ingredientRepository.fetchIngredients(nil) }
-            await send(.ingredientsLoaded(result))
-          }
+          return .merge(
+            hapticEffect,
+            .run { send in
+              let result = await Result { try await ingredientRepository.fetchIngredients(nil) }
+              await send(.ingredientsLoaded(result))
+            }
+          )
         }
         
         state.isLoading = true
-        return .run { [categories = state.categories, selected] send in
-          var categoryCodes: [String] = []
-          
-          for categoryName in selected {
-            if categoryName == "즐겨찾기" {
-              categoryCodes.append("FAVORITE")
-            } else if let category = categories.first(where: { $0.categoryName == categoryName }) {
-              categoryCodes.append(category.categoryCode)
-            } else {
-              switch categoryName {
-              case "식재료": categoryCodes.append("INGREDIENTS")
-              case "운영 재료": categoryCodes.append("MATERIALS")
-              default: break
+        return .merge(
+          hapticEffect,
+          .run { [categories = state.categories, selected] send in
+            var categoryCodes: [String] = []
+
+            for categoryName in selected {
+              if categoryName == "즐겨찾기" {
+                categoryCodes.append("FAVORITE")
+              } else if let category = categories.first(where: { $0.categoryName == categoryName }) {
+                categoryCodes.append(category.categoryCode)
+              } else {
+                switch categoryName {
+                case "식재료": categoryCodes.append("INGREDIENTS")
+                case "운영 재료": categoryCodes.append("MATERIALS")
+                default: break
+                }
               }
             }
+
+            let result = await Result {
+              try await ingredientRepository.fetchIngredients(categoryCodes.isEmpty ? nil : categoryCodes)
+            }
+            await send(.ingredientsLoaded(result))
           }
-          
-          let result = await Result {
-            try await ingredientRepository.fetchIngredients(categoryCodes.isEmpty ? nil : categoryCodes)
-          }
-          await send(.ingredientsLoaded(result))
-        }
+        )
         
       case .searchButtonTapped:
         return .none
@@ -223,6 +273,136 @@ public struct IngredientsFeature {
         
       case .addIngredientTapped:
         state.isManageMenuPresented = false
+        state.showAddIngredientSheet = true
+        state.addIngredientName = ""
+        state.showDupNameHint = false
+        return .cancel(id: CancelID.checkDupName)
+
+      case let .showAddIngredientSheetChanged(isPresented):
+        state.showAddIngredientSheet = isPresented
+        if !isPresented {
+          state.addIngredientName = ""
+          state.showDupNameHint = false
+          return .cancel(id: CancelID.checkDupName)
+        }
+        return .none
+
+      case let .addIngredientNameChanged(name):
+        state.addIngredientName = name
+        state.showDupNameHint = false
+
+        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+          return .cancel(id: CancelID.checkDupName)
+        }
+
+        return .run { [trimmed] send in
+          try await Task.sleep(for: .milliseconds(350))
+          let isDup = (try? await ingredientRepository.checkDupName(trimmed)) ?? false
+          await send(.addIngredientDupChecked(trimmed, isDup))
+        }
+        .cancellable(id: CancelID.checkDupName, cancelInFlight: true)
+
+      case let .addIngredientDupChecked(keyword, isDup):
+        guard keyword == state.addIngredientName.trimmingCharacters(in: .whitespacesAndNewlines) else {
+          return .none
+        }
+        state.showDupNameHint = isDup
+        return .none
+
+      case .addIngredientConfirmTapped:
+        guard !state.addIngredientName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+          return .none
+        }
+        state.showAddIngredientSheet = false
+        state.showAddIngredientDetailSheet = true
+        state.addIngredientCategory = "식재료"
+        state.addIngredientPrice = ""
+        state.addIngredientAmount = ""
+        state.addIngredientSupplier = ""
+        state.addIngredientUnit = .g
+        state.showDupNameHint = false
+        return .none
+
+      case let .showAddIngredientDetailSheetChanged(isPresented):
+        state.showAddIngredientDetailSheet = isPresented
+        if !isPresented {
+          state.addIngredientName = ""
+          state.addIngredientPrice = ""
+          state.addIngredientAmount = ""
+          state.addIngredientSupplier = ""
+          state.addIngredientCategory = "식재료"
+          state.addIngredientUnit = .g
+          state.isCreatingIngredient = false
+        }
+        return .none
+
+      case let .addIngredientCategorySelected(category):
+        state.addIngredientCategory = category
+        return selectionHaptic()
+
+      case let .addIngredientPriceChanged(price):
+        state.addIngredientPrice = price
+        return .none
+
+      case let .addIngredientAmountChanged(amount):
+        state.addIngredientAmount = amount
+        return .none
+
+      case let .addIngredientSupplierChanged(supplier):
+        state.addIngredientSupplier = supplier
+        return .none
+
+      case let .addIngredientUnitSelected(unit):
+        state.addIngredientUnit = unit
+        return .none
+
+      case .createIngredientTapped:
+        guard !state.isCreatingIngredient else { return .none }
+        let name = state.addIngredientName.trimmingCharacters(in: .whitespacesAndNewlines)
+        let priceText = state.addIngredientPrice.replacingOccurrences(of: ",", with: "")
+        let amountText = state.addIngredientAmount.replacingOccurrences(of: ",", with: "")
+        guard
+          !name.isEmpty,
+          let price = Double(priceText), price > 0,
+          let amount = Double(amountText), amount > 0
+        else {
+          return .none
+        }
+
+        state.isCreatingIngredient = true
+        let categoryCode = state.addIngredientCategory == "운영 재료" ? "MATERIALS" : "INGREDIENTS"
+        let unitCode = state.addIngredientUnit.serverCode
+        let supplier = state.addIngredientSupplier.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        return .run { send in
+          let request = IngredientCreateRequest(
+            categoryCode: categoryCode,
+            ingredientName: name,
+            unitCode: unitCode,
+            price: price,
+            amount: amount,
+            supplier: supplier.isEmpty ? nil : supplier
+          )
+          let result = await Result { try await ingredientRepository.createIngredient(request) }
+          await send(.createIngredientResponse(result))
+        }
+
+      case .createIngredientResponse(.success):
+        state.isCreatingIngredient = false
+        state.showAddIngredientDetailSheet = false
+        state.showToast = true
+        state.toastMessage = "재료가 추가됐어요"
+        return .send(.refreshIngredients)
+
+      case let .createIngredientResponse(.failure(error)):
+        state.isCreatingIngredient = false
+        if let apiError = error as? APIError, !apiError.message.isEmpty {
+          state.toastMessage = apiError.message
+        } else {
+          state.toastMessage = "재료 추가에 실패했어요"
+        }
+        state.showToast = true
         return .none
         
       case .deleteModeTapped:
@@ -289,6 +469,15 @@ public struct IngredientsFeature {
       case let .showToastChanged(isPresented):
         state.showToast = isPresented
         return .none
+      }
+    }
+  }
+
+  private func selectionHaptic() -> Effect<Action> {
+    .run { _ in
+      await MainActor.run {
+        let generator = UISelectionFeedbackGenerator()
+        generator.selectionChanged()
       }
     }
   }
