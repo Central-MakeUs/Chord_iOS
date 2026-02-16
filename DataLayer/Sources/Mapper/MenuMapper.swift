@@ -9,7 +9,7 @@ public extension MenuResponse {
       name: menuName,
       price: String(format: "%.0f원", sellingPrice),
       category: .all,
-      status: marginGradeCodeToStatus(marginGradeCode),
+      status: MenuStatus.from(marginGradeCode: marginGradeCode),
       costRate: String(format: "%.1f%%", costRate),
       marginRate: String(format: "%.1f%%", marginRate),
       costAmount: "0원",
@@ -21,15 +21,6 @@ public extension MenuResponse {
     )
   }
   
-  private func marginGradeCodeToStatus(_ code: String) -> MenuStatus {
-    switch code {
-    case "SAFE": return .safe
-    case "NORMAL": return .normal
-    case "WARNING": return .warning
-    case "DANGER": return .danger
-    default: return .normal
-    }
-  }
 }
 
 public extension MenuDetailResponse {
@@ -40,7 +31,7 @@ public extension MenuDetailResponse {
       name: menuName,
       price: String(format: "%.0f원", sellingPrice),
       category: .all,
-      status: marginGradeCodeToStatus(marginGradeCode),
+      status: MenuStatus.from(marginGradeCode: marginGradeCode),
       costRate: String(format: "%.1f%%", costRate),
       marginRate: String(format: "%.1f%%", marginRate),
       costAmount: String(format: "%.0f원", totalCost),
@@ -52,13 +43,4 @@ public extension MenuDetailResponse {
     )
   }
   
-  private func marginGradeCodeToStatus(_ code: String) -> MenuStatus {
-    switch code {
-    case "SAFE": return .safe
-    case "NORMAL": return .normal
-    case "WARNING": return .warning
-    case "DANGER": return .danger
-    default: return .normal
-    }
-  }
 }

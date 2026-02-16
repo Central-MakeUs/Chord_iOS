@@ -39,7 +39,7 @@ public struct APIClient: Sendable {
   private let keychainStorage: KeychainStorage
   
   public init(
-    baseURL: String = "http://3.36.186.131",
+    baseURL: String = Self.resolveBaseURL(),
     session: URLSession = .shared,
     defaultHeaders: [String: String] = ["userId": "1", "laborCost": "10320"],
     tokenStorage: TokenStorage = .shared,
@@ -50,6 +50,25 @@ public struct APIClient: Sendable {
     self.defaultHeaders = defaultHeaders
     self.tokenStorage = tokenStorage
     self.keychainStorage = keychainStorage
+  }
+
+  public static func resolveBaseURL() -> String {
+    let configURL = Bundle.main.url(forResource: "App", withExtension: "config")
+      ?? Bundle.main.url(forResource: "App", withExtension: "config", subdirectory: "Resources")
+
+    if let url = configURL,
+       let raw = try? String(contentsOf: url, encoding: .utf8) {
+      for line in raw.split(whereSeparator: \.isNewline) {
+        let trimmed = line.trimmingCharacters(in: .whitespaces)
+        if trimmed.hasPrefix("#") || trimmed.isEmpty { continue }
+        if trimmed.hasPrefix("BASE_URL=") {
+          let value = String(trimmed.dropFirst("BASE_URL=".count)).trimmingCharacters(in: .whitespaces)
+          if !value.isEmpty { return value }
+        }
+      }
+    }
+
+    return "http://localhost:8080"
   }
   
   public func request<T: Decodable>(

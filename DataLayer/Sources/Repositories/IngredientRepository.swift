@@ -6,6 +6,7 @@ public struct IngredientRepository: Sendable {
   public var fetchIngredients: @Sendable ([String]?) async throws -> [InventoryIngredientItem]
   public var fetchIngredientDetail: @Sendable (Int) async throws -> InventoryIngredientItem
   public var searchIngredients: @Sendable (String) async throws -> [SearchMyIngredientsResponse]
+  public var searchIngredientsInCatalog: @Sendable (String) async throws -> [SearchMyIngredientsResponse]
   public var createIngredient: @Sendable (IngredientCreateRequest) async throws -> IngredientResponse
   public var updateIngredient: @Sendable (Int, IngredientUpdateRequest) async throws -> Void
   public var deleteIngredient: @Sendable (Int) async throws -> Void
@@ -19,6 +20,7 @@ public struct IngredientRepository: Sendable {
     fetchIngredients: @escaping @Sendable ([String]?) async throws -> [InventoryIngredientItem],
     fetchIngredientDetail: @escaping @Sendable (Int) async throws -> InventoryIngredientItem,
     searchIngredients: @escaping @Sendable (String) async throws -> [SearchMyIngredientsResponse],
+    searchIngredientsInCatalog: @escaping @Sendable (String) async throws -> [SearchMyIngredientsResponse],
     createIngredient: @escaping @Sendable (IngredientCreateRequest) async throws -> IngredientResponse,
     updateIngredient: @escaping @Sendable (Int, IngredientUpdateRequest) async throws -> Void,
     deleteIngredient: @escaping @Sendable (Int) async throws -> Void,
@@ -31,6 +33,7 @@ public struct IngredientRepository: Sendable {
     self.fetchIngredients = fetchIngredients
     self.fetchIngredientDetail = fetchIngredientDetail
     self.searchIngredients = searchIngredients
+    self.searchIngredientsInCatalog = searchIngredientsInCatalog
     self.createIngredient = createIngredient
     self.updateIngredient = updateIngredient
     self.deleteIngredient = deleteIngredient
@@ -76,6 +79,18 @@ extension IngredientRepository: DependencyKey {
         )
         guard let data = response.data else { return [] }
         return data
+      },
+      searchIngredientsInCatalog: { query in
+        let response: BaseResponse<[SearchIngredientsResponse]> = try await apiClient.request(
+          path: "/api/v1/catalog/ingredients/search",
+          method: .get,
+          queryItems: [URLQueryItem(name: "keyword", value: query)]
+        )
+        guard let data = response.data else { return [] }
+        return data.compactMap { item in
+          guard let ingredientId = item.ingredientId else { return nil }
+          return SearchMyIngredientsResponse(ingredientId: ingredientId, ingredientName: item.ingredientName)
+        }
       },
       createIngredient: { request in
         let response: BaseResponse<IngredientResponse> = try await apiClient.request(
@@ -160,6 +175,13 @@ extension IngredientRepository: DependencyKey {
         .filter { $0.name.lowercased().contains(lowercasedQuery) }
         .map { SearchMyIngredientsResponse(ingredientId: 0, ingredientName: $0.name) }
     },
+    searchIngredientsInCatalog: { query in
+      try await Task.sleep(for: .milliseconds(100))
+      let lowercasedQuery = query.lowercased()
+      return MockIngredientData.items
+        .filter { $0.name.lowercased().contains(lowercasedQuery) }
+        .map { SearchMyIngredientsResponse(ingredientId: 0, ingredientName: $0.name) }
+    },
     createIngredient: { _ in throw APIError.unknown },
     updateIngredient: { _, _ in },
     deleteIngredient: { _ in },
@@ -179,6 +201,7 @@ extension IngredientRepository: DependencyKey {
     fetchIngredients: { _ in [] },
     fetchIngredientDetail: { _ in throw APIError.unknown },
     searchIngredients: { _ in [] },
+    searchIngredientsInCatalog: { _ in [] },
     createIngredient: { _ in throw APIError.unknown },
     updateIngredient: { _, _ in },
     deleteIngredient: { _ in },

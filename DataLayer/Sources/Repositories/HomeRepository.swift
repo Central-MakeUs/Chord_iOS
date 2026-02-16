@@ -1,24 +1,25 @@
 import ComposableArchitecture
+import CoreModels
 import Foundation
 
 public struct DashboardStats: Equatable, Sendable {
   public let averageCostRate: String
-  public let averageCostRateDescription: String
+  public let averageCostRateStatus: MenuStatus
   public let contributionMarginRate: String
-  public let contributionMarginRateDescription: String
+  public let contributionMarginRateStatus: MenuStatus
   public let diagnosisNeededCount: Int
   
   public init(
     averageCostRate: String,
-    averageCostRateDescription: String,
+    averageCostRateStatus: MenuStatus,
     contributionMarginRate: String,
-    contributionMarginRateDescription: String,
+    contributionMarginRateStatus: MenuStatus,
     diagnosisNeededCount: Int
   ) {
     self.averageCostRate = averageCostRate
-    self.averageCostRateDescription = averageCostRateDescription
+    self.averageCostRateStatus = averageCostRateStatus
     self.contributionMarginRate = contributionMarginRate
-    self.contributionMarginRateDescription = contributionMarginRateDescription
+    self.contributionMarginRateStatus = contributionMarginRateStatus
     self.diagnosisNeededCount = diagnosisNeededCount
   }
 }
@@ -27,13 +28,11 @@ public struct StrategyGuideItem: Equatable, Identifiable, Sendable {
   public let id: UUID
   public let summary: String
   public let title: String
-  public let action: String
   
-  public init(id: UUID = UUID(), summary: String, title: String, action: String) {
+  public init(id: UUID = UUID(), summary: String, title: String) {
     self.id = id
     self.summary = summary
     self.title = title
-    self.action = action
   }
 }
 
@@ -53,18 +52,45 @@ public struct HomeRepository: Sendable {
 extension HomeRepository: DependencyKey {
   public static let liveValue = HomeRepository(
     fetchDashboardStats: {
-      try await Task.sleep(for: .milliseconds(300))
+      let apiClient = APIClient()
+      let response: BaseResponse<HomeMenusResponse> = try await apiClient.request(
+        path: "/api/v1/home/menus",
+        method: .get
+      )
+      guard let data = response.data else { throw APIError.decodingError("Missing data") }
+
+      let avgCostRate = percentString(from: data.avgCostRate.avgCostRate)
+      let avgMarginRate = percentString(from: data.avgMarginRate)
+      let marginStatus = MenuStatus.from(marginGradeCode: data.avgCostRate.marginGradeCode)
+
       return DashboardStats(
-        averageCostRate: "0%",
-        averageCostRateDescription: "데이터 없음",
-        contributionMarginRate: "0%",
-        contributionMarginRateDescription: "데이터 없음",
-        diagnosisNeededCount: 0
+        averageCostRate: avgCostRate,
+        averageCostRateStatus: marginStatus,
+        contributionMarginRate: avgMarginRate,
+        contributionMarginRateStatus: marginStatus,
+        diagnosisNeededCount: data.numOfDangerMenus
       )
     },
     fetchStrategyGuides: {
-      try await Task.sleep(for: .milliseconds(300))
-      return []
+      let apiClient = APIClient()
+      let (year, month, weekOfMonth) = currentYearMonthWeek()
+      let response: BaseResponse<HomeStrategiesResponse> = try await apiClient.request(
+        path: "/api/v1/home/insights",
+        method: .get,
+        queryItems: [
+          URLQueryItem(name: "year", value: String(year)),
+          URLQueryItem(name: "month", value: String(month)),
+          URLQueryItem(name: "weekOfMonth", value: String(weekOfMonth))
+        ]
+      )
+      guard let data = response.data else { return [] }
+
+      return data.strategies.map {
+        StrategyGuideItem(
+          summary: $0.summary,
+          title: $0.title
+        )
+      }
     }
   )
   
@@ -73,9 +99,9 @@ extension HomeRepository: DependencyKey {
       try await Task.sleep(for: .milliseconds(100))
       return DashboardStats(
         averageCostRate: "28.5%",
-        averageCostRateDescription: "안정적",
+        averageCostRateStatus: .safe,
         contributionMarginRate: "+12%",
-        contributionMarginRateDescription: "지난주 대비 상승",
+        contributionMarginRateStatus: .normal,
         diagnosisNeededCount: 3
       )
     },
@@ -84,18 +110,15 @@ extension HomeRepository: DependencyKey {
       return [
         StrategyGuideItem(
           summary: "원가율 35% 유지 가능해요",
-          title: "바닐라 라떼",
-          action: "판매가 조정"
+          title: "바닐라 라떼"
         ),
         StrategyGuideItem(
           summary: "단가가 18% 상승했어요",
-          title: "우유",
-          action: "대체 브랜드 알아보기"
+          title: "우유"
         ),
         StrategyGuideItem(
           summary: "원가율 35% 유지 가능해요",
-          title: "레몬티",
-          action: "시즌 메뉴로 전환"
+          title: "레몬티"
         )
       ]
     }
@@ -105,15 +128,37 @@ extension HomeRepository: DependencyKey {
     fetchDashboardStats: {
       DashboardStats(
         averageCostRate: "0%",
-        averageCostRateDescription: "테스트",
+        averageCostRateStatus: .normal,
         contributionMarginRate: "0%",
-        contributionMarginRateDescription: "테스트",
+        contributionMarginRateStatus: .normal,
         diagnosisNeededCount: 0
       )
     },
     fetchStrategyGuides: { [] }
   )
 }
+
+private func percentString(from value: Double) -> String {
+  if value.truncatingRemainder(dividingBy: 1) == 0 {
+    return "\(Int(value))%"
+  }
+  return String(format: "%.1f%%", value)
+}
+
+private func currentYearMonthWeek() -> (Int, Int, Int) {
+  var calendar = Calendar(identifier: .gregorian)
+  calendar.locale = Locale(identifier: "ko_KR")
+  calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
+  calendar.firstWeekday = 2
+  calendar.minimumDaysInFirstWeek = 4
+
+  let now = Date()
+  let year = calendar.component(.year, from: now)
+  let month = calendar.component(.month, from: now)
+  let weekOfMonth = calendar.component(.weekOfMonth, from: now)
+  return (year, month, weekOfMonth)
+}
+
 
 public extension DependencyValues {
   var homeRepository: HomeRepository {

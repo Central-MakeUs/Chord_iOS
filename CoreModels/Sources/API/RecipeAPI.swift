@@ -50,6 +50,7 @@ public struct RecipeCreateRequest: Codable, Equatable {
 
 public struct NewRecipeCreateRequest: Codable, Equatable {
   public let amount: Double
+  public let usageAmount: Double
   public let price: Double
   public let unitCode: String
   public let ingredientCategoryCode: String
@@ -58,6 +59,7 @@ public struct NewRecipeCreateRequest: Codable, Equatable {
   
   public init(
     amount: Double,
+    usageAmount: Double,
     price: Double,
     unitCode: String,
     ingredientCategoryCode: String,
@@ -65,6 +67,7 @@ public struct NewRecipeCreateRequest: Codable, Equatable {
     supplier: String? = nil
   ) {
     self.amount = amount
+    self.usageAmount = usageAmount
     self.price = price
     self.unitCode = unitCode
     self.ingredientCategoryCode = ingredientCategoryCode

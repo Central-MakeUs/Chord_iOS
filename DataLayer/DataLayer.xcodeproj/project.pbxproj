@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		002597E3D8693288BA39F5D6 /* InsightRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E973828617FD6EA4B095BF8 /* InsightRepository.swift */; };
 		0ADE44E95DC3801E996C939C /* MenuRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBCB5036C23A202020B521 /* MenuRepository.swift */; };
 		1CD92052FDA614890964108B /* KeychainStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0E60600F6CAAB7FEBDEA6A7D /* KeychainStorage.swift */; };
 		1CDA4C3A88076AB04B04A48F /* IngredientMapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5457F203DA60AE2EDC7F1BA5 /* IngredientMapper.swift */; };
@@ -45,6 +46,7 @@
 		5241E83946B1C184C6110FC5 /* CategoryRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CategoryRepository.swift; sourceTree = "<group>"; };
 		5404FC03E05C7CB278F3E70E /* MockMenuData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockMenuData.swift; sourceTree = "<group>"; };
 		5457F203DA60AE2EDC7F1BA5 /* IngredientMapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IngredientMapper.swift; sourceTree = "<group>"; };
+		6E973828617FD6EA4B095BF8 /* InsightRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsightRepository.swift; sourceTree = "<group>"; };
 		715EF8D63456ECE8C0768D5E /* UserRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRepository.swift; sourceTree = "<group>"; };
 		7CFAA2F7BA414C190CBECD2F /* MockIngredientData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockIngredientData.swift; sourceTree = "<group>"; };
 		80EE0194C5B49A944E670E7B /* ComposableArchitecture.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ComposableArchitecture.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -153,6 +155,7 @@
 				5241E83946B1C184C6110FC5 /* CategoryRepository.swift */,
 				04FC687D431E1AD7AD312FB1 /* HomeRepository.swift */,
 				A3B126F8BCCBF55F093619ED /* IngredientRepository.swift */,
+				6E973828617FD6EA4B095BF8 /* InsightRepository.swift */,
 				84EBCB5036C23A202020B521 /* MenuRepository.swift */,
 				8EF228F048E01A1B90C78CCA /* RecipeRepository.swift */,
 				715EF8D63456ECE8C0768D5E /* UserRepository.swift */,
@@ -252,6 +255,7 @@
 				73428370E463074007772088 /* CategoryRepository.swift in Sources */,
 				F4427C756FAFAD8AB6A6F561 /* HomeRepository.swift in Sources */,
 				69C3A6D35696659658E9A5FE /* IngredientRepository.swift in Sources */,
+				002597E3D8693288BA39F5D6 /* InsightRepository.swift in Sources */,
 				0ADE44E95DC3801E996C939C /* MenuRepository.swift in Sources */,
 				5B77F7A298349D9BAF77BDD6 /* RecipeRepository.swift in Sources */,
 				E3703BD374F434EA64FE81DA /* UserRepository.swift in Sources */,

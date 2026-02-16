@@ -37,6 +37,16 @@ public enum MenuStatus: CaseIterable, Hashable {
       return "위험"
     }
   }
+
+  public static func from(marginGradeCode: String) -> MenuStatus {
+    switch marginGradeCode.uppercased() {
+    case "SAFE": return .safe
+    case "NORMAL": return .normal
+    case "WARNING", "CAUTION": return .warning
+    case "DANGER": return .danger
+    default: return .normal
+    }
+  }
 }
 
 public struct MenuItem: Identifiable, Hashable {
