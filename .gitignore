@@ -32,3 +32,6 @@ Tuist/.build/
 Tuist/.cache/
 Tuist/Dependencies/
 .tuist/
+
+# Local app config
+CoachCoach/Resources/App.config
