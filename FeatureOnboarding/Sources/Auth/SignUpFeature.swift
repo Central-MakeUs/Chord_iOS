@@ -25,6 +25,9 @@ public struct SignUpFeature {
     var isUserIdAvailable: Bool? = nil
     var isErrorAlertPresented: Bool = false
     var errorMessage: String = ""
+    var isTermsSheetPresented: Bool = false
+    var isServiceTermsAgreed: Bool = false
+    var isPrivacyTermsAgreed: Bool = false
     
     public init() {}
     
@@ -59,6 +62,14 @@ public struct SignUpFeature {
       userIdError == nil &&
       isUserIdAvailable == true
     }
+
+    var isTermsAgreementValid: Bool {
+      isServiceTermsAgreed && isPrivacyTermsAgreed
+    }
+
+    var isAllTermsAgreed: Bool {
+      isServiceTermsAgreed && isPrivacyTermsAgreed
+    }
   }
   
   public enum Action: BindableAction, Equatable {
@@ -71,6 +82,11 @@ public struct SignUpFeature {
     case passwordConfirmChanged(String)
     case checkUserIdAvailability
     case userIdCheckResponse(Bool)
+    case termsSheetDismissed
+    case toggleAllTermsAgreement
+    case toggleServiceTermsAgreement
+    case togglePrivacyTermsAgreement
+    case termsAgreeConfirmTapped
     case signUpSuccess
     case signUpFailure(String)
     case errorAlertDismissed
@@ -152,10 +168,36 @@ public struct SignUpFeature {
       case .togglePasswordConfirmVisibility:
         state.isPasswordConfirmVisible.toggle()
         return .none
-        
+
       case .signUpTapped:
         guard state.isFormValid else { return .none }
-        
+
+        state.isTermsSheetPresented = true
+        return .none
+
+      case .termsSheetDismissed:
+        state.isTermsSheetPresented = false
+        return .none
+
+      case .toggleAllTermsAgreement:
+        let shouldAgreeAll = !state.isAllTermsAgreed
+        state.isServiceTermsAgreed = shouldAgreeAll
+        state.isPrivacyTermsAgreed = shouldAgreeAll
+        return .none
+
+      case .toggleServiceTermsAgreement:
+        state.isServiceTermsAgreed.toggle()
+        return .none
+
+      case .togglePrivacyTermsAgreement:
+        state.isPrivacyTermsAgreed.toggle()
+        return .none
+
+      case .termsAgreeConfirmTapped:
+        guard state.isFormValid, state.isTermsAgreementValid else { return .none }
+
+        state.isTermsSheetPresented = false
+
         return .run { [userId = state.userId, password = state.password] send in
           do {
             try await authRepository.signUp(userId, password)
@@ -174,9 +216,11 @@ public struct SignUpFeature {
             await send(.signUpFailure("회원가입에 실패했습니다\n잠시 후 다시 시도해주세요"))
           }
         }
-        
+
       case .signUpSuccess:
         state.step = .complete
+        state.isServiceTermsAgreed = false
+        state.isPrivacyTermsAgreed = false
         return .run { send in
           try await Task.sleep(for: .seconds(1))
           await send(.completionTimerFired)

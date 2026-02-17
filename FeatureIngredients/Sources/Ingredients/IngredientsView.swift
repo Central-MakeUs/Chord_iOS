@@ -24,7 +24,6 @@ public struct IngredientsView: View {
                 VStack(spacing: 0) {
                     header(totalCount: totalCount, isDeleteMode: viewStore.isDeleteMode, viewStore: viewStore)
                         .padding(.horizontal, 20)
-                        .padding(.vertical, 12)
                     
                     filterChips(
                         options: viewStore.filterOptions,
@@ -165,6 +164,7 @@ public struct IngredientsView: View {
                 }
             }
         }
+        .frame(height: 56)
     }
     
     private func manageMenuOverlay(viewStore: ViewStoreOf<IngredientsFeature>) -> some View {

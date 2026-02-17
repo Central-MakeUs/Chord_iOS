@@ -47,6 +47,7 @@ let project = Project(
               "CODE_SIGN_STYLE": "Automatic",
               "CODE_SIGN_IDENTITY": "Apple Development",
               "PROVISIONING_PROFILE_SPECIFIER": "",
+              "INFOPLIST_KEY_CFBundleDisplayName": "코치코치",
               "INFOPLIST_KEY_CFBundlePackageType": "APPL",
               "PRODUCT_BUNDLE_IDENTIFIER": "com.seungwan.coachcoach"
             ]
@@ -58,6 +59,7 @@ let project = Project(
               "CODE_SIGN_STYLE": "Manual",
               "CODE_SIGN_IDENTITY": "Apple Distribution",
               "PROVISIONING_PROFILE_SPECIFIER": "CoachCoach AppStore (Manual)",
+              "INFOPLIST_KEY_CFBundleDisplayName": "코치코치",
               "INFOPLIST_KEY_CFBundlePackageType": "APPL",
               "PRODUCT_BUNDLE_IDENTIFIER": "com.seungwan.coachcoach"
             ]

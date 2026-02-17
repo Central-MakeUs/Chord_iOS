@@ -19,6 +19,8 @@ public extension Image {
   static let infoFilledIcon = Image("InfoFilledIcon", bundle: designSystemBundle)
   static let infoOutlinedIcon = Image("InfoFOutlinedIcon", bundle: designSystemBundle)
   static let bellIcon = Image("BellIcon", bundle: designSystemBundle)
+  static let eyeIcon = Image("EyeIcon", bundle: designSystemBundle)
+  static let eyeOffIcon = Image("EyeOffIcon", bundle: designSystemBundle)
   static let gearIcon = Image("GearIcon", bundle: designSystemBundle)
   static let meatballIcon = Image("MeatballIcon", bundle: designSystemBundle)
   static let menuRoundedIcon = Image("MenuRoundedIcon", bundle: designSystemBundle)

@@ -150,13 +150,13 @@ public struct AICoachView: View {
             
         }
         .background(Color.white)
-        .padding(.horizontal, 20)
         .clipShape(
             UnevenRoundedRectangle(
                 topLeadingRadius: 24,
                 topTrailingRadius: 24
             )
         )
+        .padding(.horizontal, 20)
     }
     
     private func monthNavigationHeader(viewStore: ViewStoreOf<AICoachFeature>) -> some View {

@@ -201,7 +201,7 @@ private struct UnderlinedFieldWithDropdown: View {
                   .font(.pretendardSubtitle2)
                   .foregroundColor(AppColor.grayscale900)
               }
-              .frame(width: 22, height: 27)
+              .frame(width: 22, height: 29)
               .padding(.leading, 35)
               .padding(.trailing, 20)
               .padding(.vertical, 4)
@@ -217,8 +217,8 @@ private struct UnderlinedFieldWithDropdown: View {
         }
         .background(AppColor.grayscale200)
         .cornerRadius(8)
-        .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 4)
-        .frame(maxWidth: 80)
+        .shadow(color: Color(red: 0.18, green: 0.18, blue: 0.22).opacity(0.06), radius: 5, x: 0, y: 0)
+        .frame(maxWidth: 78)
         .offset(y: 52)
       }
     }
