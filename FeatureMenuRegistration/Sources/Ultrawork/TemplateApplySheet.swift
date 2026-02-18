@@ -22,17 +22,13 @@ public struct TemplateApplySheet: View {
             .font(.pretendardHeadline2)
             .foregroundColor(AppColor.grayscale900)
             .multilineTextAlignment(.leading)
-          
-          VStack(spacing: 4) {
-            Text("메뉴 구성과 재료 항목이 자동으로 채워져요")
-              .font(.pretendardBody3)
-              .foregroundColor(AppColor.grayscale700)
-            
-            Text("적용후에도 자유롭게 수정할 수 있어요")
-              .font(.pretendardBody2)
-              .foregroundColor(AppColor.grayscale700)
-          }
-          .multilineTextAlignment(.leading)
+              Text("메뉴 구성과 재료 항목이 자동으로 채워져요")
+                .font(.pretendardBody3)
+                .foregroundColor(AppColor.grayscale700)
+              
+              Text("적용후에도 자유롭게 수정할 수 있어요")
+                .font(.pretendardBody2)
+                .foregroundColor(AppColor.grayscale700)
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 20)

@@ -15,6 +15,15 @@ public enum IngredientUnit: String, CaseIterable, Hashable {
     }
   }
 
+  public var baseQuantity: Double {
+    switch self {
+    case .ml, .g:
+      return 100
+    case .count:
+      return 1
+    }
+  }
+
   public static func from(_ text: String) -> IngredientUnit {
     switch text.uppercased() {
     case "ML": return .ml

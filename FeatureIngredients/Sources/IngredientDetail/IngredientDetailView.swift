@@ -283,7 +283,7 @@ public struct IngredientDetailView: View {
       } else {
         HStack(spacing: 8) {
           ForEach(Array(menus.prefix(3)), id: \.menuName) { menu in
-            let unit = menu.unitCode.displayUnit
+            let unit = IngredientUnit.from(menu.unitCode).title
             UsageMenuCard(
               menuName: menu.menuName,
               amount: "\(Int(menu.amount))\(unit)"
@@ -303,7 +303,7 @@ public struct IngredientDetailView: View {
       if !viewStore.priceHistory.isEmpty {
         ZStack(alignment: .topLeading) {
           TimelineLine()
-          VStack(spacing: 16) {
+          VStack(alignment: .leading, spacing: 16) {
             ForEach(viewStore.priceHistory) { item in
               HistoryRow(item: item)
             }
@@ -362,8 +362,10 @@ private struct HistoryRow: View {
   var formattedPrice: String {
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
-    let price = formatter.string(from: NSNumber(value: item.unitPrice)) ?? "\(Int(item.unitPrice))"
-    return "\(price)원/\(item.baseQuantity)\(item.unitCode)"
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 2
+    let price = formatter.string(from: NSNumber(value: item.unitPrice)) ?? String(format: "%.2f", item.unitPrice)
+    return "\(price)원/\(item.baseQuantity)\(IngredientUnit.from(item.unitCode).title)"
   }
 
   var body: some View {
@@ -419,13 +421,4 @@ private struct TimelineLine: View {
     }
   )
   .environment(\.colorScheme, .light)
-}
-
-private extension String {
-  var displayUnit: String {
-    self
-      .replacingOccurrences(of: "G", with: "g")
-      .replacingOccurrences(of: "ML", with: "ml")
-      .replacingOccurrences(of: "EA", with: "개")
-  }
 }

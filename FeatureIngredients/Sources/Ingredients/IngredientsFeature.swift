@@ -342,11 +342,11 @@ public struct IngredientsFeature {
         return selectionHaptic()
 
       case let .addIngredientPriceChanged(price):
-        state.addIngredientPrice = price
+        state.addIngredientPrice = Self.sanitizedDigitsAndCommas(price)
         return .none
 
       case let .addIngredientAmountChanged(amount):
-        state.addIngredientAmount = amount
+        state.addIngredientAmount = Self.sanitizedDigitsAndCommas(amount)
         return .none
 
       case let .addIngredientSupplierChanged(supplier):
@@ -480,5 +480,11 @@ public struct IngredientsFeature {
         generator.selectionChanged()
       }
     }
+  }
+}
+
+private extension IngredientsFeature {
+  static func sanitizedDigitsAndCommas(_ value: String) -> String {
+    value.filter { $0.isNumber || $0 == "," }
   }
 }

@@ -607,11 +607,13 @@ private struct IngredientRow: View {
     let isSelected: Bool
     
     private var displayAmount: String {
-        let amount = item.amount
-        return amount
-            .replacingOccurrences(of: "G", with: "g")
-            .replacingOccurrences(of: "ML", with: "ml")
-            .replacingOccurrences(of: "EA", with: "개")
+        let trimmed = item.amount.trimmingCharacters(in: .whitespacesAndNewlines)
+        let numericPart = String(trimmed.prefix { $0.isNumber || $0 == "." || $0 == "," })
+        let unitPart = String(trimmed.drop(while: { $0.isNumber || $0 == "." || $0 == "," }))
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !unitPart.isEmpty else { return item.amount }
+        return numericPart + IngredientUnit.from(unitPart).title
     }
     
     var body: some View {
@@ -635,7 +637,7 @@ private struct IngredientRow: View {
                 Text(item.price)
                     .font(.pretendardBody1)
                     .foregroundColor(AppColor.primaryBlue500)
-                Text("사용량 \(displayAmount)")
+                Text("\(displayAmount)당")
                     .font(.pretendardCaption2)
                     .foregroundColor(AppColor.grayscale600)
             }

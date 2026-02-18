@@ -174,7 +174,10 @@ public struct AddIngredientSheet: View {
             "",
             text: Binding(
               get: { registeredIngredientDraft?.usageAmount ?? "" },
-              set: { newValue in registeredIngredientDraft?.usageAmount = newValue }
+              set: { newValue in
+                guard let unit = registeredIngredientDraft?.unitCode else { return }
+                registeredIngredientDraft?.usageAmount = sanitizeUsageInput(newValue, unit: unit)
+              }
             ),
             prompt: Text("제조시 사용되는 용량 입력")
               .font(.pretendardSubtitle2)
@@ -261,7 +264,7 @@ public struct AddIngredientSheet: View {
             UnderlinedTextField(
               text: Binding(
                 get: { customIngredientDraft?.price ?? "" },
-                set: { customIngredientDraft?.price = $0 }
+                set: { customIngredientDraft?.price = sanitizeDigitsAndCommas($0) }
               ),
               title: "가격",
               placeholder: "구매하신 가격을 입력해주세요",
@@ -353,7 +356,7 @@ public struct AddIngredientSheet: View {
           "",
           text: Binding(
             get: { customIngredientDraft?.purchaseAmount ?? "" },
-            set: { customIngredientDraft?.purchaseAmount = $0 }
+            set: { customIngredientDraft?.purchaseAmount = sanitizeDigitsAndCommas($0) }
           ),
           prompt: Text("구매하신 총 용량을 입력해주세요")
             .font(.pretendardSubtitle2)
@@ -443,7 +446,7 @@ public struct AddIngredientSheet: View {
           "",
           text: Binding(
             get: { customIngredientDraft?.usageAmount ?? "" },
-            set: { customIngredientDraft?.usageAmount = $0 }
+            set: { customIngredientDraft?.usageAmount = sanitizeDigitsAndCommas($0) }
           ),
           prompt: Text("이 메뉴에서의 재료 사용량을 입력해주세요")
             .font(.pretendardSubtitle2)
@@ -571,7 +574,7 @@ public struct AddIngredientSheet: View {
     let ingredient = IngredientItem(
       ingredientId: draft.ingredientId,
       name: draft.name,
-      amount: "\(formatAmount(usageAmount))\(draft.unitCode)",
+      amount: "\(formatAmount(usageAmount))\(IngredientUnit.from(draft.unitCode).title)",
       price: formatPrice(calculatedPrice)
     )
     onAdd(ingredient)
@@ -618,7 +621,39 @@ public struct AddIngredientSheet: View {
     let value = Double(numeric) ?? 0
     let unit = String(trimmed.filter { !$0.isNumber && $0 != "." && $0 != "," })
       .trimmingCharacters(in: .whitespacesAndNewlines)
-    return (value, unit.isEmpty ? "g" : unit)
+    return (value, IngredientUnit.from(unit).title)
+  }
+
+  private func sanitizeDigitsAndCommas(_ value: String) -> String {
+    value.filter { $0.isNumber || $0 == "," }
+  }
+
+  private func sanitizeDecimalsAndCommas(_ value: String) -> String {
+    let filtered = value.filter { $0.isNumber || $0 == "." || $0 == "," }
+    var hasDot = false
+    var result = ""
+
+    for character in filtered {
+      if character == "." {
+        guard !hasDot else { continue }
+        hasDot = true
+      }
+      result.append(character)
+    }
+
+    return result
+  }
+
+  private func sanitizeUsageInput(_ value: String, unit: String) -> String {
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty else { return "" }
+
+    let hasUnitSuffix = !unit.isEmpty && trimmed.hasSuffix(unit)
+    let numericSource = hasUnitSuffix ? String(trimmed.dropLast(unit.count)) : trimmed
+    let sanitizedNumeric = sanitizeDecimalsAndCommas(numericSource)
+
+    guard !sanitizedNumeric.isEmpty else { return "" }
+    return hasUnitSuffix ? sanitizedNumeric + unit : sanitizedNumeric
   }
 
   private func parsePrice(from text: String) -> Double {
@@ -684,7 +719,7 @@ public struct AddIngredientSheet: View {
 
   private func unitPriceText(_ draft: RegisteredIngredientDraft) -> String {
     if draft.baseQuantity > 0 {
-      return "\(formatAmount(draft.baseQuantity))\(draft.unitCode)당 \(formatPrice(draft.basePrice))"
+      return "\(formatAmount(draft.baseQuantity))\(IngredientUnit.from(draft.unitCode).title)당 \(formatPrice(draft.basePrice))"
     }
     return "-"
   }

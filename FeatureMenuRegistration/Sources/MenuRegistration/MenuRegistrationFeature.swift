@@ -56,10 +56,11 @@ public struct MenuRegistrationFeature {
 
     public var formattedAmount: String {
       let intAmount = Int(amount)
+      let displayUnit = IngredientUnit.from(unitCode).title
       if Double(intAmount) == amount {
-        return "\(intAmount)\(unitCode)"
+        return "\(intAmount)\(displayUnit)"
       }
-      return "\(amount)\(unitCode)"
+      return "\(amount)\(displayUnit)"
     }
 
     public var formattedPrice: String {
@@ -383,7 +384,7 @@ public struct MenuRegistrationFeature {
         .cancellable(id: CancelID.menuSearch, cancelInFlight: true)
 
       case let .priceChanged(price):
-        state.price = price
+        state.price = Self.sanitizedDigitsAndCommas(price)
         return .none
 
       case let .categorySelected(category):
@@ -487,7 +488,7 @@ public struct MenuRegistrationFeature {
           RegistrationIngredient(
             name: ingredient.ingredientName,
             amount: ingredient.defaultUsageAmount,
-            unitCode: ingredient.unitCode,
+            unitCode: IngredientUnit.from(ingredient.unitCode).title,
             price: ingredient.defaultPrice,
             isFromTemplate: true
           )
@@ -600,7 +601,8 @@ public struct MenuRegistrationFeature {
         return .none
 
       case let .registeredIngredientUsageChanged(text):
-        state.registeredIngredientDraft?.usageAmount = text
+        let unitCode = state.registeredIngredientDraft?.unitCode ?? ""
+        state.registeredIngredientDraft?.usageAmount = Self.sanitizedUsageWithOptionalUnit(text, unit: unitCode)
         return .none
 
       case let .showRegisteredIngredientSheetChanged(isPresented):
@@ -706,15 +708,15 @@ public struct MenuRegistrationFeature {
         return shouldHaptic ? selectionHaptic() : .none
 
       case let .ingredientAddPriceChanged(price):
-        state.ingredientAddPrice = price
+        state.ingredientAddPrice = Self.sanitizedDigitsAndCommas(price)
         return .none
 
       case let .ingredientAddPurchaseAmountChanged(amount):
-        state.ingredientAddPurchaseAmount = amount
+        state.ingredientAddPurchaseAmount = Self.sanitizedDigitsAndCommas(amount)
         return .none
 
       case let .ingredientAddUsageAmountChanged(amount):
-        state.ingredientAddUsageAmount = amount
+        state.ingredientAddUsageAmount = Self.sanitizedDigitsAndCommas(amount)
         return .none
 
       case let .ingredientAddSupplierChanged(supplier):
@@ -975,6 +977,38 @@ public struct MenuRegistrationFeature {
 }
 
 private extension MenuRegistrationFeature {
+  static func sanitizedDigitsAndCommas(_ value: String) -> String {
+    value.filter { $0.isNumber || $0 == "," }
+  }
+
+  static func sanitizedDecimalsAndCommas(_ value: String) -> String {
+    let filtered = value.filter { $0.isNumber || $0 == "." || $0 == "," }
+    var hasDot = false
+    var result = ""
+
+    for character in filtered {
+      if character == "." {
+        guard !hasDot else { continue }
+        hasDot = true
+      }
+      result.append(character)
+    }
+
+    return result
+  }
+
+  static func sanitizedUsageWithOptionalUnit(_ value: String, unit: String) -> String {
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !trimmed.isEmpty else { return "" }
+
+    let hasUnitSuffix = !unit.isEmpty && trimmed.hasSuffix(unit)
+    let numericSource = hasUnitSuffix ? String(trimmed.dropLast(unit.count)) : trimmed
+    let sanitizedNumeric = sanitizedDecimalsAndCommas(numericSource)
+
+    guard !sanitizedNumeric.isEmpty else { return "" }
+    return hasUnitSuffix ? sanitizedNumeric + unit : sanitizedNumeric
+  }
+
   func categoryNameFromCode(_ code: String) -> String {
     switch code {
     case "BEVERAGE": return "음료"
@@ -999,7 +1033,7 @@ private extension MenuRegistrationFeature {
     let unitPart = String(trimmed.drop(while: { $0.isNumber || $0 == "." || $0 == "," })).trimmingCharacters(in: .whitespaces)
 
     let amount = Double(numericPart) ?? 0
-    let unit = unitPart.isEmpty ? "g" : unitPart
+    let unit = IngredientUnit.from(unitPart).title
     return (amount, unit)
   }
 

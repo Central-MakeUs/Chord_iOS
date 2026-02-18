@@ -105,8 +105,8 @@ public struct MenuDetailFeature {
             recipeId: recipe.recipeId,
             ingredientId: recipe.ingredientId,
             name: recipe.ingredientName,
-            amount: "\(Int(recipe.amount))\(recipe.unitCode)",
-            price: "\(Int(recipe.price))원"
+            amount: "\(Int(recipe.amount))\(IngredientUnit.from(recipe.unitCode).title)",
+            price: formattedPriceText(recipe.price)
           )
         }
         
@@ -154,5 +154,14 @@ public struct MenuDetailFeature {
       }
     }
     .ifLet(\.$alert, action: /Action.alert)
+  }
+
+  private func formattedPriceText(_ value: Double) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 2
+    let formatted = formatter.string(from: NSNumber(value: value)) ?? String(format: "%.2f", value)
+    return "\(formatted)원"
   }
 }

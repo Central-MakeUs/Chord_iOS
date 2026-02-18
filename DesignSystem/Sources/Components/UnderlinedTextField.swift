@@ -143,6 +143,39 @@ public struct UnderlinedTextField: View {
                     .foregroundColor(errorColor)
             }
         }
+        .onChange(of: text) { _, newValue in
+            let sanitized = sanitizedText(newValue)
+            if sanitized != newValue {
+                text = sanitized
+            }
+        }
+    }
+
+    private func sanitizedText(_ value: String) -> String {
+        switch keyboardType {
+        case .numberPad, .asciiCapableNumberPad:
+            return value.filter { $0.isNumber || $0 == "," }
+        case .decimalPad:
+            return sanitizedDecimalText(value)
+        default:
+            return value
+        }
+    }
+
+    private func sanitizedDecimalText(_ value: String) -> String {
+        let filtered = value.filter { $0.isNumber || $0 == "." || $0 == "," }
+        var hasDot = false
+        var result = ""
+
+        for character in filtered {
+            if character == "." {
+                guard !hasDot else { continue }
+                hasDot = true
+            }
+            result.append(character)
+        }
+
+        return result
     }
 }
 

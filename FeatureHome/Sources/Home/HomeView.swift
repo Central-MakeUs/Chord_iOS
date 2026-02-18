@@ -349,6 +349,20 @@ private struct StoreInfoEditView: View {
       && !isSaving
   }
 
+  private var staffCountBinding: Binding<String> {
+    Binding(
+      get: { staffCountText },
+      set: { staffCountText = sanitizedDigits($0) }
+    )
+  }
+
+  private var laborCostBinding: Binding<String> {
+    Binding(
+      get: { laborCostText },
+      set: { laborCostText = sanitizedDigitsAndCommas($0) }
+    )
+  }
+
   private var storeNameSection: some View {
     UnderlinedTextField(
       text: $storeNameText,
@@ -404,7 +418,7 @@ private struct StoreInfoEditView: View {
       if isStaffCountFocused {
         TextField(
           "",
-          text: $staffCountText,
+          text: staffCountBinding,
           prompt: Text("사장님을 제외한 직원수 입력")
             .font(.pretendardBody2)
             .foregroundColor(AppColor.grayscale400)
@@ -461,7 +475,7 @@ private struct StoreInfoEditView: View {
       if isLaborCostFocused {
         TextField(
           "",
-          text: $laborCostText,
+          text: laborCostBinding,
           prompt: Text("시급 기준으로 입력")
             .font(.pretendardBody2)
             .foregroundColor(AppColor.grayscale400)
@@ -500,6 +514,14 @@ private struct StoreInfoEditView: View {
     formatter.numberStyle = .decimal
     let formatted = formatter.string(from: NSNumber(value: number)) ?? value
     return "\(formatted)원"
+  }
+
+  private func sanitizedDigits(_ value: String) -> String {
+    value.filter(\.isNumber)
+  }
+
+  private func sanitizedDigitsAndCommas(_ value: String) -> String {
+    value.filter { $0.isNumber || $0 == "," }
   }
 
   private func formattedStaffCount(_ value: String) -> String {

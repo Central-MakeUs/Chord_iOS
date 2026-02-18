@@ -85,7 +85,7 @@ public struct OnboardingFeature {
         return .none
 
       case let .staffCountChanged(count):
-        state.staffCount = count
+        state.staffCount = Self.sanitizedDigits(count)
         return .none
 
       case .isSoloWorkerToggled:
@@ -98,7 +98,7 @@ public struct OnboardingFeature {
         return .none
 
       case let .laborCostChanged(cost):
-        state.laborCost = cost
+        state.laborCost = Self.sanitizedDigitsAndCommas(cost)
         return .none
 
       case .includeWeeklyAllowanceToggled:
@@ -171,5 +171,15 @@ public struct OnboardingFeature {
         return .none
       }
     }
+  }
+}
+
+private extension OnboardingFeature {
+  static func sanitizedDigits(_ value: String) -> String {
+    value.filter(\.isNumber)
+  }
+
+  static func sanitizedDigitsAndCommas(_ value: String) -> String {
+    value.filter { $0.isNumber || $0 == "," }
   }
 }

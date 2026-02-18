@@ -281,7 +281,7 @@ public struct MenuRegistrationStep2View: View {
               .font(.pretendardCaption1)
               .foregroundColor(AppColor.grayscale800)
 
-            infoRow(label: "단가", value: "\(formatAmount(draft.baseQuantity))\(draft.unitCode)당 \(formatPrice(draft.basePrice))")
+            infoRow(label: "단가", value: "\(formatAmount(draft.baseQuantity))\(IngredientUnit.from(draft.unitCode).title)당 \(formatPrice(draft.basePrice))")
             infoRow(label: "공급업체", value: (draft.supplier?.isEmpty == false ? draft.supplier! : "-"))
           }
           .padding(12)

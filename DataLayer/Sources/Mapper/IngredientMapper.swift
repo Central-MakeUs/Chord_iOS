@@ -18,19 +18,24 @@ private func stableIngredientUUID(_ ingredientId: Int) -> UUID {
   return UUID(uuid: bytes)
 }
 
+private func formattedPriceText(_ value: Double) -> String {
+  let formatter = NumberFormatter()
+  formatter.numberStyle = .decimal
+  formatter.minimumFractionDigits = 0
+  formatter.maximumFractionDigits = 2
+  return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.2f", value)
+}
+
 public extension IngredientResponse {
   func toInventoryIngredientItem() -> InventoryIngredientItem {
-    let displayPrice = currentUnitPrice * Double(baseQuantity)
-    
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .decimal
-    let formattedPrice = formatter.string(from: NSNumber(value: displayPrice)) ?? String(format: "%.0f", displayPrice)
+    let displayPrice = currentUnitPrice
+    let formattedPrice = formattedPriceText(displayPrice)
     
     return InventoryIngredientItem(
       id: stableIngredientUUID(ingredientId),
       apiId: ingredientId,
       name: ingredientName,
-      amount: "\(baseQuantity)\(unitCode)",
+      amount: "\(baseQuantity)\(IngredientUnit.from(unitCode).title)",
       price: "\(formattedPrice)원",
       category: ingredientCategoryCode,
       supplier: nil
@@ -40,15 +45,13 @@ public extension IngredientResponse {
 
 public extension IngredientDetailResponse {
   func toInventoryIngredientItem() -> InventoryIngredientItem {
-    let formatter = NumberFormatter()
-    formatter.numberStyle = .decimal
-    let formattedPrice = formatter.string(from: NSNumber(value: originalPrice)) ?? String(format: "%.0f", originalPrice)
+    let formattedPrice = formattedPriceText(unitPrice)
     
     return InventoryIngredientItem(
       id: stableIngredientUUID(ingredientId),
       apiId: ingredientId,
       name: ingredientName,
-      amount: "\(Int(originalAmount))\(unitCode)",
+      amount: "\(baseQuantity)\(IngredientUnit.from(unitCode).title)",
       price: "\(formattedPrice)원",
       category: ingredientCategoryCode ?? "ETC",
       supplier: supplier,

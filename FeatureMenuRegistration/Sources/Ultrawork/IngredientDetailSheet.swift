@@ -1,4 +1,5 @@
 import SwiftUI
+import CoreModels
 import DesignSystem
 
 public struct IngredientDetailSheet: View {
@@ -46,7 +47,7 @@ public struct IngredientDetailSheet: View {
             .font(.pretendardTitle2)
             .foregroundColor(AppColor.grayscale900)
           
-          Text(ingredient.unitCode)
+          Text(IngredientUnit.from(ingredient.unitCode).title)
             .font(.pretendardBody2)
             .foregroundColor(AppColor.grayscale600)
             .padding(.horizontal, 8)
@@ -103,7 +104,7 @@ public struct IngredientDetailSheet: View {
       VStack(spacing: 16) {
         detailRow(label: "재료명", value: ingredient.name)
         detailRow(label: "사용량", value: ingredient.formattedAmount)
-        detailRow(label: "단위", value: ingredient.unitCode)
+        detailRow(label: "단위", value: IngredientUnit.from(ingredient.unitCode).title)
         detailRow(label: "가격", value: ingredient.formattedPrice)
       }
     }

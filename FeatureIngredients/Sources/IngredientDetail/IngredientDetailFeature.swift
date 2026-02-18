@@ -24,8 +24,7 @@ public struct IngredientDetailFeature {
     public init(item: InventoryIngredientItem) {
       self.item = item
       self.priceHistory = []
-      let priceDigits = item.price.filter { $0.isNumber }
-      let formattedPrice = IngredientDetailFeature.formattedNumber(from: priceDigits)
+      let formattedPrice = IngredientDetailFeature.formattedPriceText(from: item.price)
       let parsed = IngredientDetailFeature.parseAmount(item.amount)
       priceText = formattedPrice
       usageText = parsed.value
@@ -40,6 +39,7 @@ public struct IngredientDetailFeature {
     case onAppear
     case detailResponse(TaskResult<InventoryIngredientItem>)
     case priceHistoryResponse(TaskResult<[PriceHistoryResponse]>)
+    case ingredientUpdateResponse(TaskResult<Void>)
     case editPresented(Bool)
     case supplierPresented(Bool)
     case editCompleted(price: String, usage: String, unit: IngredientUnit, category: String)
@@ -63,6 +63,8 @@ public struct IngredientDetailFeature {
       case (.detailResponse(.failure), .detailResponse(.failure)): return true
       case let (.priceHistoryResponse(.success(l)), .priceHistoryResponse(.success(r))): return l == r
       case (.priceHistoryResponse(.failure), .priceHistoryResponse(.failure)): return true
+      case (.ingredientUpdateResponse(.success), .ingredientUpdateResponse(.success)): return true
+      case (.ingredientUpdateResponse(.failure), .ingredientUpdateResponse(.failure)): return true
       case let (.editPresented(l), .editPresented(r)): return l == r
       case let (.supplierPresented(l), .supplierPresented(r)): return l == r
       case let (.editCompleted(p1, u1, un1, c1), .editCompleted(p2, u2, un2, c2)):
@@ -145,8 +147,7 @@ public struct IngredientDetailFeature {
             isFavorite: item.isFavorite
         )
         
-        let priceDigits = item.price.filter { $0.isNumber }
-        state.priceText = IngredientDetailFeature.formattedNumber(from: priceDigits)
+        state.priceText = IngredientDetailFeature.formattedPriceText(from: item.price)
         let parsed = IngredientDetailFeature.parseAmount(item.amount)
         state.usageText = parsed.value
         state.unit = parsed.unit
@@ -184,22 +185,7 @@ public struct IngredientDetailFeature {
         return .none
         
       case let .editCompleted(price, usage, unit, category):
-        state.priceText = price
-        state.usageText = usage
-        state.unit = unit
-        state.item = InventoryIngredientItem(
-          id: state.item.id,
-          apiId: state.item.apiId,
-          name: state.item.name,
-          amount: state.item.amount,
-          price: state.item.price,
-          category: category,
-          supplier: state.item.supplier,
-          usedMenus: state.item.usedMenus,
-          isFavorite: state.item.isFavorite
-        )
         state.isEditPresented = false
-        state.showToast = true
         
         guard let apiId = state.item.apiId else { return .none }
         let numericPrice = price.replacingOccurrences(of: ",", with: "")
@@ -213,8 +199,30 @@ public struct IngredientDetailFeature {
           unitCode: unit.serverCode
         )
         return .run { send in
-          try await ingredientRepository.updateIngredient(apiId, request)
+          await send(.ingredientUpdateResponse(TaskResult {
+            try await ingredientRepository.updateIngredient(apiId, request)
+          }))
         }
+
+      case .ingredientUpdateResponse(.success):
+        guard let apiId = state.item.apiId else { return .none }
+        state.showToast = true
+        return .merge(
+          .run { send in
+            await send(.detailResponse(TaskResult {
+              try await ingredientRepository.fetchIngredientDetail(apiId)
+            }))
+          },
+          .run { send in
+            await send(.priceHistoryResponse(TaskResult {
+              try await ingredientRepository.fetchPriceHistory(apiId)
+            }))
+          }
+        )
+
+      case let .ingredientUpdateResponse(.failure(error)):
+        state.alert = AlertState { TextState("재료 수정 실패") } message: { TextState(error.localizedDescription) }
+        return .none
         
       case let .supplierCompleted(name):
         state.supplierName = name
@@ -305,18 +313,28 @@ private extension IngredientDetailFeature {
     return "\(type(of: error)): \(error.localizedDescription) domain=\(nsError.domain) code=\(nsError.code) userInfo=\(nsError.userInfo)"
   }
 
-  static func formattedNumber(from value: String) -> String {
-    guard let number = Int64(value) else { return "" }
+  static func formattedPriceText(from value: String) -> String {
+    let normalized = value
+      .replacingOccurrences(of: ",", with: "")
+      .replacingOccurrences(of: "원", with: "")
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+    guard let number = Double(normalized) else { return "" }
+
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
-    return formatter.string(from: NSNumber(value: number)) ?? value
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 2
+    return formatter.string(from: NSNumber(value: number)) ?? String(format: "%.2f", number)
   }
 
   static func parseAmount(_ value: String) -> (value: String, unit: IngredientUnit) {
-    let digits = value.filter { $0.isNumber }
-    let unitText = value.filter { !$0.isNumber }
+    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+    let numeric = trimmed
+      .filter { $0.isNumber || $0 == "." || $0 == "," }
+      .replacingOccurrences(of: ",", with: "")
+    let unitText = String(trimmed.filter { !$0.isNumber && $0 != "." && $0 != "," })
     let unit = IngredientUnit.from(unitText)
-    return (digits.isEmpty ? value : digits, unit)
+    return (numeric.isEmpty ? value : numeric, unit)
   }
 
   static func isNotFoundError(_ error: Error) -> Bool {
