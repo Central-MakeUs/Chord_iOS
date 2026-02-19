@@ -62,7 +62,7 @@ public struct MenuFeature {
             }
           }
         }
-        .cancellable(id: CancelID.router)
+        .cancellable(id: CancelID.router, cancelInFlight: true)
         
         guard !state.isLoading else { return routerEffect }
         

@@ -637,7 +637,7 @@ private struct IngredientRow: View {
                 Text(item.price)
                     .font(.pretendardBody1)
                     .foregroundColor(AppColor.primaryBlue500)
-                Text("\(displayAmount)당")
+                Text("단위 \(displayAmount)당")
                     .font(.pretendardCaption2)
                     .foregroundColor(AppColor.grayscale600)
             }

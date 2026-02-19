@@ -45,7 +45,15 @@ public struct IngredientsFeature {
       if categories.isEmpty {
         return ["즐겨찾기", "식재료", "운영 재료"]
       }
-      return ["즐겨찾기"] + categories.sorted { $0.displayOrder < $1.displayOrder }.map { $0.categoryName }
+      var seen = Set<String>()
+      let uniqueCategories: [String] = categories
+        .sorted { $0.displayOrder < $1.displayOrder }
+        .compactMap { category in
+          guard !seen.contains(category.categoryName) else { return nil }
+          seen.insert(category.categoryName)
+          return category.categoryName
+        }
+      return ["즐겨찾기"] + uniqueCategories
     }
   }
   
@@ -218,7 +226,7 @@ public struct IngredientsFeature {
         if state.selectedCategories.contains(keyword) {
           state.selectedCategories.remove(keyword)
         } else {
-          state.selectedCategories.insert(keyword)
+          state.selectedCategories = [keyword]
         }
         
         let selected = state.selectedCategories

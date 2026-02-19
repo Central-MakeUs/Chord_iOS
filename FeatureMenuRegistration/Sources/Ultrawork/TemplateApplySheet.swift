@@ -13,10 +13,8 @@ public struct TemplateApplySheet: View {
   }
   
   public var body: some View {
-    VStack(spacing: 0) {
-      SheetDragHandle()
 
-      VStack(spacing: 0) {
+      VStack(alignment: .leading, spacing: 0) {
           VStack(alignment: .leading, spacing: 4) {
           Text("템플릿을 적용할까요?")
             .font(.pretendardHeadline2)
@@ -30,15 +28,13 @@ public struct TemplateApplySheet: View {
                 .font(.pretendardBody2)
                 .foregroundColor(AppColor.grayscale700)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 20)
+        .padding(.top, 40)
         .padding(.bottom, 10)
         Spacer()
         actionButtons
       }
       .padding(.horizontal, 24)
       .padding(.bottom, 20)
-    }
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     .background(Color.white)
   }

@@ -11,7 +11,9 @@ public struct MenuEditFeature {
     let item: MenuItem
     var menuName: String
     var menuPrice: String
-    var prepareTime: String
+    var prepareTimeMinutes: Int
+    var prepareTimeSeconds: Int
+    let initialWorkTime: Int
     var selectedCategory: MenuCategory
     var isNameEditPresented = false
     var isPriceEditPresented = false
@@ -25,7 +27,10 @@ public struct MenuEditFeature {
       self.item = item
       menuName = item.name
       menuPrice = MenuEditFeature.formattedPrice(from: item.price)
-      prepareTime = item.workTimeText
+      let totalWorkTime = item.workTime ?? 90
+      prepareTimeMinutes = totalWorkTime / 60
+      prepareTimeSeconds = totalWorkTime % 60
+      initialWorkTime = totalWorkTime
       if item.category == .all {
         selectedCategory = .beverage
       } else {
@@ -37,23 +42,14 @@ public struct MenuEditFeature {
       [.beverage, .food, .dessert]
     }
     
-    public var prepareTimeMinutes: Int {
-      let components = prepareTime.components(separatedBy: "분")
-      guard let firstPart = components.first,
-            let minutes = Int(firstPart.trimmingCharacters(in: .whitespaces)) else {
-        return 1
+    public var prepareTime: String {
+      if prepareTimeMinutes > 0 && prepareTimeSeconds > 0 {
+        return "\(prepareTimeMinutes)분 \(prepareTimeSeconds)초"
+      } else if prepareTimeMinutes > 0 {
+        return "\(prepareTimeMinutes)분"
+      } else {
+        return "\(prepareTimeSeconds)초"
       }
-      return minutes
-    }
-    
-    public var prepareTimeSeconds: Int {
-      let components = prepareTime.components(separatedBy: "분")
-      guard components.count > 1 else { return 30 }
-      let secondPart = components[1].replacingOccurrences(of: "초", with: "")
-      guard let seconds = Int(secondPart.trimmingCharacters(in: .whitespaces)) else {
-        return 30
-      }
-      return seconds
     }
 
     public var hasPendingChanges: Bool {
@@ -66,7 +62,7 @@ public struct MenuEditFeature {
 
       return normalizedName != originalName
         || currentPrice != originalPrice
-        || currentWorkTime != item.workTime
+        || currentWorkTime != initialWorkTime
         || selectedCategory != originalCategory
     }
   }
@@ -154,7 +150,8 @@ public struct MenuEditFeature {
         return .none
 
       case let .prepareTimeUpdated(minutes, seconds):
-        state.prepareTime = "\(minutes)분 \(seconds)초"
+        state.prepareTimeMinutes = minutes
+        state.prepareTimeSeconds = seconds
         state.isPrepareTimePresented = false
         return .none
 
@@ -181,7 +178,7 @@ public struct MenuEditFeature {
         let currentPriceValue = Double(currentPriceDigits)
 
         let currentWorkTime = state.prepareTimeMinutes * 60 + state.prepareTimeSeconds
-        let hasWorkTimeChanged = currentWorkTime != state.item.workTime
+        let hasWorkTimeChanged = currentWorkTime != state.initialWorkTime
 
         let originalCategory = state.item.category == .all ? MenuCategory.beverage : state.item.category
         let hasCategoryChanged = state.selectedCategory != originalCategory

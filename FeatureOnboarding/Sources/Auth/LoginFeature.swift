@@ -83,6 +83,7 @@ public struct LoginFeature {
         
       case .signUpDismissed:
         state.showSignUp = false
+        state.signUp = SignUpFeature.State()
         return .none
         
       case .errorAlertDismissed:
@@ -90,9 +91,12 @@ public struct LoginFeature {
         return .none
         
       case .signUp(.delegate(.signUpCompleted)):
+        let id = state.signUp.userId
+        let password = state.signUp.password
         state.showSignUp = false
-        
-        return .run { [id = state.signUp.userId, password = state.signUp.password] send in
+        state.signUp = SignUpFeature.State()
+
+        return .run { send in
           do {
             let onboardingCompleted = try await authRepository.login(id, password)
             print("✅ Auto-login after signup success. OnboardingCompleted: \(onboardingCompleted)")
@@ -106,6 +110,7 @@ public struct LoginFeature {
         
       case .signUp(.delegate(.dismissed)):
         state.showSignUp = false
+        state.signUp = SignUpFeature.State()
         return .none
         
       case .signUp:

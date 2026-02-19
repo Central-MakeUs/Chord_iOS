@@ -35,9 +35,9 @@ public struct MenuIngredientsView: View {
             Button(action: {
               viewStore.send(.deleteTapped)
             }) {
-              Text("삭제")
+              Text("취소")
                 .font(.pretendardCTA)
-                .foregroundColor(viewStore.selectedIngredients.isEmpty ? AppColor.grayscale600 : AppColor.semanticWarningText)
+                .foregroundColor(AppColor.grayscale600)
             }
             .buttonStyle(.plain)
           } else {
@@ -71,20 +71,22 @@ public struct MenuIngredientsView: View {
       .background(Color.white.ignoresSafeArea())
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
-      .coachCoachAlert(
-        isPresented: viewStore.binding(
-          get: \.showDeleteAlert,
-          send: { _ in MenuIngredientsFeature.Action.deleteAlertCancelled }
-        ),
-        title: "메뉴를 삭제하시겠어요?",
-        alertType: .twoButton,
-        rightButtonTitle: "삭제하기",
-        leftButtonAction: {
-          viewStore.send(.deleteAlertCancelled)
-        },
-        rightButtonAction: {
-          viewStore.send(.deleteAlertConfirmed)
+      .overlay(alignment: .bottom) {
+        if viewStore.isEditMode {
+          deleteBottomBar(
+            selectedCount: viewStore.selectedIngredients.count,
+            isDeleting: viewStore.isLoading,
+            onDelete: { viewStore.send(.deleteButtonTapped) }
+          )
         }
+      }
+      .toastBanner(
+        isPresented: viewStore.binding(
+          get: \.showToast,
+          send: MenuIngredientsFeature.Action.showToastChanged
+        ),
+        message: viewStore.toastMessage,
+        duration: 1.0
       )
       .sheet(
         isPresented: viewStore.binding(
@@ -149,6 +151,26 @@ public struct MenuIngredientsView: View {
         }
       }
     }
+  }
+
+  private func deleteBottomBar(
+    selectedCount: Int,
+    isDeleting: Bool,
+    onDelete: @escaping () -> Void
+  ) -> some View {
+    VStack(spacing: 0) {
+      BottomButton(
+        title: selectedCount > 0 ? "\(selectedCount)개 삭제" : "삭제",
+        style: selectedCount > 0 && !isDeleting ? .primary : .secondary
+      ) {
+        onDelete()
+      }
+      .disabled(selectedCount == 0 || isDeleting)
+      .padding(.horizontal, 20)
+      .padding(.top, 8)
+      .padding(.bottom, 12)
+    }
+    .background(Color.white)
   }
   
   private func ingredientRow(ingredient: IngredientItem, viewStore: ViewStoreOf<MenuIngredientsFeature>) -> some View {

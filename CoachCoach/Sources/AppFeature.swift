@@ -255,7 +255,7 @@ struct AppFeature {
         return .none
         
       case .menuRegistration(.delegate(.dismissed)):
-        state.status = .unauthenticated
+        state.status = state.hasCompletedOnboarding ? .authenticated : .onboarding
         state.isShowingMenuRegistration = false
         return .none
 

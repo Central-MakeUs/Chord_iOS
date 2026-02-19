@@ -96,17 +96,26 @@ public struct RecipeTemplateResponse: Codable, Equatable {
   public let ingredientName: String
   public let defaultUsageAmount: Double
   public let defaultPrice: Double
+  public let unitPrice: Double
+  public let baseQuantity: Double
   public let unitCode: String
+  public let ingredientCategoryCode: String
   
   public init(
     ingredientName: String,
     defaultUsageAmount: Double,
     defaultPrice: Double,
-    unitCode: String
+    unitPrice: Double,
+    baseQuantity: Double,
+    unitCode: String,
+    ingredientCategoryCode: String
   ) {
     self.ingredientName = ingredientName
     self.defaultUsageAmount = defaultUsageAmount
     self.defaultPrice = defaultPrice
+    self.unitPrice = unitPrice
+    self.baseQuantity = baseQuantity
     self.unitCode = unitCode
+    self.ingredientCategoryCode = ingredientCategoryCode
   }
 }

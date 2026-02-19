@@ -1,6 +1,30 @@
 import SwiftUI
+import UIKit
 
 private let designSystemBundle = Bundle(identifier: "com.seungwan.CoachCoach.DesignSystem") ?? Bundle.main
+
+private func bundledImage(
+  primaryName: String,
+  bundle: Bundle,
+  fallbacks: [String] = [],
+  systemFallback: String = "questionmark.square"
+) -> Image {
+  let names = [primaryName] + fallbacks
+
+  for name in names {
+    if UIImage(named: name, in: bundle, compatibleWith: nil) != nil {
+      return Image(name, bundle: bundle)
+    }
+  }
+
+  for name in names {
+    if UIImage(named: name, in: .main, compatibleWith: nil) != nil {
+      return Image(name, bundle: .main)
+    }
+  }
+
+  return Image(systemName: systemFallback)
+}
 
 public extension Image {
   static let arrowLeftIcon = Image("ArrowLeftIcon", bundle: designSystemBundle)
@@ -16,8 +40,19 @@ public extension Image {
   static let chevronUpOutlineIcon = Image("ChevronUpOutlineIcon", bundle: designSystemBundle)
   static let homeIcon = Image("HomeIcon", bundle: designSystemBundle)
   static let homeIconActive = Image("HomeIconActive", bundle: designSystemBundle)
-  static let infoFilledIcon = Image("InfoFilledIcon", bundle: designSystemBundle)
-  static let infoOutlinedIcon = Image("InfoFOutlinedIcon", bundle: designSystemBundle)
+  static let infoFilledIcon = bundledImage(
+    primaryName: "InfoFilledIcon",
+    bundle: designSystemBundle,
+    fallbacks: ["InfoFilledIcon.svg"],
+    systemFallback: "info.circle.fill"
+  )
+
+  static let infoOutlinedIcon = bundledImage(
+    primaryName: "InfoFOutlinedIcon",
+    bundle: designSystemBundle,
+    fallbacks: ["InfoFOutlinedIcon.svg"],
+    systemFallback: "info.circle"
+  )
   static let bellIcon = Image("BellIcon", bundle: designSystemBundle)
   static let eyeIcon = Image("EyeIcon", bundle: designSystemBundle)
   static let eyeOffIcon = Image("EyeOffIcon", bundle: designSystemBundle)
@@ -46,6 +81,5 @@ public extension Image {
   static let trashIcon = Image("TrashIcon", bundle: Bundle.main)
   static let speechBubbleTail = Image("SpeechBubbleTail", bundle: Bundle.main)
   static let coachCoachLogo = Image("CoachCoachLogo", bundle: Bundle.main)
-  static let appLogo = Image("AppLogo", bundle: Bundle.main)
   static let strategyCompletionGraphic = Image("StrategyCompletionGraphic", bundle: Bundle.main)
 }

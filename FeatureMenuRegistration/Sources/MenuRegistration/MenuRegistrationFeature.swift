@@ -230,6 +230,7 @@ public struct MenuRegistrationFeature {
     case showIngredientDetailSheetChanged(Bool)
     case ingredientSelectionTapped
     case ingredientSelectionToggled(UUID)
+    case deleteSelectedIngredientsTapped
 
     case showIngredientAddSheetChanged(Bool)
     case ingredientAddCategorySelected(String)
@@ -312,6 +313,7 @@ public struct MenuRegistrationFeature {
       case let (.showIngredientDetailSheetChanged(l), .showIngredientDetailSheetChanged(r)): return l == r
       case (.ingredientSelectionTapped, .ingredientSelectionTapped): return true
       case let (.ingredientSelectionToggled(l), .ingredientSelectionToggled(r)): return l == r
+      case (.deleteSelectedIngredientsTapped, .deleteSelectedIngredientsTapped): return true
       case let (.showIngredientAddSheetChanged(l), .showIngredientAddSheetChanged(r)): return l == r
       case let (.ingredientAddCategorySelected(l), .ingredientAddCategorySelected(r)): return l == r
       case let (.ingredientAddPriceChanged(l), .ingredientAddPriceChanged(r)): return l == r
@@ -488,9 +490,12 @@ public struct MenuRegistrationFeature {
           RegistrationIngredient(
             name: ingredient.ingredientName,
             amount: ingredient.defaultUsageAmount,
-            unitCode: IngredientUnit.from(ingredient.unitCode).title,
+            unitCode: ingredient.unitCode,
             price: ingredient.defaultPrice,
-            isFromTemplate: true
+            isFromTemplate: true,
+            category: ingredient.ingredientCategoryCode,
+            purchaseAmount: ingredient.baseQuantity,
+            purchasePrice: ingredient.unitPrice
           )
         }
         return .none
@@ -532,7 +537,7 @@ public struct MenuRegistrationFeature {
         }
 
       case .backTapped:
-        return .send(.delegate(.dismissed))
+        return .send(.previousStepTapped)
 
       case let .ingredientInputChanged(input):
         state.ingredientInput = input
@@ -696,6 +701,13 @@ public struct MenuRegistrationFeature {
         } else {
           state.selectedIngredientIDs.insert(id)
         }
+        return .none
+
+      case .deleteSelectedIngredientsTapped:
+        guard !state.selectedIngredientIDs.isEmpty else { return .none }
+        state.addedIngredients.removeAll { state.selectedIngredientIDs.contains($0.id) }
+        state.selectedIngredientIDs = []
+        state.isIngredientSelectionMode = false
         return .none
 
       case let .showIngredientAddSheetChanged(isPresented):
@@ -1020,8 +1032,8 @@ private extension MenuRegistrationFeature {
   
   func ingredientCategoryCode(from category: String?) -> String {
     switch category {
-    case "식재료": return "INGREDIENTS"
-    case "운영 재료": return "MATERIALS"
+    case "식재료", "INGREDIENTS": return "INGREDIENTS"
+    case "운영 재료", "MATERIALS": return "MATERIALS"
     default: return "INGREDIENTS"
     }
   }

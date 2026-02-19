@@ -8,6 +8,8 @@ public struct MenuRegistrationStep2View: View {
   let store: StoreOf<MenuRegistrationFeature>
   @FocusState private var isInputFocused: Bool
   @FocusState private var isRegisteredUsageFocused: Bool
+  @State private var hasSectionHintExpired = false
+  @State private var hasSectionHintTimerStarted = false
 
   public init(store: StoreOf<MenuRegistrationFeature>) {
     self.store = store
@@ -15,6 +17,10 @@ public struct MenuRegistrationStep2View: View {
 
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
+      let shouldShowSectionHint = !viewStore.isIngredientSelectionMode
+        && viewStore.addedIngredients.isEmpty
+        && !hasSectionHintExpired
+
       VStack(spacing: 0) {
         NavigationTopBar(onBackTap: { viewStore.send(.previousStepTapped) })
 
@@ -110,6 +116,12 @@ public struct MenuRegistrationStep2View: View {
         leftButtonAction: { viewStore.send(.ingredientDupAlertConfirmed) },
         rightButtonAction: { viewStore.send(.ingredientDupAlertCancelled) }
       )
+      .onAppear {
+        startSectionHintTimerIfNeeded(shouldShowSectionHint)
+      }
+      .onChange(of: shouldShowSectionHint) { _, isVisible in
+        startSectionHintTimerIfNeeded(isVisible)
+      }
     }
   }
 
@@ -387,6 +399,8 @@ public struct MenuRegistrationStep2View: View {
 
   private func addedListSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     let showHint = !viewStore.isIngredientSelectionMode
+      && viewStore.addedIngredients.isEmpty
+      && !hasSectionHintExpired
 
     return ZStack(alignment: .topTrailing) {
       VStack(alignment: .leading, spacing: 0) {
@@ -397,22 +411,22 @@ public struct MenuRegistrationStep2View: View {
 
           Spacer()
 
-          if !viewStore.addedIngredients.isEmpty {
-            Button(action: {
-              viewStore.send(.ingredientSelectionTapped)
-            }) {
-              Text(viewStore.isIngredientSelectionMode ? "취소" : "선택")
-                .font(.pretendardCaption1)
-                .foregroundColor(viewStore.isIngredientSelectionMode ? AppColor.error : AppColor.grayscale600)
-                .padding(.horizontal, 10)
-                .padding(.vertical, 4)
-                .overlay(
-                  RoundedRectangle(cornerRadius: 6)
-                    .stroke(AppColor.grayscale300, lineWidth: 1)
-                )
-            }
-            .buttonStyle(.plain)
+        if !viewStore.addedIngredients.isEmpty {
+          Button(action: {
+            viewStore.send(.ingredientSelectionTapped)
+          }) {
+            Text(viewStore.isIngredientSelectionMode ? "취소" : "선택")
+              .font(.pretendardCaption1)
+              .foregroundColor(viewStore.isIngredientSelectionMode ? AppColor.error : AppColor.grayscale600)
+              .padding(.horizontal, 10)
+              .padding(.vertical, 4)
+              .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                  .stroke(AppColor.grayscale300, lineWidth: 1)
+              )
           }
+          .buttonStyle(.plain)
+        }
         }
         .padding(.bottom, 8)
 
@@ -525,18 +539,37 @@ public struct MenuRegistrationStep2View: View {
     )
   }
 
+  private func startSectionHintTimerIfNeeded(_ isVisible: Bool) {
+    guard isVisible, !hasSectionHintTimerStarted else { return }
+    hasSectionHintTimerStarted = true
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+      hasSectionHintExpired = true
+    }
+  }
+
   private func bottomButtons(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     VStack(spacing: 0) {
-
-      
       HStack(spacing: 12) {
-
-        BottomButton(
-          title: "완료",
-          style: viewStore.addedIngredients.isEmpty ? .secondary : .primary
-        ) {
-          if !viewStore.addedIngredients.isEmpty {
-            viewStore.send(.finalCompleteTapped)
+        if viewStore.isIngredientSelectionMode {
+          let selectedCount = viewStore.selectedIngredientIDs.count
+          BottomButton(
+            title: selectedCount > 0 ? "\(selectedCount)개 삭제" : "삭제",
+            style: selectedCount > 0 ? .primary : .secondary
+          ) {
+            if selectedCount > 0 {
+              viewStore.send(.deleteSelectedIngredientsTapped)
+            }
+          }
+          .disabled(selectedCount == 0)
+        } else {
+          BottomButton(
+            title: "완료",
+            style: viewStore.addedIngredients.isEmpty ? .secondary : .primary
+          ) {
+            if !viewStore.addedIngredients.isEmpty {
+              viewStore.send(.finalCompleteTapped)
+            }
           }
         }
       }

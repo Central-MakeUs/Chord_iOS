@@ -6,7 +6,6 @@ import UIKit
 
 public struct MenuRegistrationStep1View: View {
   let store: StoreOf<MenuRegistrationFeature>
-  @Environment(\.dismiss) private var dismiss
   @State private var isCategorySheetPresented = false
   @State private var selectedCategoryDraft = "음료"
 
@@ -18,8 +17,7 @@ public struct MenuRegistrationStep1View: View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
         NavigationTopBar(onBackTap: {
-          viewStore.send(.backTapped)
-          dismiss()
+          viewStore.send(.previousStepTapped)
         })
 
         HStack {
@@ -364,9 +362,10 @@ public struct MenuRegistrationStep1View: View {
   }
 
   private func bottomButtons(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    let isNextEnabled = !viewStore.menuName
-      .trimmingCharacters(in: .whitespacesAndNewlines)
-      .isEmpty
+    let menuName = viewStore.menuName.trimmingCharacters(in: .whitespacesAndNewlines)
+    let priceText = viewStore.price.replacingOccurrences(of: ",", with: "")
+    let priceValue = Double(priceText) ?? 0
+    let isNextEnabled = !menuName.isEmpty && priceValue > 0
 
     return BottomButton(
       title: "다음",

@@ -121,15 +121,20 @@ public struct NavigationTopBar: View {
 }
 
 public struct SheetDragHandle: View {
+  @Environment(\.dismiss) private var dismiss
+
   public init() {}
 
   public var body: some View {
-    RoundedRectangle(cornerRadius: 20, style: .continuous)
-      .fill(AppColor.grayscale300)
-      .frame(width: 60, height: 7)
-      .frame(maxWidth: .infinity)
-      .padding(.top, 20)
-      .accessibilityHidden(true)
+    Button(action: { dismiss() }) {
+      RoundedRectangle(cornerRadius: 20, style: .continuous)
+        .fill(AppColor.grayscale300)
+        .frame(width: 60, height: 7)
+    }
+    .buttonStyle(.plain)
+    .frame(maxWidth: .infinity)
+    .padding(.top, 20)
+    .accessibilityHidden(true)
   }
 }
 

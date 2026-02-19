@@ -14,10 +14,12 @@ public struct MenuIngredientsFeature {
     var selectedTab: IngredientTab = .ingredient
     var isEditMode: Bool = false
     var selectedIngredients: Set<UUID> = []
-    var showDeleteAlert: Bool = false
     var showAddSheet: Bool = false
     var isLoading: Bool = false
     var isManageMenuPresented: Bool = false
+    var showToast: Bool = false
+    var toastMessage: String = ""
+    var pendingDeleteCount: Int = 0
     @PresentationState var alert: AlertState<Action.Alert>?
     
     public init(menuId: Int, menuName: String, ingredients: [IngredientItem]) {
@@ -33,10 +35,10 @@ public struct MenuIngredientsFeature {
     case manageMenuDismissed
     case addTapped
     case deleteTapped
+    case deleteButtonTapped
+    case showToastChanged(Bool)
     case selectedTabChanged(IngredientTab)
     case ingredientToggled(UUID)
-    case deleteAlertConfirmed
-    case deleteAlertCancelled
     case deleteRecipesResponse(Result<Void, Error>)
     case addSheetPresented(Bool)
     case ingredientAdded(IngredientItem)
@@ -54,10 +56,10 @@ public struct MenuIngredientsFeature {
       case (.manageMenuDismissed, .manageMenuDismissed): return true
       case (.addTapped, .addTapped): return true
       case (.deleteTapped, .deleteTapped): return true
+      case (.deleteButtonTapped, .deleteButtonTapped): return true
+      case let (.showToastChanged(l), .showToastChanged(r)): return l == r
       case let (.selectedTabChanged(l), .selectedTabChanged(r)): return l == r
       case let (.ingredientToggled(l), .ingredientToggled(r)): return l == r
-      case (.deleteAlertConfirmed, .deleteAlertConfirmed): return true
-      case (.deleteAlertCancelled, .deleteAlertCancelled): return true
       case (.deleteRecipesResponse(.success), .deleteRecipesResponse(.success)): return true
       case (.deleteRecipesResponse(.failure), .deleteRecipesResponse(.failure)): return true
       case let (.addSheetPresented(l), .addSheetPresented(r)): return l == r
@@ -102,13 +104,45 @@ public struct MenuIngredientsFeature {
         
       case .deleteTapped:
         state.isManageMenuPresented = false
-        if state.isEditMode && !state.selectedIngredients.isEmpty {
-          state.showDeleteAlert = true
-        } else {
-          state.isEditMode.toggle()
-          if !state.isEditMode {
-            state.selectedIngredients.removeAll()
-          }
+        state.isEditMode.toggle()
+        if !state.isEditMode {
+          state.selectedIngredients.removeAll()
+        }
+        return .none
+
+      case .deleteButtonTapped:
+        guard state.isEditMode, !state.selectedIngredients.isEmpty else { return .none }
+
+        let selectedCount = state.selectedIngredients.count
+        state.pendingDeleteCount = selectedCount
+
+        let recipeIds = state.ingredients
+          .filter { state.selectedIngredients.contains($0.id) }
+          .compactMap { $0.recipeId }
+
+        guard !recipeIds.isEmpty else {
+          state.ingredients.removeAll { state.selectedIngredients.contains($0.id) }
+          state.selectedIngredients.removeAll()
+          state.isEditMode = false
+          state.toastMessage = "\(selectedCount)개의 재료가 삭제됐어요"
+          state.showToast = true
+          state.pendingDeleteCount = 0
+          return .none
+        }
+
+        state.isLoading = true
+        let menuId = state.menuId
+        let request = DeleteRecipesRequest(recipeIds: recipeIds)
+
+        return .run { send in
+          let result = await Result { try await recipeRepository.deleteRecipes(menuId, request) }
+          await send(.deleteRecipesResponse(result))
+        }
+
+      case let .showToastChanged(isPresented):
+        state.showToast = isPresented
+        if !isPresented {
+          state.toastMessage = ""
         }
         return .none
         
@@ -124,44 +158,21 @@ public struct MenuIngredientsFeature {
         }
         return .none
         
-      case .deleteAlertConfirmed:
-        let recipeIds = state.ingredients
-          .filter { state.selectedIngredients.contains($0.id) }
-          .compactMap { $0.recipeId }
-        
-        guard !recipeIds.isEmpty else {
-          state.ingredients.removeAll { state.selectedIngredients.contains($0.id) }
-          state.selectedIngredients.removeAll()
-          state.isEditMode = false
-          state.showDeleteAlert = false
-          return .none
-        }
-        
-        state.isLoading = true
-        state.showDeleteAlert = false
-        let menuId = state.menuId
-        let request = DeleteRecipesRequest(recipeIds: recipeIds)
-        let ingredientsToDelete = state.selectedIngredients
-        
-        return .run { send in
-          let result = await Result { try await recipeRepository.deleteRecipes(menuId, request) }
-          await send(.deleteRecipesResponse(result))
-        }
-        
       case .deleteRecipesResponse(.success):
+        let deletedCount = state.pendingDeleteCount
         state.ingredients.removeAll { state.selectedIngredients.contains($0.id) }
         state.selectedIngredients.removeAll()
         state.isEditMode = false
         state.isLoading = false
+        state.toastMessage = "\(deletedCount)개의 재료가 삭제됐어요"
+        state.showToast = true
+        state.pendingDeleteCount = 0
         return .none
         
       case let .deleteRecipesResponse(.failure(error)):
         state.isLoading = false
+        state.pendingDeleteCount = 0
         state.alert = AlertState { TextState("삭제 실패") } message: { TextState(errorMessage(from: error)) }
-        return .none
-        
-      case .deleteAlertCancelled:
-        state.showDeleteAlert = false
         return .none
         
       case let .addSheetPresented(isPresented):

@@ -6,7 +6,6 @@ import DesignSystem
 public struct MenuDetailView: View {
   let store: StoreOf<MenuDetailFeature>
   @Environment(\.dismiss) private var dismiss
-  @State private var applyRecommendedPrice: Bool = false
 
   public init(store: StoreOf<MenuDetailFeature>) {
     self.store = store
@@ -28,11 +27,17 @@ public struct MenuDetailView: View {
           trailing: {
             HStack {
               Spacer()
-              NavigationLink(value: MenuRoute.edit(viewStore.item)) {
-                Text("관리")
-                  .font(.pretendardCTA)
-                  .foregroundColor(AppColor.grayscale600)
+              Button {
+                viewStore.send(.manageTapped)
+              } label: {
+                Image.meatballIcon
+                  .renderingMode(.template)
+                  .foregroundColor(AppColor.grayscale700)
+                  .frame(width: 24, height: 24)
               }
+              .buttonStyle(.plain)
+              .disabled(viewStore.isLoading)
+              .opacity(viewStore.isLoading ? 0.4 : 1.0)
             }
           }
         )
@@ -44,7 +49,10 @@ public struct MenuDetailView: View {
 
             VStack(spacing: 16) {
               marginInfoCard(status: viewStore.item.status, item: viewStore.item)
-              recommendedPriceCard(price: viewStore.item.recommendedPrice)
+                VStack(alignment: .leading, spacing: 8) {
+                  recommendedPriceCard(price: viewStore.item.recommendedPrice)
+                  recommendedPriceDescription()
+                }
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)
@@ -64,11 +72,92 @@ public struct MenuDetailView: View {
       .background(AppColor.grayscale100.ignoresSafeArea())
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
+      .coachCoachAlert(
+        isPresented: viewStore.binding(
+          get: \.isDeleteConfirmPresented,
+          send: { _ in MenuDetailFeature.Action.deleteCancelTapped }
+        ),
+        title: "메뉴를 삭제하시겠어요?",
+        alertType: .twoButton,
+        leftButtonTitle: "아니요",
+        rightButtonTitle: "삭제하기",
+        leftButtonAction: {
+          viewStore.send(.deleteCancelTapped)
+        },
+        rightButtonAction: {
+          viewStore.send(.deleteConfirmTapped)
+        }
+      )
+      .coachCoachAlert(
+        isPresented: viewStore.binding(
+          get: \.isDeleteSuccessPresented,
+          send: { _ in MenuDetailFeature.Action.deleteSuccessTapped }
+        ),
+        title: "메뉴가 삭제 됐어요",
+        alertType: .oneButton,
+        rightButtonTitle: "확인",
+        rightButtonAction: {
+          viewStore.send(.deleteSuccessTapped)
+        }
+      )
+      .overlay {
+        if viewStore.isDeleting {
+          ProgressView()
+        }
+      }
+      .overlay(alignment: .topTrailing) {
+        if viewStore.isManageMenuPresented {
+          ZStack(alignment: .topTrailing) {
+            Color.black.opacity(0.001)
+              .ignoresSafeArea()
+              .onTapGesture {
+                viewStore.send(.manageMenuDismissed)
+              }
+
+            manageMenuOverlay(viewStore: viewStore)
+              .frame(width: 76, height: 80)
+              .padding(.top, 50)
+              .padding(.trailing, 20)
+          }
+        }
+      }
       .onAppear {
         viewStore.send(.onAppear)
       }
       .alert(store: store.scope(state: \.$alert, action: { .alert($0) }))
     }
+  }
+
+  private func manageMenuOverlay(viewStore: ViewStoreOf<MenuDetailFeature>) -> some View {
+    VStack(spacing: 0) {
+      Button {
+        viewStore.send(.editTapped)
+      } label: {
+        Text("수정")
+          .font(.pretendardBody3)
+          .foregroundColor(AppColor.grayscale900)
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+      }
+      .frame(height: 40)
+      .buttonStyle(.plain)
+
+      Divider()
+        .background(AppColor.grayscale200)
+
+      Button {
+        viewStore.send(.deleteTapped)
+      } label: {
+        Text("삭제")
+          .font(.pretendardBody3)
+          .foregroundColor(AppColor.semanticWarningText)
+          .frame(maxWidth: .infinity, maxHeight: .infinity)
+      }
+      .frame(height: 40)
+      .buttonStyle(.plain)
+    }
+    .background(Color.white)
+    .clipShape(RoundedRectangle(cornerRadius: 8))
+    .shadow(color: .black.opacity(0.12), radius: 8, x: 0, y: 4)
   }
   
   private func menuInfoCard(item: MenuItem) -> some View {
@@ -119,15 +208,6 @@ public struct MenuDetailView: View {
           .foregroundColor(AppColor.grayscale700)
         
         MenuBadge(status: status)
-      }
-      
-      VStack(alignment: .leading, spacing: 4) {
-        Text(statusMessage(for: status))
-          .font(.pretendardCaption2)
-          .foregroundColor(AppColor.grayscale700)
-        Text("가격 또는 원가 구조 점검을 권장드려요")
-          .font(.pretendardCaption2)
-          .foregroundColor(AppColor.grayscale700)
       }
       
       HStack(spacing: 0) {
@@ -218,6 +298,39 @@ public struct MenuDetailView: View {
     .background(AppColor.grayscale200)
     .cornerRadius(16)
   }
+
+  private func recommendedPriceDescription() -> some View {
+    VStack(alignment: .leading, spacing: 2) {
+      HStack(alignment: .center, spacing: 4) {
+        Image.infoOutlinedIcon
+          .renderingMode(.template)
+          .resizable()
+          .scaledToFit()
+          .foregroundColor(AppColor.grayscale500)
+          .frame(width: 10, height: 10)
+          .clipped()
+
+        Text("마진율은 재료비와 인건비를 기준으로 계산한 추정값이예요.")
+          .font(.pretendardCaption4)
+          .foregroundColor(AppColor.grayscale500)
+      }
+
+      Text("우리 가게의 효율을 알려드려요.")
+        .font(.pretendardCaption4)
+        .foregroundColor(AppColor.grayscale500)
+        .padding(.leading, 14)
+    }
+    .padding(.horizontal, 4)
+  }
+
+  private func shouldShowRecommendedPrice(for status: MenuStatus) -> Bool {
+    switch status {
+    case .warning, .danger:
+      return true
+    case .safe, .normal:
+      return false
+    }
+  }
   
   private func ingredientsCard(item: MenuItem) -> some View {
     VStack(alignment: .leading, spacing: 16) {
@@ -246,6 +359,10 @@ public struct MenuDetailView: View {
           ingredientRow(name: ingredient.name, amount: ingredient.amount, price: ingredient.price)
         }
       }
+
+      Rectangle()
+        .fill(AppColor.grayscale200)
+        .frame(height: 1)
       
       HStack(spacing: 4) {
         Text("총")

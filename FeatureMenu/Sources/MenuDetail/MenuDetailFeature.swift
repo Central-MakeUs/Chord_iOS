@@ -12,6 +12,10 @@ public struct MenuDetailFeature {
   public struct State: Equatable {
     var item: MenuItem
     var isLoading = false
+    var isManageMenuPresented = false
+    var isDeleteConfirmPresented = false
+    var isDeleteSuccessPresented = false
+    var isDeleting = false
     @PresentationState var alert: AlertState<Action.Alert>?
 
     public init(item: MenuItem) {
@@ -24,6 +28,13 @@ public struct MenuDetailFeature {
     case menuDetailLoaded(Result<MenuItem, Error>)
     case recipesLoaded(Result<RecipeListResponse, Error>)
     case manageTapped
+    case manageMenuDismissed
+    case editTapped
+    case deleteTapped
+    case deleteConfirmTapped
+    case deleteCancelTapped
+    case deleteSuccessTapped
+    case deleteMenuResponse(Result<Void, Error>)
     case ingredientsTapped
     case backTapped
     case alert(PresentationAction<Alert>)
@@ -38,6 +49,14 @@ public struct MenuDetailFeature {
       case (.recipesLoaded(.success(let l)), .recipesLoaded(.success(let r))): return l == r
       case (.recipesLoaded(.failure), .recipesLoaded(.failure)): return true
       case (.manageTapped, .manageTapped): return true
+      case (.manageMenuDismissed, .manageMenuDismissed): return true
+      case (.editTapped, .editTapped): return true
+      case (.deleteTapped, .deleteTapped): return true
+      case (.deleteConfirmTapped, .deleteConfirmTapped): return true
+      case (.deleteCancelTapped, .deleteCancelTapped): return true
+      case (.deleteSuccessTapped, .deleteSuccessTapped): return true
+      case (.deleteMenuResponse(.success), .deleteMenuResponse(.success)): return true
+      case (.deleteMenuResponse(.failure), .deleteMenuResponse(.failure)): return true
       case (.ingredientsTapped, .ingredientsTapped): return true
       case (.backTapped, .backTapped): return true
       case (.alert(let l), .alert(let r)): return l == r
@@ -137,7 +156,54 @@ public struct MenuDetailFeature {
         return .none
 
       case .manageTapped:
+        state.isManageMenuPresented = true
+        return .none
+
+      case .manageMenuDismissed:
+        state.isManageMenuPresented = false
+        return .none
+
+      case .editTapped:
+        guard !state.isLoading else { return .none }
+        state.isManageMenuPresented = false
         menuRouter.push(.edit(state.item))
+        return .none
+
+      case .deleteTapped:
+        state.isManageMenuPresented = false
+        state.isDeleteConfirmPresented = true
+        return .none
+
+      case .deleteCancelTapped:
+        state.isDeleteConfirmPresented = false
+        return .none
+
+      case .deleteConfirmTapped:
+        guard let apiId = state.item.apiId else { return .none }
+        state.isDeleteConfirmPresented = false
+        state.isDeleting = true
+        return .run { send in
+          let result = await Result { try await menuRepository.deleteMenu(apiId) }
+          await send(.deleteMenuResponse(result))
+        }
+
+      case .deleteMenuResponse(.success):
+        state.isDeleting = false
+        state.isDeleteSuccessPresented = true
+        return .none
+
+      case let .deleteMenuResponse(.failure(error)):
+        state.isDeleting = false
+        state.alert = AlertState {
+          TextState("메뉴 삭제 실패")
+        } message: {
+          TextState(errorMessage(from: error))
+        }
+        return .none
+
+      case .deleteSuccessTapped:
+        state.isDeleteSuccessPresented = false
+        menuRouter.pop()
         return .none
         
       case .ingredientsTapped:
@@ -163,5 +229,12 @@ public struct MenuDetailFeature {
     formatter.maximumFractionDigits = 2
     let formatted = formatter.string(from: NSNumber(value: value)) ?? String(format: "%.2f", value)
     return "\(formatted)원"
+  }
+
+  private func errorMessage(from error: Error) -> String {
+    if let apiError = error as? APIError {
+      return apiError.message
+    }
+    return error.localizedDescription
   }
 }
