@@ -107,6 +107,10 @@ struct MainFeature {
 
       case .home(.delegate(.openAICoachTab)):
         return .send(.selectedTabChanged(.aiCoach))
+
+      case .home(.delegate(.openWeeklyGuide)):
+        state.path.append(HomeRoute.weeklyGuide)
+        return .none
         
       case .home:
         return .none

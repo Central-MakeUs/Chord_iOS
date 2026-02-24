@@ -23,6 +23,7 @@ public struct HomeFeature {
 
     public enum Delegate: Equatable {
       case openAICoachTab
+      case openWeeklyGuide
     }
     
     public static func == (lhs: Action, rhs: Action) -> Bool {
@@ -81,8 +82,10 @@ public struct HomeFeature {
         state.error = errorMessage(error)
         return .none
 
-      case .diagnosisBannerTapped,
-          .strategyGuideTapped:
+      case .diagnosisBannerTapped:
+        return .send(.delegate(.openWeeklyGuide))
+
+      case .strategyGuideTapped:
         return .send(.delegate(.openAICoachTab))
 
       case .delegate:

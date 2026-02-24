@@ -37,7 +37,7 @@ public struct HomeView: View {
                 }
               }
           }
-          .padding(.horizontal, 24)
+          .padding(.horizontal, 20)
 
 
 
@@ -314,7 +314,6 @@ private struct StoreInfoEditView: View {
           }
         }
         .padding(.horizontal, 20)
-        .padding(.top, 12)
         .padding(.bottom, 100)
       }
 

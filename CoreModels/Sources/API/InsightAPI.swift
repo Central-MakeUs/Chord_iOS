@@ -101,7 +101,7 @@ public struct InsightDangerStrategyDetailResponse: Codable, Equatable {
   public let guide: String
   public let expectedEffect: String
   public let state: String
-  public let saved: Bool
+  public let saved: Bool?
   public let startDate: String?
   public let completionDate: String?
   public let menuId: Int
@@ -120,7 +120,7 @@ public struct InsightCautionStrategyDetailResponse: Codable, Equatable {
   public let guide: String
   public let expectedEffect: String
   public let state: String
-  public let saved: Bool
+  public let saved: Bool?
   public let startDate: String?
   public let completionDate: String?
   public let menuId: Int
@@ -139,7 +139,7 @@ public struct InsightHighMarginStrategyDetailResponse: Codable, Equatable {
   public let guide: String
   public let expectedEffect: String
   public let state: String
-  public let saved: Bool
+  public let saved: Bool?
   public let startDate: String?
   public let completionDate: String?
   public let type: String
@@ -201,5 +201,46 @@ public struct InsightStrategyDetailResponse: Equatable {
     self.menuName = menuName
     self.menuNames = menuNames
     self.costRate = costRate
+  }
+}
+
+public struct InsightNeedManagementResponse: Codable, Equatable {
+  public let strategyDate: String?
+  public let menus: [InsightNeedManagementMenuResponse]
+
+  public init(
+    strategyDate: String?,
+    menus: [InsightNeedManagementMenuResponse]
+  ) {
+    self.strategyDate = strategyDate
+    self.menus = menus
+  }
+}
+
+public struct InsightNeedManagementMenuResponse: Codable, Equatable {
+  public let strategyId: Int
+  public let menuId: Int
+  public let menuName: String
+  public let costRate: Double
+  public let marginRate: Double
+  public let marginGradeCode: String
+  public let state: String
+
+  public init(
+    strategyId: Int,
+    menuId: Int,
+    menuName: String,
+    costRate: Double,
+    marginRate: Double,
+    marginGradeCode: String,
+    state: String
+  ) {
+    self.strategyId = strategyId
+    self.menuId = menuId
+    self.menuName = menuName
+    self.costRate = costRate
+    self.marginRate = marginRate
+    self.marginGradeCode = marginGradeCode
+    self.state = state
   }
 }

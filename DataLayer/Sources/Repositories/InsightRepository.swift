@@ -5,6 +5,7 @@ import Foundation
 public struct InsightRepository: Sendable {
   public var fetchWeeklyStrategies: @Sendable (_ year: Int, _ month: Int, _ weekOfMonth: Int) async throws -> [InsightStrategyBriefResponse]
   public var fetchSavedStrategies: @Sendable (_ year: Int, _ month: Int, _ isCompleted: Bool) async throws -> [InsightSavedStrategyResponse]
+  public var fetchNeedManagementMenus: @Sendable () async throws -> InsightNeedManagementResponse
   public var fetchStrategyDetail: @Sendable (_ strategyId: Int, _ type: String) async throws -> InsightStrategyDetailResponse
   public var startStrategy: @Sendable (_ strategyId: Int, _ type: String) async throws -> Void
   public var completeStrategy: @Sendable (_ strategyId: Int, _ type: String) async throws -> InsightCompletionPhraseResponse
@@ -12,12 +13,14 @@ public struct InsightRepository: Sendable {
   public init(
     fetchWeeklyStrategies: @escaping @Sendable (_ year: Int, _ month: Int, _ weekOfMonth: Int) async throws -> [InsightStrategyBriefResponse],
     fetchSavedStrategies: @escaping @Sendable (_ year: Int, _ month: Int, _ isCompleted: Bool) async throws -> [InsightSavedStrategyResponse],
+    fetchNeedManagementMenus: @escaping @Sendable () async throws -> InsightNeedManagementResponse,
     fetchStrategyDetail: @escaping @Sendable (_ strategyId: Int, _ type: String) async throws -> InsightStrategyDetailResponse,
     startStrategy: @escaping @Sendable (_ strategyId: Int, _ type: String) async throws -> Void,
     completeStrategy: @escaping @Sendable (_ strategyId: Int, _ type: String) async throws -> InsightCompletionPhraseResponse
   ) {
     self.fetchWeeklyStrategies = fetchWeeklyStrategies
     self.fetchSavedStrategies = fetchSavedStrategies
+    self.fetchNeedManagementMenus = fetchNeedManagementMenus
     self.fetchStrategyDetail = fetchStrategyDetail
     self.startStrategy = startStrategy
     self.completeStrategy = completeStrategy
@@ -53,6 +56,13 @@ extension InsightRepository: DependencyKey {
         )
         return response.data ?? []
       },
+      fetchNeedManagementMenus: {
+        let response: BaseResponse<InsightNeedManagementResponse> = try await apiClient.request(
+          path: "/api/v1/insights/strategies/danger",
+          method: .get
+        )
+        return response.data ?? InsightNeedManagementResponse(strategyDate: nil, menus: [])
+      },
       fetchStrategyDetail: { strategyId, type in
         switch type {
         case "DANGER":
@@ -69,7 +79,7 @@ extension InsightRepository: DependencyKey {
             detail: data.detail,
             guide: data.guide,
             expectedEffect: data.expectedEffect,
-            saved: data.saved,
+            saved: data.saved ?? false,
             startDate: data.startDate,
             completionDate: data.completionDate,
             year: data.year,
@@ -93,7 +103,7 @@ extension InsightRepository: DependencyKey {
             detail: data.detail,
             guide: data.guide,
             expectedEffect: data.expectedEffect,
-            saved: data.saved,
+            saved: data.saved ?? false,
             startDate: data.startDate,
             completionDate: data.completionDate,
             year: data.year,
@@ -117,7 +127,7 @@ extension InsightRepository: DependencyKey {
             detail: data.detail,
             guide: data.guide,
             expectedEffect: data.expectedEffect,
-            saved: data.saved,
+            saved: data.saved ?? false,
             startDate: data.startDate,
             completionDate: data.completionDate,
             year: data.year,
@@ -157,6 +167,7 @@ extension InsightRepository: DependencyKey {
   public static let previewValue = InsightRepository(
     fetchWeeklyStrategies: { _, _, _ in [] },
     fetchSavedStrategies: { _, _, _ in [] },
+    fetchNeedManagementMenus: { InsightNeedManagementResponse(strategyDate: nil, menus: []) },
     fetchStrategyDetail: { _, _ in
       InsightStrategyDetailResponse(
         strategyId: 0,
@@ -184,6 +195,7 @@ extension InsightRepository: DependencyKey {
   public static let testValue = InsightRepository(
     fetchWeeklyStrategies: { _, _, _ in [] },
     fetchSavedStrategies: { _, _, _ in [] },
+    fetchNeedManagementMenus: { InsightNeedManagementResponse(strategyDate: nil, menus: []) },
     fetchStrategyDetail: { _, _ in
       InsightStrategyDetailResponse(
         strategyId: 0,
