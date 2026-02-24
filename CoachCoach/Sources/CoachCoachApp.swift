@@ -12,6 +12,8 @@ import UIKit
 
 @main
 struct CoachCoachApp: App {
+  @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
+
   private let appStore = Store(initialState: AppFeature.State()) {
     AppFeature()
   }

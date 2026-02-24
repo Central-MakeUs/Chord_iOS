@@ -39,6 +39,10 @@ let package = Package(
     .package(
       url: "https://github.com/pointfreeco/swift-composable-architecture.git",
       from: "1.11.0"
+    ),
+    .package(
+      url: "https://github.com/firebase/firebase-ios-sdk.git",
+      from: "12.9.0"
     )
   ]
 )

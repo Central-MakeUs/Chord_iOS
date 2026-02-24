@@ -29,7 +29,17 @@ extension AuthRepository: DependencyKey {
     
     return AuthRepository(
       login: { loginId, password in
-        let request = LoginRequest(loginId: loginId, password: password)
+        let userDefaults = UserDefaults.standard
+        let fcmToken = userDefaults.string(forKey: "fcmToken")?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let deviceId = userDefaults.string(forKey: "deviceId")?.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let request = LoginRequest(
+          loginId: loginId,
+          password: password,
+          fcmToken: fcmToken?.isEmpty == true ? nil : fcmToken,
+          deviceType: "IOS",
+          deviceId: deviceId?.isEmpty == true ? nil : deviceId
+        )
         let response: BaseResponse<LoginResponse> = try await apiClient.request(
           path: "/api/v1/auth/login",
           method: .post,

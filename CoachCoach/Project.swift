@@ -6,8 +6,11 @@ let project = Project(
   settings: .settings(
     base: [
       "SWIFT_VERSION": "5.9",
-      "MARKETING_VERSION": "0.0.3",
-      "CURRENT_PROJECT_VERSION": "3"
+      "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES": "YES",
+      "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"],
+      "CODE_SIGN_ENTITLEMENTS": "CoachCoach.entitlements",
+      "MARKETING_VERSION": "0.0.6",
+      "CURRENT_PROJECT_VERSION": "6"
     ]
   ),
   targets: [
@@ -22,6 +25,7 @@ let project = Project(
       resources: [
         "Assets.xcassets",
         "Resources/App.config",
+        "Resources/GoogleService-Info.plist",
         "Resources/Assets.xcassets",
         "Resources/Fonts/**",
         "Resources/LaunchScreen.storyboard"
@@ -36,7 +40,9 @@ let project = Project(
         .project(target: "FeatureMenu", path: "../FeatureMenu"),
         .project(target: "FeatureMenuRegistration", path: "../FeatureMenuRegistration"),
         .project(target: "FeatureOnboarding", path: "../FeatureOnboarding"),
-        .external(name: "ComposableArchitecture")
+        .external(name: "ComposableArchitecture"),
+        .external(name: "FirebaseCore"),
+        .external(name: "FirebaseMessaging")
       ],
       settings: .settings(
         configurations: [
@@ -44,6 +50,7 @@ let project = Project(
             name: .debug,
             settings: [
               "DEVELOPMENT_TEAM": "YH4A87H8M4",
+              "APS_ENVIRONMENT": "development",
               "CODE_SIGN_STYLE": "Automatic",
               "CODE_SIGN_IDENTITY": "Apple Development",
               "PROVISIONING_PROFILE_SPECIFIER": "",
@@ -56,9 +63,10 @@ let project = Project(
             name: .release,
             settings: [
               "DEVELOPMENT_TEAM": "YH4A87H8M4",
-              "CODE_SIGN_STYLE": "Manual",
+              "APS_ENVIRONMENT": "production",
+              "CODE_SIGN_STYLE": "Automatic",
               "CODE_SIGN_IDENTITY": "Apple Distribution",
-              "PROVISIONING_PROFILE_SPECIFIER": "CoachCoach AppStore (Manual)",
+              "PROVISIONING_PROFILE_SPECIFIER": "",
               "INFOPLIST_KEY_CFBundleDisplayName": "코치코치",
               "INFOPLIST_KEY_CFBundlePackageType": "APPL",
               "PRODUCT_BUNDLE_IDENTIFIER": "com.seungwan.coachcoach"

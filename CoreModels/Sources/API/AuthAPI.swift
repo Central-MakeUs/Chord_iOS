@@ -3,10 +3,22 @@ import Foundation
 public struct LoginRequest: Codable, Equatable {
   public let loginId: String
   public let password: String
+  public let fcmToken: String?
+  public let deviceType: String?
+  public let deviceId: String?
   
-  public init(loginId: String, password: String) {
+  public init(
+    loginId: String,
+    password: String,
+    fcmToken: String? = nil,
+    deviceType: String? = nil,
+    deviceId: String? = nil
+  ) {
     self.loginId = loginId
     self.password = password
+    self.fcmToken = fcmToken
+    self.deviceType = deviceType
+    self.deviceId = deviceId
   }
 }
 
