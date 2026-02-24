@@ -46,7 +46,6 @@ public struct OnboardingView: View {
           content(viewStore: viewStore)
         }
         .padding(.horizontal, 20)
-        .padding(.top, 12)
         .padding(.bottom, 100)
       }
 

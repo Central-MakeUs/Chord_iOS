@@ -79,7 +79,8 @@ public struct IngredientSearchFeature {
           apiId: result.ingredientId,
           name: result.ingredientName,
           amount: "",
-          price: ""
+          price: "",
+          category: ""
         )
         state.detail = IngredientDetailFeature.State(item: item)
         return .none

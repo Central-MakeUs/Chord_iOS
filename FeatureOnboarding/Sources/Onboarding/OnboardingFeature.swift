@@ -52,6 +52,7 @@ public struct OnboardingFeature {
 
     public enum Delegate: Equatable {
       case finished
+      case dismissed
     }
     
     public static func == (lhs: Action, rhs: Action) -> Bool {
@@ -108,7 +109,7 @@ public struct OnboardingFeature {
       case .backTapped:
         switch state.step {
         case .storeName:
-          break
+          return .send(.delegate(.dismissed))
         case .storeOperation:
           state.step = .storeName
         case .completion, .menuPrompt:

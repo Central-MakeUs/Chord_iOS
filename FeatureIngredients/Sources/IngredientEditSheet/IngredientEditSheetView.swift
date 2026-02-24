@@ -20,7 +20,7 @@ public struct IngredientEditSheetView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        SheetDragHandle()
+        Color.clear.frame(height: 40)
 
         VStack(alignment: .leading, spacing: 20) {
           VStack(alignment: .leading, spacing: 8) {
@@ -50,7 +50,7 @@ public struct IngredientEditSheetView: View {
                 send: IngredientEditSheetFeature.Action.draftPriceChanged
               ),
               trailingText: "원",
-              keyboardType: .numberPad,
+              keyboardType: .decimalPad,
               allowsComma: true
             )
 
@@ -164,7 +164,7 @@ private struct UnderlinedFieldWithDropdown: View {
         )
         .font(.pretendardSubtitle1)
         .foregroundColor(AppColor.grayscale900)
-        .keyboardType(.numberPad)
+        .keyboardType(.decimalPad)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
 

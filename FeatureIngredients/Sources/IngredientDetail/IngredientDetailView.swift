@@ -72,7 +72,6 @@ public struct IngredientDetailView: View {
             Spacer(minLength: 24)
           }
           .padding(.horizontal, 20)
-          .padding(.top, 12)
           .padding(.bottom, 24)
         }
         

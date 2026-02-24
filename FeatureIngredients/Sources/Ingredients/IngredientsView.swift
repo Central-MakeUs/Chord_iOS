@@ -235,7 +235,7 @@ public struct IngredientsView: View {
 
             if viewStore.showDupNameHint {
                 duplicateNameHint
-                    .padding(.top, 4)
+                    .padding(.top, -4)
             }
 
             Spacer(minLength: 20)
@@ -272,13 +272,13 @@ public struct IngredientsView: View {
                     .padding(.bottom, -2)
                 
                 Text("동일한 재료명이 존재해요\n이대로 진행할까요?")
-                    .font(.pretendardSubtitle2)
+                    .font(.pretendardCaption2)
                     .foregroundColor(Color.white)
                     .lineSpacing(2)
-                    .padding(.horizontal, 14)
-                    .padding(.vertical, 10)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
                     .background(AppColor.grayscale800)
-                    .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
+                    .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
             }
             
             Spacer(minLength: 0)
@@ -287,7 +287,7 @@ public struct IngredientsView: View {
     
     private func addIngredientDetailSheet(viewStore: ViewStoreOf<IngredientsFeature>) -> some View {
         VStack(spacing: 12) {
-            SheetDragHandle()
+            Color.clear.frame(height: 40)
             
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -429,7 +429,7 @@ public struct IngredientsView: View {
                 )
                 .font(.pretendardSubtitle2)
                 .foregroundColor(AppColor.grayscale900)
-                .keyboardType(.numberPad)
+                .keyboardType(.decimalPad)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)
                 

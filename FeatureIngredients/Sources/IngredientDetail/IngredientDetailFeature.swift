@@ -38,6 +38,8 @@ public struct IngredientDetailFeature {
   public enum Action: Equatable {
     case onAppear
     case detailResponse(TaskResult<InventoryIngredientItem>)
+    case categoryResponse(TaskResult<String?>)
+    case detailFallbackResponse(TaskResult<InventoryIngredientItem?>)
     case priceHistoryResponse(TaskResult<[PriceHistoryResponse]>)
     case ingredientUpdateResponse(TaskResult<Void>)
     case editPresented(Bool)
@@ -61,6 +63,10 @@ public struct IngredientDetailFeature {
       case (.onAppear, .onAppear): return true
       case let (.detailResponse(.success(l)), .detailResponse(.success(r))): return l == r
       case (.detailResponse(.failure), .detailResponse(.failure)): return true
+      case let (.categoryResponse(.success(l)), .categoryResponse(.success(r))): return l == r
+      case (.categoryResponse(.failure), .categoryResponse(.failure)): return true
+      case let (.detailFallbackResponse(.success(l)), .detailFallbackResponse(.success(r))): return l == r
+      case (.detailFallbackResponse(.failure), .detailFallbackResponse(.failure)): return true
       case let (.priceHistoryResponse(.success(l)), .priceHistoryResponse(.success(r))): return l == r
       case (.priceHistoryResponse(.failure), .priceHistoryResponse(.failure)): return true
       case (.ingredientUpdateResponse(.success), .ingredientUpdateResponse(.success)): return true
@@ -95,45 +101,76 @@ public struct IngredientDetailFeature {
         print(
           "👀 [IngredientDetail] onAppear name=\(state.item.name) apiId=\(String(describing: state.item.apiId)) category=\(state.item.category) amount=\(state.item.amount) price=\(state.item.price)"
         )
-        guard let apiId = state.item.apiId else { 
+        guard let apiId = state.item.apiId else {
           print("❌ [IngredientDetail] apiId is nil - cannot fetch detail")
-          return .none 
+          return .none
         }
-        return .merge(
-          .run { send in
-            await send(.detailResponse(TaskResult {
-              do {
-                print("📡 [IngredientDetail] fetch detail start id=\(apiId)")
-                let detail = try await ingredientRepository.fetchIngredientDetail(apiId)
-                print("✅ [IngredientDetail] fetch detail success id=\(apiId)")
-                return detail
-              } catch {
-                print("❌ [IngredientDetail] fetch detail failed id=\(apiId) error=\(Self.errorDebugString(error))")
-                throw error
-              }
-            }))
-          },
-          .run { send in
-            await send(.priceHistoryResponse(TaskResult {
-              do {
-                print("📡 [IngredientDetail] fetch price history start id=\(apiId)")
-                let history = try await ingredientRepository.fetchPriceHistory(apiId)
-                print("✅ [IngredientDetail] fetch price history success id=\(apiId) count=\(history.count)")
-                return history
-              } catch {
-                print("❌ [IngredientDetail] fetch price history failed id=\(apiId) error=\(Self.errorDebugString(error))")
-                throw error
-              }
-            }))
-          }
-        )
+        let currentCategory = state.item.category.trimmingCharacters(in: .whitespacesAndNewlines)
+        let shouldFetchCategoryFromList = currentCategory.isEmpty || currentCategory.uppercased() == "ETC"
+
+        let detailEffect: Effect<Action> = .run { send in
+          await send(.detailResponse(TaskResult {
+            do {
+              print("📡 [IngredientDetail] fetch detail start id=\(apiId)")
+              let detail = try await ingredientRepository.fetchIngredientDetail(apiId)
+              print("✅ [IngredientDetail] fetch detail success id=\(apiId)")
+              return detail
+            } catch {
+              print("❌ [IngredientDetail] fetch detail failed id=\(apiId) error=\(Self.errorDebugString(error))")
+              throw error
+            }
+          }))
+        }
+
+        let priceHistoryEffect: Effect<Action> = .run { send in
+          await send(.priceHistoryResponse(TaskResult {
+            do {
+              print("📡 [IngredientDetail] fetch price history start id=\(apiId)")
+              let history = try await ingredientRepository.fetchPriceHistory(apiId)
+              print("✅ [IngredientDetail] fetch price history success id=\(apiId) count=\(history.count)")
+              return history
+            } catch {
+              print("❌ [IngredientDetail] fetch price history failed id=\(apiId) error=\(Self.errorDebugString(error))")
+              throw error
+            }
+          }))
+        }
+
+        guard shouldFetchCategoryFromList else {
+          return .merge(detailEffect, priceHistoryEffect)
+        }
+
+        let categoryEffect: Effect<Action> = .run { send in
+          await send(.categoryResponse(TaskResult {
+            do {
+              let ingredients = try await ingredientRepository.fetchIngredients(nil)
+              let category = ingredients
+                .first(where: { $0.apiId == apiId })?
+                .category
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+              return category
+            } catch {
+              throw error
+            }
+          }))
+        }
+
+        return .merge(detailEffect, priceHistoryEffect, categoryEffect)
         
       case let .detailResponse(.success(item)):
         print("✅ Detail Loaded: \(item.name), menus: \(item.usedMenus)")
-        
-        // Use the category explicitly from the existing state (passed from parent view)
-        // because the detail API response might be missing it or defaulting to "ETC".
-        let validCategory = state.item.category
+
+        let currentCategory = state.item.category.trimmingCharacters(in: .whitespacesAndNewlines)
+        let serverCategory = item.category.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        let resolvedCategory: String
+        if !serverCategory.isEmpty, serverCategory.uppercased() != "ETC" {
+          resolvedCategory = serverCategory
+        } else if !currentCategory.isEmpty, currentCategory.uppercased() != "ETC" {
+          resolvedCategory = currentCategory
+        } else {
+          resolvedCategory = ""
+        }
         
         state.item = InventoryIngredientItem(
             id: item.id,
@@ -141,7 +178,7 @@ public struct IngredientDetailFeature {
             name: item.name,
             amount: item.amount,
             price: item.price,
-            category: validCategory, // Force use of existing valid category
+            category: resolvedCategory,
             supplier: item.supplier,
             usedMenus: item.usedMenus,
             isFavorite: item.isFavorite
@@ -155,9 +192,80 @@ public struct IngredientDetailFeature {
           state.supplierName = supplier
         }
         return .none
+
+      case let .categoryResponse(.success(category)):
+        guard let category else { return .none }
+        let trimmed = category.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return .none }
+
+        state.item = InventoryIngredientItem(
+          id: state.item.id,
+          apiId: state.item.apiId,
+          name: state.item.name,
+          amount: state.item.amount,
+          price: state.item.price,
+          category: trimmed,
+          supplier: state.item.supplier,
+          usedMenus: state.item.usedMenus,
+          isFavorite: state.item.isFavorite
+        )
+        return .none
+
+      case let .categoryResponse(.failure(error)):
+        print("❌ [IngredientDetail] categoryResponse failure: \(Self.errorDebugString(error))")
+        return .none
         
       case let .detailResponse(.failure(error)):
+        if Self.isMissingPriceHistoryError(error), let apiId = state.item.apiId {
+          return .run { send in
+            await send(.detailFallbackResponse(TaskResult {
+              let ingredients = try await ingredientRepository.fetchIngredients(nil)
+              return ingredients.first(where: { $0.apiId == apiId })
+            }))
+          }
+        }
+
         print("❌ [IngredientDetail] detailResponse failure: \(Self.errorDebugString(error))")
+        state.alert = AlertState { TextState("재료 상세 정보 로드 실패") } message: { TextState(error.localizedDescription) }
+        return .none
+
+      case let .detailFallbackResponse(.success(fallbackItem)):
+        guard let fallbackItem else {
+          state.alert = AlertState { TextState("재료 상세 정보 로드 실패") } message: { TextState("재료 정보를 찾지 못했어요") }
+          return .none
+        }
+
+        let existingCategory = state.item.category.trimmingCharacters(in: .whitespacesAndNewlines)
+        let fallbackCategory = fallbackItem.category.trimmingCharacters(in: .whitespacesAndNewlines)
+        let resolvedCategory: String
+        if !fallbackCategory.isEmpty, fallbackCategory.uppercased() != "ETC" {
+          resolvedCategory = fallbackCategory
+        } else if !existingCategory.isEmpty, existingCategory.uppercased() != "ETC" {
+          resolvedCategory = existingCategory
+        } else {
+          resolvedCategory = ""
+        }
+
+        state.item = InventoryIngredientItem(
+          id: fallbackItem.id,
+          apiId: fallbackItem.apiId,
+          name: fallbackItem.name,
+          amount: fallbackItem.amount,
+          price: fallbackItem.price,
+          category: resolvedCategory,
+          supplier: state.item.supplier,
+          usedMenus: state.item.usedMenus,
+          isFavorite: fallbackItem.isFavorite
+        )
+
+        state.priceText = IngredientDetailFeature.formattedPriceText(from: fallbackItem.price)
+        let parsed = IngredientDetailFeature.parseAmount(fallbackItem.amount)
+        state.usageText = parsed.value
+        state.unit = parsed.unit
+        return .none
+
+      case let .detailFallbackResponse(.failure(error)):
+        print("❌ [IngredientDetail] detailFallbackResponse failure: \(Self.errorDebugString(error))")
         state.alert = AlertState { TextState("재료 상세 정보 로드 실패") } message: { TextState(error.localizedDescription) }
         return .none
         
@@ -347,5 +455,17 @@ private extension IngredientDetailFeature {
     }
 
     return code == 404
+  }
+
+  static func isMissingPriceHistoryError(_ error: Error) -> Bool {
+    guard let apiError = error as? APIError else {
+      return false
+    }
+
+    guard case let .serverError(code, message) = apiError else {
+      return false
+    }
+
+    return code == 404 && message.contains("변경 이력이 없어요")
   }
 }

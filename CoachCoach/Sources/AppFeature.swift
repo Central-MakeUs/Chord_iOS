@@ -22,6 +22,7 @@ struct AppFeature {
     var status: AppStatus = .loading
     var isLoggedIn: Bool
     var hasCompletedOnboarding: Bool
+    var hasRegisteredMenu: Bool = false
     var isShowingMenuRegistration = false
     var login = LoginFeature.State()
     var onboarding = OnboardingFeature.State()
@@ -151,9 +152,14 @@ struct AppFeature {
       
       case .autoLoginResult(.failure):
         state.isLoggedIn = false
+        state.hasCompletedOnboarding = false
+        state.hasRegisteredMenu = false
         state.status = .unauthenticated
         UserDefaults.standard.set(false, forKey: UserDefaultsKeys.isLoggedIn)
-        return .none
+        UserDefaults.standard.set(false, forKey: UserDefaultsKeys.hasCompletedOnboarding)
+        return .run { [authRepository] _ in
+          try? await authRepository.logout()
+        }
       
       case .main(.logoutTapped):
         return .send(.logout)
@@ -176,6 +182,7 @@ struct AppFeature {
       case .logoutResult(.success):
         state.isLoggedIn = false
         state.hasCompletedOnboarding = false
+        state.hasRegisteredMenu = false
         state.status = .unauthenticated
         state.isShowingMenuRegistration = false
 
@@ -212,6 +219,7 @@ struct AppFeature {
         return .none
 
       case .menuCheckCompleted(let hasMenu):
+        state.hasRegisteredMenu = hasMenu
         if !hasMenu {
           state.status = .menuRegistration
           state.isShowingMenuRegistration = true
@@ -223,6 +231,7 @@ struct AppFeature {
       case .login(.delegate(.loginCompleted(let onboardingCompleted))):
         state.isLoggedIn = true
         state.hasCompletedOnboarding = onboardingCompleted
+        state.hasRegisteredMenu = false
         UserDefaults.standard.set(true, forKey: UserDefaultsKeys.isLoggedIn)
         UserDefaults.standard.set(onboardingCompleted, forKey: UserDefaultsKeys.hasCompletedOnboarding)
         
@@ -249,15 +258,45 @@ struct AppFeature {
         UserDefaults.standard.set(true, forKey: UserDefaultsKeys.hasCompletedOnboarding)
         return .none
 
+      case .onboarding(.delegate(.dismissed)):
+        state.isLoggedIn = false
+        state.hasCompletedOnboarding = false
+        state.hasRegisteredMenu = false
+        state.status = .unauthenticated
+        state.isShowingMenuRegistration = false
+
+        state.onboarding = OnboardingFeature.State()
+        state.menuRegistration = MenuRegistrationFeature.State()
+
+        UserDefaults.standard.set(false, forKey: UserDefaultsKeys.isLoggedIn)
+        UserDefaults.standard.set(false, forKey: UserDefaultsKeys.hasCompletedOnboarding)
+        return .run { [authRepository] _ in
+          try? await authRepository.logout()
+        }
+
       case .menuRegistration(.delegate(.menuCreated)):
+        state.hasRegisteredMenu = true
         state.status = .authenticated
         state.isShowingMenuRegistration = false
         return .none
         
       case .menuRegistration(.delegate(.dismissed)):
-        state.status = state.hasCompletedOnboarding ? .authenticated : .onboarding
-        state.isShowingMenuRegistration = false
-        return .none
+        if !state.hasRegisteredMenu {
+          state.isLoggedIn = false
+          state.hasCompletedOnboarding = false
+          state.status = .unauthenticated
+          UserDefaults.standard.set(false, forKey: UserDefaultsKeys.isLoggedIn)
+          UserDefaults.standard.set(false, forKey: UserDefaultsKeys.hasCompletedOnboarding)
+          state.menuRegistration = MenuRegistrationFeature.State()
+          state.isShowingMenuRegistration = false
+          return .run { [authRepository] _ in
+            try? await authRepository.logout()
+          }
+        } else {
+          state.status = state.hasCompletedOnboarding ? .authenticated : .onboarding
+          state.isShowingMenuRegistration = false
+          return .none
+        }
 
       case .login,
            .onboarding,

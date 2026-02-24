@@ -495,7 +495,6 @@ private struct TermsDetailSheetView: View {
             NavigationTopBar(
                 onBackTap: { dismiss() },
                 verticalPadding: 12,
-                barHeight: 56,
                 backgroundColor: .white
             )
 

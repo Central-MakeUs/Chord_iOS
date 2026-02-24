@@ -71,10 +71,10 @@ public struct IngredientEditSheetFeature {
         state.draftCategory = category
         return .none
       case let .draftPriceChanged(price):
-        state.draftPrice = Self.sanitizedDigitsAndCommas(price)
+        state.draftPrice = Self.sanitizedDecimalsAndCommas(price)
         return .none
       case let .draftUsageChanged(usage):
-        state.draftUsage = Self.sanitizedDigitsAndCommas(usage)
+        state.draftUsage = Self.sanitizedDecimalsAndCommas(usage)
         return .none
       case let .unitSelected(unit):
         state.draftUnit = unit
@@ -89,5 +89,21 @@ public struct IngredientEditSheetFeature {
 private extension IngredientEditSheetFeature {
   static func sanitizedDigitsAndCommas(_ value: String) -> String {
     value.filter { $0.isNumber || $0 == "," }
+  }
+
+  static func sanitizedDecimalsAndCommas(_ value: String) -> String {
+    let filtered = value.filter { $0.isNumber || $0 == "." || $0 == "," }
+    var hasDot = false
+    var result = ""
+
+    for character in filtered {
+      if character == "." {
+        guard !hasDot else { continue }
+        hasDot = true
+      }
+      result.append(character)
+    }
+
+    return result
   }
 }

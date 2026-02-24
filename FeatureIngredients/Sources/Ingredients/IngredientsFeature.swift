@@ -354,7 +354,7 @@ public struct IngredientsFeature {
         return .none
 
       case let .addIngredientAmountChanged(amount):
-        state.addIngredientAmount = Self.sanitizedDigitsAndCommas(amount)
+        state.addIngredientAmount = Self.sanitizedDecimalsAndCommas(amount)
         return .none
 
       case let .addIngredientSupplierChanged(supplier):
@@ -494,5 +494,21 @@ public struct IngredientsFeature {
 private extension IngredientsFeature {
   static func sanitizedDigitsAndCommas(_ value: String) -> String {
     value.filter { $0.isNumber || $0 == "," }
+  }
+
+  static func sanitizedDecimalsAndCommas(_ value: String) -> String {
+    let filtered = value.filter { $0.isNumber || $0 == "." || $0 == "," }
+    var hasDot = false
+    var result = ""
+
+    for character in filtered {
+      if character == "." {
+        guard !hasDot else { continue }
+        hasDot = true
+      }
+      result.append(character)
+    }
+
+    return result
   }
 }
