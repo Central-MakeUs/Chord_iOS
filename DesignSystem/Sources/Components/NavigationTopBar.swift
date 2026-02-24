@@ -120,24 +120,6 @@ public struct NavigationTopBar: View {
   }
 }
 
-public struct SheetDragHandle: View {
-  @Environment(\.dismiss) private var dismiss
-
-  public init() {}
-
-  public var body: some View {
-    Button(action: { dismiss() }) {
-      RoundedRectangle(cornerRadius: 20, style: .continuous)
-        .fill(AppColor.grayscale300)
-        .frame(width: 60, height: 7)
-    }
-    .buttonStyle(.plain)
-    .frame(maxWidth: .infinity)
-    .padding(.top, 20)
-    .accessibilityHidden(true)
-  }
-}
-
 #Preview {
   VStack(spacing: 20) {
     NavigationTopBar(onBackTap: {})

@@ -26,7 +26,7 @@ public struct MenuIngredientsView: View {
           Spacer()
           
           Text(viewStore.menuName)
-            .font(.pretendardSubtitle1)
+            .font(.pretendardSubtitle2)
             .foregroundColor(AppColor.grayscale900)
           
           Spacer()
@@ -99,6 +99,17 @@ public struct MenuIngredientsView: View {
         }
         .presentationDragIndicator(.hidden)
         .presentationCornerRadius(24)
+      }
+      .sheet(
+        isPresented: viewStore.binding(
+          get: \.showIngredientDetailSheet,
+          send: MenuIngredientsFeature.Action.ingredientDetailSheetPresented
+        )
+      ) {
+        ingredientDetailSheet(viewStore: viewStore)
+          .presentationDetents([.height(420)])
+          .presentationDragIndicator(.hidden)
+          .presentationCornerRadius(24)
       }
       .alert(store: store.scope(state: \.$alert, action: { .alert($0) }))
       .overlay {
@@ -177,6 +188,8 @@ public struct MenuIngredientsView: View {
     Button {
       if viewStore.isEditMode {
         viewStore.send(.ingredientToggled(ingredient.id))
+      } else {
+        viewStore.send(.ingredientRowTapped(ingredient))
       }
     } label: {
       HStack(alignment: .center, spacing: 12) {
@@ -192,19 +205,121 @@ public struct MenuIngredientsView: View {
         
         Spacer()
         
-        HStack(spacing: 4) {
-          Text(ingredient.amount)
-          Text(ingredient.price)
+        HStack(spacing: 8) {
+          HStack(spacing: 4) {
+            Text(ingredient.amount)
+            Text(ingredient.price)
+          }
+
+          Image.chevronRightOutlineIcon
+            .renderingMode(.template)
+            .foregroundColor(AppColor.grayscale500)
+            .frame(width: 16, height: 16)
         }
+        .frame(minHeight: 26)
         .font(.pretendardBody3)
         .foregroundColor(AppColor.grayscale600)
       }
-      .frame(height: 26)
       .padding(.horizontal, 20)
-      .padding(.vertical, 20)
+      .padding(.vertical, 16)
       .contentShape(Rectangle())
     }
     .buttonStyle(.plain)
+  }
+
+  private func ingredientDetailSheet(viewStore: ViewStoreOf<MenuIngredientsFeature>) -> some View {
+    VStack(spacing: 0) {
+      Color.clear.frame(height: 40)
+
+      if let ingredient = viewStore.selectedIngredient {
+        VStack(alignment: .leading, spacing: 0) {
+          Text(ingredient.name)
+            .font(.pretendardHeadline2)
+            .foregroundColor(AppColor.grayscale900)
+            .padding(.bottom, 18)
+
+          Text("사용량")
+            .font(.pretendardCaption1)
+            .foregroundColor(AppColor.grayscale900)
+
+          HStack(spacing: 4) {
+            TextField(
+              "",
+              text: viewStore.binding(
+                get: \.selectedIngredientUsage,
+                send: MenuIngredientsFeature.Action.ingredientDetailUsageChanged
+              ),
+              prompt: Text("제조시 사용되는 용량 입력")
+                .font(.pretendardSubtitle2)
+                .foregroundColor(AppColor.grayscale400)
+            )
+            .font(.pretendardSubtitle2)
+            .foregroundColor(AppColor.grayscale900)
+            .keyboardType(.decimalPad)
+            .textInputAutocapitalization(.never)
+            .disableAutocorrection(true)
+
+            Text(viewStore.selectedIngredientUnit.title)
+              .font(.pretendardSubtitle2)
+              .foregroundColor(AppColor.grayscale900)
+          }
+          .padding(.top, 8)
+
+          Rectangle()
+            .fill(AppColor.grayscale300)
+            .frame(height: 1)
+            .padding(.top, 8)
+
+          VStack(alignment: .leading, spacing: 12) {
+            Text("재료 정보")
+              .font(.pretendardCaption1)
+              .foregroundColor(AppColor.grayscale800)
+
+            infoRow(label: "단가", value: viewStore.selectedIngredientUnitPriceText)
+            infoRow(label: "공급업체", value: viewStore.selectedIngredientSupplier)
+          }
+          .padding(12)
+          .background(AppColor.grayscale200)
+          .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+          .padding(.top, 14)
+
+          Spacer(minLength: 12)
+
+          BottomButton(
+            title: "수정",
+            style: isUpdateEnabled(viewStore) && !viewStore.isUpdatingIngredient ? .primary : .secondary
+          ) {
+            viewStore.send(.ingredientUpdateTapped)
+          }
+          .disabled(!isUpdateEnabled(viewStore) || viewStore.isUpdatingIngredient)
+          .padding(.bottom, 12)
+        }
+        .padding(.horizontal, 20)
+      }
+    }
+    .background(Color.white.ignoresSafeArea())
+  }
+
+  private func infoRow(label: String, value: String) -> some View {
+    HStack(spacing: 8) {
+      Text(label)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale500)
+
+      Rectangle()
+        .fill(AppColor.grayscale300)
+        .frame(width: 1, height: 14)
+
+      Text(value)
+        .font(.pretendardBody3)
+        .foregroundColor(AppColor.grayscale700)
+
+      Spacer()
+    }
+  }
+
+  private func isUpdateEnabled(_ viewStore: ViewStoreOf<MenuIngredientsFeature>) -> Bool {
+    !viewStore.selectedIngredientUsage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
   }
 }
 

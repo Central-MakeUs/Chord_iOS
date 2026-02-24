@@ -49,10 +49,12 @@ public struct MenuDetailView: View {
 
             VStack(spacing: 16) {
               marginInfoCard(status: viewStore.item.status, item: viewStore.item)
+              if shouldShowRecommendedPrice(for: viewStore.item.status) {
                 VStack(alignment: .leading, spacing: 8) {
                   recommendedPriceCard(price: viewStore.item.recommendedPrice)
                   recommendedPriceDescription()
                 }
+              }
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)
@@ -64,7 +66,6 @@ public struct MenuDetailView: View {
             
             ingredientsCard(item: viewStore.item)
               .padding(.horizontal, 20)
-              .padding(.top, 24)
               .padding(.bottom, 16)
           }
         }
@@ -264,39 +265,47 @@ public struct MenuDetailView: View {
   private func formattedRecommendedPrice(_ price: String) -> String {
     let cleaned = price.replacingOccurrences(of: "원", with: "")
                        .replacingOccurrences(of: ",", with: "")
-    guard let number = Int(cleaned) else { return price }
+    guard let number = Double(cleaned) else { return price }
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 6
     return "\(formatter.string(from: NSNumber(value: number)) ?? "\(number)")원"
   }
 
   private func formattedMenuPrice(_ price: String) -> String {
     let cleaned = price.replacingOccurrences(of: "원", with: "")
       .replacingOccurrences(of: ",", with: "")
-    guard let number = Int(cleaned) else { return price }
+    guard let number = Double(cleaned) else { return price }
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 6
     return "\(formatter.string(from: NSNumber(value: number)) ?? "\(number)")원"
   }
 
   private func recommendedPriceCard(price: String?) -> some View {
-    HStack(spacing: 8) {
-      Image.checkmarkIcon
-        .frame(width: 12, height: 9)
+    HStack(spacing: 4) {
+      Image("RecommendedPriceCheckIcon", bundle: .main)
+        .resizable()
+        .scaledToFit()
+        .frame(width: 20, height: 20)
       
       Text("권장가격 ")
-        .font(.pretendardBody2)
-        .foregroundColor(AppColor.grayscale900)
-      + Text(formattedRecommendedPrice(price ?? "- 원"))
+        .font(.pretendardBody3)
+        .foregroundColor(AppColor.grayscale700)
+        
+        Spacer()
+
+      Text(formattedRecommendedPrice(price ?? "- 원"))
         .font(.pretendardBody1)
-        .foregroundColor(AppColor.primaryBlue500)
+        .foregroundColor(AppColor.primaryBlue600)
       
-      Spacer()
     }
-    .padding(.horizontal, 20)
-    .padding(.vertical, 16)
+    .padding(.horizontal, 24)
+    .padding(.vertical, 8)
     .background(AppColor.grayscale200)
-    .cornerRadius(16)
+    .cornerRadius(12)
   }
 
   private func recommendedPriceDescription() -> some View {
@@ -333,7 +342,7 @@ public struct MenuDetailView: View {
   }
   
   private func ingredientsCard(item: MenuItem) -> some View {
-    VStack(alignment: .leading, spacing: 16) {
+    VStack(alignment: .leading, spacing: 0) {
       NavigationLink(value: MenuRoute.ingredients(menuId: item.apiId ?? 0, menuName: item.name, ingredients: item.ingredients)) {
         HStack(spacing: 4) {
           Text("재료 ")
@@ -353,16 +362,20 @@ public struct MenuDetailView: View {
         .contentShape(Rectangle())
       }
       .buttonStyle(.plain)
+      .padding(.bottom, 24)
       
       VStack(spacing: 12) {
         ForEach(item.ingredients) { ingredient in
           ingredientRow(name: ingredient.name, amount: ingredient.amount, price: ingredient.price)
         }
       }
+      .padding(.bottom, 12)
+
 
       Rectangle()
         .fill(AppColor.grayscale200)
         .frame(height: 1)
+        .padding(.bottom, 12)
       
       HStack(spacing: 4) {
         Text("총")
@@ -373,9 +386,8 @@ public struct MenuDetailView: View {
           .foregroundColor(AppColor.grayscale900)
       }
       .frame(maxWidth: .infinity, alignment: .center)
-      .padding(.top, 8)
     }
-    .padding(20)
+    .padding(24)
     .background(Color.white)
     .cornerRadius(16)
     .overlay(

@@ -55,8 +55,8 @@ public struct MenuEditFeature {
     public var hasPendingChanges: Bool {
       let normalizedName = menuName.trimmingCharacters(in: .whitespacesAndNewlines)
       let originalName = item.name.trimmingCharacters(in: .whitespacesAndNewlines)
-      let currentPrice = MenuEditFeature.digitsOnly(menuPrice)
-      let originalPrice = MenuEditFeature.digitsOnly(MenuEditFeature.formattedPrice(from: item.price))
+      let currentPrice = MenuEditFeature.normalizedPriceInput(menuPrice)
+      let originalPrice = MenuEditFeature.normalizedPriceInput(MenuEditFeature.formattedPrice(from: item.price))
       let currentWorkTime = prepareTimeMinutes * 60 + prepareTimeSeconds
       let originalCategory = item.category == .all ? MenuCategory.beverage : item.category
 
@@ -140,13 +140,12 @@ public struct MenuEditFeature {
         return .none
 
       case let .menuPriceUpdated(price):
-        let digits = Self.digitsOnly(price)
-        state.menuPrice = digits
+        state.menuPrice = Self.sanitizedDecimalsAndCommas(price)
         state.isPriceEditPresented = false
         return .none
 
       case .menuPriceFieldTapped:
-        state.menuPrice = Self.digitsOnly(state.menuPrice)
+        state.menuPrice = Self.normalizedPriceInput(state.menuPrice)
         return .none
 
       case let .prepareTimeUpdated(minutes, seconds):
@@ -172,10 +171,10 @@ public struct MenuEditFeature {
         let originalName = state.item.name.trimmingCharacters(in: .whitespacesAndNewlines)
         let hasNameChanged = normalizedName != originalName && !normalizedName.isEmpty
 
-        let currentPriceDigits = Self.digitsOnly(state.menuPrice)
-        let originalPriceDigits = Self.digitsOnly(Self.formattedPrice(from: state.item.price))
-        let hasPriceChanged = currentPriceDigits != originalPriceDigits && !currentPriceDigits.isEmpty
-        let currentPriceValue = Double(currentPriceDigits)
+        let currentPriceText = Self.normalizedPriceInput(state.menuPrice)
+        let originalPriceText = Self.normalizedPriceInput(Self.formattedPrice(from: state.item.price))
+        let hasPriceChanged = currentPriceText != originalPriceText && !currentPriceText.isEmpty
+        let currentPriceValue = Double(currentPriceText)
 
         let currentWorkTime = state.prepareTimeMinutes * 60 + state.prepareTimeSeconds
         let hasWorkTimeChanged = currentWorkTime != state.initialWorkTime
@@ -266,15 +265,38 @@ public struct MenuEditFeature {
 
 private extension MenuEditFeature {
   static func formattedPrice(from value: String) -> String {
-    let digits = value.filter { $0.isNumber }
-    guard let number = Int64(digits), !digits.isEmpty else { return "" }
+    let normalized = normalizedPriceInput(value)
+    guard let number = Double(normalized), !normalized.isEmpty else { return "" }
     let formatter = NumberFormatter()
     formatter.numberStyle = .decimal
-    return formatter.string(from: NSNumber(value: number)) ?? digits
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 6
+    return formatter.string(from: NSNumber(value: number)) ?? normalized
   }
 
   static func digitsOnly(_ value: String) -> String {
     value.filter { $0.isNumber }
+  }
+
+  static func sanitizedDecimalsAndCommas(_ value: String) -> String {
+    let filtered = value.filter { $0.isNumber || $0 == "." || $0 == "," }
+    var hasDot = false
+    var result = ""
+
+    for character in filtered {
+      if character == "." {
+        guard !hasDot else { continue }
+        hasDot = true
+      }
+      result.append(character)
+    }
+
+    return result
+  }
+
+  static func normalizedPriceInput(_ value: String) -> String {
+    sanitizedDecimalsAndCommas(value)
+      .replacingOccurrences(of: ",", with: "")
   }
   
   func categoryToCode(_ category: MenuCategory) -> String {

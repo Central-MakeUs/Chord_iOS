@@ -16,6 +16,7 @@ public struct AddIngredientSheet: View {
   @State private var detailLoadFailed: Bool = false
   @State private var isUnitDropdownExpanded: Bool = false
   @FocusState private var isUsageFocused: Bool
+  @FocusState private var isCustomPriceFocused: Bool
 
   @Dependency(\.ingredientRepository) var ingredientRepository
 
@@ -48,7 +49,7 @@ public struct AddIngredientSheet: View {
 
   private var addRootContent: some View {
     VStack(spacing: 0) {
-      SheetDragHandle()
+      Color.clear.frame(height: 40)
 
       Text("재료 추가")
         .font(.pretendardHeadline2)
@@ -156,166 +157,202 @@ public struct AddIngredientSheet: View {
   }
 
   private var registeredIngredientDetailContent: some View {
-    VStack(spacing: 0) {
-      SheetDragHandle()
-
-      if let draft = registeredIngredientDraft {
-        VStack(alignment: .leading, spacing: 0) {
-          Text(draft.name)
-            .font(.pretendardHeadline2)
-            .foregroundColor(AppColor.grayscale900)
-            .padding(.bottom, 18)
-
-          Text("사용량")
-            .font(.pretendardCaption1)
-            .foregroundColor(AppColor.grayscale900)
-
-          TextField(
-            "",
-            text: Binding(
-              get: { registeredIngredientDraft?.usageAmount ?? "" },
-              set: { newValue in
-                guard let unit = registeredIngredientDraft?.unitCode else { return }
-                registeredIngredientDraft?.usageAmount = sanitizeUsageInput(newValue, unit: unit)
-              }
-            ),
-            prompt: Text("제조시 사용되는 용량 입력")
-              .font(.pretendardSubtitle2)
-              .foregroundColor(AppColor.grayscale400)
+    ZStack {
+      Color.white
+        .ignoresSafeArea()
+        .onTapGesture {
+          isUsageFocused = false
+          UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
           )
-          .font(.pretendardSubtitle2)
-          .foregroundColor(AppColor.grayscale900)
-          .keyboardType(.decimalPad)
-          .textInputAutocapitalization(.never)
-          .disableAutocorrection(true)
-          .focused($isUsageFocused)
-          .padding(.top, 8)
-          .onChange(of: isUsageFocused) { _, isFocused in
-            guard let currentDraft = registeredIngredientDraft else { return }
-            if isFocused {
-              registeredIngredientDraft?.usageAmount = stripUnit(from: currentDraft.usageAmount, unit: currentDraft.unitCode)
-            } else {
-              registeredIngredientDraft?.usageAmount = appendUnitIfNeeded(to: currentDraft.usageAmount, unit: currentDraft.unitCode)
-            }
-          }
+        }
 
-          Rectangle()
-            .fill(AppColor.grayscale300)
-            .frame(height: 1)
+      VStack(spacing: 0) {
+        Color.clear.frame(height: 40)
+
+        if let draft = registeredIngredientDraft {
+          VStack(alignment: .leading, spacing: 0) {
+            Text(draft.name)
+              .font(.pretendardHeadline2)
+              .foregroundColor(AppColor.grayscale900)
+              .padding(.bottom, 18)
+
+            Text("사용량")
+              .font(.pretendardCaption1)
+              .foregroundColor(AppColor.grayscale900)
+
+            TextField(
+              "",
+              text: Binding(
+                get: {
+                  guard let draft = registeredIngredientDraft else { return "" }
+                  if isUsageFocused {
+                    return stripUnit(from: draft.usageAmount, unit: draft.unitCode)
+                      .replacingOccurrences(of: ",", with: "")
+                  }
+                  return appendUnitIfNeeded(to: draft.usageAmount, unit: draft.unitCode)
+                },
+                set: { newValue in
+                  guard let unit = registeredIngredientDraft?.unitCode else { return }
+                  let raw = stripUnit(from: newValue, unit: unit)
+                    .replacingOccurrences(of: ",", with: "")
+                  registeredIngredientDraft?.usageAmount = sanitizeDecimalsAndCommas(raw)
+                }
+              ),
+              prompt: Text("제조시 사용되는 용량 입력")
+                .font(.pretendardSubtitle2)
+                .foregroundColor(AppColor.grayscale400)
+            )
+            .font(.pretendardSubtitle2)
+            .foregroundColor(AppColor.grayscale900)
+            .tint(AppColor.grayscale900)
+            .keyboardType(.decimalPad)
+            .textInputAutocapitalization(.never)
+            .disableAutocorrection(true)
+            .focused($isUsageFocused)
             .padding(.top, 8)
 
-          VStack(alignment: .leading, spacing: 12) {
-            Text("재료 정보")
-              .font(.pretendardCaption1)
-              .foregroundColor(AppColor.grayscale800)
+            Rectangle()
+              .fill(AppColor.grayscale300)
+              .frame(height: 1)
+              .padding(.top, 8)
 
-            infoRow(label: "단가", value: unitPriceText(draft))
-            infoRow(label: "공급업체", value: draft.supplier?.isEmpty == false ? draft.supplier! : "-")
+            VStack(alignment: .leading, spacing: 12) {
+              Text("재료 정보")
+                .font(.pretendardCaption1)
+                .foregroundColor(AppColor.grayscale800)
+
+              infoRow(label: "단가", value: unitPriceText(draft))
+              infoRow(label: "공급업체", value: draft.supplier?.isEmpty == false ? draft.supplier! : "-")
+            }
+            .padding(12)
+            .background(AppColor.grayscale200)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .padding(.top, 14)
+
+            Spacer(minLength: 12)
+
+            BottomButton(
+              title: "재료 추가",
+              style: isUsageEmpty(draft) ? .secondary : .primary
+            ) {
+              isUsageFocused = false
+              confirmRegisteredIngredientAdd()
+            }
+            .disabled(isUsageEmpty(draft))
+            .padding(.bottom, 12)
           }
-          .padding(12)
-          .background(AppColor.grayscale200)
-          .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-          .padding(.top, 14)
-
-          Spacer(minLength: 12)
-
-          BottomButton(
-            title: "재료 추가",
-            style: isUsageEmpty(draft) ? .secondary : .primary
-          ) {
-            confirmRegisteredIngredientAdd()
-          }
-          .disabled(isUsageEmpty(draft))
-          .padding(.bottom, 12)
+          .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 20)
       }
     }
-    .background(Color.white.ignoresSafeArea())
-    .contentShape(Rectangle())
-    .simultaneousGesture(
-      TapGesture().onEnded {
-        isUsageFocused = false
-        UIApplication.shared.sendAction(
-          #selector(UIResponder.resignFirstResponder),
-          to: nil,
-          from: nil,
-          for: nil
-        )
-      }
-    )
   }
 
   private var customIngredientDetailContent: some View {
-    VStack(spacing: 12) {
-      SheetDragHandle()
+    ZStack {
+      Color.white
+        .ignoresSafeArea()
+        .onTapGesture {
+          UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+          )
+        }
 
-      if let draft = customIngredientDraft {
-        ScrollView {
-          VStack(alignment: .leading, spacing: 24) {
-            VStack(alignment: .leading, spacing: 12) {
-              Text(draft.name)
-                .font(.pretendardHeadline2)
-                .foregroundColor(AppColor.grayscale900)
+      VStack(spacing: 12) {
+        Color.clear.frame(height: 40)
 
-              customCategoryTabs
+        if let draft = customIngredientDraft {
+          ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+              VStack(alignment: .leading, spacing: 12) {
+                Text(draft.name)
+                  .font(.pretendardHeadline2)
+                  .foregroundColor(AppColor.grayscale900)
+
+                customCategoryTabs
+              }
+
+              customPriceField
+                .padding(.bottom, 12)
+
+              customPurchaseAmountField
+                .padding(.bottom, 12)
+
+              customUsageAmountField
+                .padding(.bottom, 12)
+
+              UnderlinedTextField(
+                text: Binding(
+                  get: { customIngredientDraft?.supplier ?? "" },
+                  set: { customIngredientDraft?.supplier = $0 }
+                ),
+                title: "공급업체",
+                placeholder: "공급업체명을 알려주세요 (선택)",
+                accentColor: AppColor.grayscale300,
+                showFocusHighlight: false
+              )
             }
-
-            UnderlinedTextField(
-              text: Binding(
-                get: { customIngredientDraft?.price ?? "" },
-                set: { customIngredientDraft?.price = sanitizeDigitsAndCommas($0) }
-              ),
-              title: "가격",
-              placeholder: "구매하신 가격을 입력해주세요",
-              accentColor: AppColor.grayscale500,
-              keyboardType: .numberPad
-            )
-            .padding(.bottom, 12)
-
-            customPurchaseAmountField
-              .padding(.bottom, 12)
-
-            customUsageAmountField
-              .padding(.bottom, 12)
-
-            UnderlinedTextField(
-              text: Binding(
-                get: { customIngredientDraft?.supplier ?? "" },
-                set: { customIngredientDraft?.supplier = $0 }
-              ),
-              title: "공급업체",
-              placeholder: "공급업체명을 알려주세요 (선택)",
-              accentColor: AppColor.grayscale300
-            )
+            .padding(.horizontal, 20)
+            .padding(.top, 20)
+            .padding(.bottom, 100)
           }
-          .padding(.horizontal, 20)
-          .padding(.top, 20)
-          .padding(.bottom, 100)
-        }
 
-        BottomButton(title: "추가하기", style: isCustomAddEnabled(draft) ? .primary : .secondary) {
-          confirmCustomIngredientAdd()
+          BottomButton(title: "추가하기", style: isCustomAddEnabled(draft) ? .primary : .secondary) {
+            confirmCustomIngredientAdd()
+          }
+          .disabled(!isCustomAddEnabled(draft))
+          .padding(.horizontal, 20)
+          .padding(.top, 16)
+          .padding(.bottom, 34)
+          .background(Color.white)
         }
-        .disabled(!isCustomAddEnabled(draft))
-        .padding(.horizontal, 20)
-        .padding(.top, 16)
-        .padding(.bottom, 34)
-        .background(Color.white)
       }
     }
-    .background(Color.white.ignoresSafeArea())
-    .contentShape(Rectangle())
-    .simultaneousGesture(
-      TapGesture().onEnded {
-        UIApplication.shared.sendAction(
-          #selector(UIResponder.resignFirstResponder),
-          to: nil,
-          from: nil,
-          for: nil
-        )
-      }
-    )
+  }
+
+  private var customPriceField: some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text("가격")
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
+
+      TextField(
+        "",
+        text: Binding(
+          get: {
+            let rawDigits = digitsOnly(from: customIngredientDraft?.price ?? "")
+            guard !rawDigits.isEmpty else { return "" }
+            if isCustomPriceFocused {
+              return rawDigits
+            }
+            return "\(formattedWithComma(rawDigits))원"
+          },
+          set: { newValue in
+            customIngredientDraft?.price = digitsOnly(from: newValue)
+          }
+        ),
+        prompt: Text("구매하신 가격을 입력해주세요")
+          .font(.pretendardSubtitle2)
+          .foregroundColor(AppColor.grayscale500)
+      )
+      .font(.pretendardSubtitle2)
+      .foregroundColor(AppColor.grayscale900)
+      .tint(AppColor.grayscale900)
+      .keyboardType(.numberPad)
+      .textInputAutocapitalization(.never)
+      .disableAutocorrection(true)
+      .focused($isCustomPriceFocused)
+
+      Rectangle()
+        .fill(AppColor.grayscale300)
+        .frame(height: 1)
+    }
   }
 
   private var customCategoryTabs: some View {
@@ -356,7 +393,7 @@ public struct AddIngredientSheet: View {
           "",
           text: Binding(
             get: { customIngredientDraft?.purchaseAmount ?? "" },
-            set: { customIngredientDraft?.purchaseAmount = sanitizeDigitsAndCommas($0) }
+            set: { customIngredientDraft?.purchaseAmount = sanitizeDecimalsAndCommas($0) }
           ),
           prompt: Text("구매하신 총 용량을 입력해주세요")
             .font(.pretendardSubtitle2)
@@ -364,7 +401,7 @@ public struct AddIngredientSheet: View {
         )
         .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
-        .keyboardType(.numberPad)
+        .keyboardType(.decimalPad)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
 
@@ -446,7 +483,7 @@ public struct AddIngredientSheet: View {
           "",
           text: Binding(
             get: { customIngredientDraft?.usageAmount ?? "" },
-            set: { customIngredientDraft?.usageAmount = sanitizeDigitsAndCommas($0) }
+            set: { customIngredientDraft?.usageAmount = sanitizeDecimalsAndCommas($0) }
           ),
           prompt: Text("이 메뉴에서의 재료 사용량을 입력해주세요")
             .font(.pretendardSubtitle2)
@@ -454,7 +491,7 @@ public struct AddIngredientSheet: View {
         )
         .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
-        .keyboardType(.numberPad)
+        .keyboardType(.decimalPad)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
 
@@ -628,6 +665,17 @@ public struct AddIngredientSheet: View {
     value.filter { $0.isNumber || $0 == "," }
   }
 
+  private func digitsOnly(from value: String) -> String {
+    value.filter { $0.isNumber }
+  }
+
+  private func formattedWithComma(_ digits: String) -> String {
+    guard let value = Int(digits) else { return digits }
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    return formatter.string(from: NSNumber(value: value)) ?? digits
+  }
+
   private func sanitizeDecimalsAndCommas(_ value: String) -> String {
     let filtered = value.filter { $0.isNumber || $0 == "." || $0 == "," }
     var hasDot = false
@@ -642,18 +690,6 @@ public struct AddIngredientSheet: View {
     }
 
     return result
-  }
-
-  private func sanitizeUsageInput(_ value: String, unit: String) -> String {
-    let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !trimmed.isEmpty else { return "" }
-
-    let hasUnitSuffix = !unit.isEmpty && trimmed.hasSuffix(unit)
-    let numericSource = hasUnitSuffix ? String(trimmed.dropLast(unit.count)) : trimmed
-    let sanitizedNumeric = sanitizeDecimalsAndCommas(numericSource)
-
-    guard !sanitizedNumeric.isEmpty else { return "" }
-    return hasUnitSuffix ? sanitizedNumeric + unit : sanitizedNumeric
   }
 
   private func parsePrice(from text: String) -> Double {
@@ -684,13 +720,19 @@ public struct AddIngredientSheet: View {
 
   private func stripUnit(from text: String, unit: String) -> String {
     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-    if trimmed.hasSuffix(unit) {
-      return String(trimmed.dropLast(unit.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+    let unitCandidates = candidateUnits(for: unit)
+
+    for candidate in unitCandidates {
+      if trimmed.lowercased().hasSuffix(candidate.lowercased()) {
+        return String(trimmed.dropLast(candidate.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+      }
     }
+
     return trimmed
   }
 
   private func appendUnitIfNeeded(to text: String, unit: String) -> String {
+    let displayUnit = IngredientUnit.from(unit).title
     let raw = stripUnit(from: text, unit: unit)
       .filter { $0.isNumber || $0 == "." || $0 == "," }
     guard !raw.isEmpty else { return "" }
@@ -699,11 +741,16 @@ public struct AddIngredientSheet: View {
     if let value = Double(normalized) {
       let intValue = Int(value)
       if Double(intValue) == value {
-        return "\(intValue)\(unit)"
+        return "\(intValue)\(displayUnit)"
       }
-      return "\(value)\(unit)"
+      return "\(value)\(displayUnit)"
     }
-    return "\(normalized)\(unit)"
+    return "\(normalized)\(displayUnit)"
+  }
+
+  private func candidateUnits(for unit: String) -> [String] {
+    let displayUnit = IngredientUnit.from(unit).title
+    return Array(Set([unit, displayUnit].filter { !$0.isEmpty }))
   }
 
   private func isUsageEmpty(_ draft: RegisteredIngredientDraft) -> Bool {

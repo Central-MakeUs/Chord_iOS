@@ -6,8 +6,11 @@ import UIKit
 
 public struct MenuRegistrationStep1View: View {
   let store: StoreOf<MenuRegistrationFeature>
+  @Environment(\.dismiss) private var dismiss
   @State private var isCategorySheetPresented = false
   @State private var selectedCategoryDraft = "음료"
+  @FocusState private var isPriceFieldFocused: Bool
+  @State private var priceFieldText: String = ""
 
   public init(store: StoreOf<MenuRegistrationFeature>) {
     self.store = store
@@ -17,7 +20,8 @@ public struct MenuRegistrationStep1View: View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
         NavigationTopBar(onBackTap: {
-          viewStore.send(.previousStepTapped)
+          viewStore.send(.backTapped)
+          dismiss()
         })
 
         HStack {
@@ -25,7 +29,6 @@ public struct MenuRegistrationStep1View: View {
           Spacer()
         }
         .padding(.horizontal, 20)
-        .padding(.top, 10)
         .padding(.bottom, 24)
 
 
@@ -125,12 +128,38 @@ public struct MenuRegistrationStep1View: View {
   }
 
   private func dismissKeyboard() {
+    isPriceFieldFocused = false
     UIApplication.shared.sendAction(
       #selector(UIResponder.resignFirstResponder),
       to: nil,
       from: nil,
       for: nil
     )
+  }
+
+  private func digitsOnly(from value: String) -> String {
+    value.filter { $0.isNumber }
+  }
+
+  private func formattedWithComma(_ digits: String) -> String {
+    guard let value = Int(digits) else { return digits }
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    return formatter.string(from: NSNumber(value: value)) ?? digits
+  }
+
+  private func syncPriceFieldText(with viewStore: ViewStoreOf<MenuRegistrationFeature>) {
+    let rawDigits = digitsOnly(from: viewStore.price)
+    guard !rawDigits.isEmpty else {
+      priceFieldText = ""
+      return
+    }
+
+    if isPriceFieldFocused {
+      priceFieldText = rawDigits
+    } else {
+      priceFieldText = "\(formattedWithComma(rawDigits))원"
+    }
   }
 
   private var stepIndicator: some View {
@@ -151,16 +180,55 @@ public struct MenuRegistrationStep1View: View {
 //      }
       
       if viewStore.isTemplateApplied || !viewStore.menuName.isEmpty && !viewStore.showSuggestions {
-        UnderlinedTextField(
-          text: viewStore.binding(
-            get: \.price,
-            send: MenuRegistrationFeature.Action.priceChanged
-          ),
-          title: "가격",
-          placeholder: "가격을 입력해주세요",
-          keyboardType: .numberPad
-        )
+        priceInputField(viewStore: viewStore)
       }
+    }
+  }
+
+  private func priceInputField(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text("가격")
+        .frame(minHeight: 20)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
+
+      TextField(
+        "",
+        text: Binding(
+          get: { priceFieldText },
+          set: { newValue in
+            priceFieldText = newValue
+            viewStore.send(.priceChanged(digitsOnly(from: newValue)))
+          }
+        ),
+        prompt: Text("가격을 입력해주세요")
+          .font(.pretendardSubtitle2)
+          .foregroundColor(AppColor.grayscale500)
+      )
+      .frame(minHeight: 30)
+      .font(.pretendardSubtitle2)
+      .foregroundColor(AppColor.grayscale900)
+      .tint(AppColor.grayscale900)
+      .keyboardType(.numberPad)
+      .textInputAutocapitalization(.never)
+      .disableAutocorrection(true)
+      .focused($isPriceFieldFocused)
+      .onAppear {
+        syncPriceFieldText(with: viewStore)
+      }
+      .onChange(of: isPriceFieldFocused) { _, _ in
+        syncPriceFieldText(with: viewStore)
+      }
+      .onChange(of: viewStore.price) { _, _ in
+        if !isPriceFieldFocused {
+          syncPriceFieldText(with: viewStore)
+        }
+      }
+
+      Rectangle()
+        .fill(AppColor.grayscale300)
+        .frame(height: 1)
+        .padding(.top, 2)
     }
   }
 
@@ -246,9 +314,12 @@ public struct MenuRegistrationStep1View: View {
 
         HStack {
             Spacer()
-            workTimeHintBanner(text: "평균적인 \(viewStore.selectedCategory)의 제조시간이에요")
-              .padding(.top, 8)
-              .padding(.horizontal, 20)
+            if viewStore.selectedCategory == "음료" {
+                workTimeHintBanner(text: "평균적인 음료의 제조시간이에요")
+                  .padding(.top, 8)
+                  .padding(.horizontal, 20)
+            }
+
         }
   
     }

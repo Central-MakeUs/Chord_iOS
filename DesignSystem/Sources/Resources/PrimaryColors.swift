@@ -28,5 +28,5 @@ public enum AppColor {
   public static let semanticCautionText = Color("SemanticCautionText", bundle: designSystemBundle)
   public static let semanticCaution = Color("SemanticCaution", bundle: designSystemBundle)
   
-  public static let error = Color(red: 235/255, green: 87/255, blue: 87/255)
+  public static let error = Color(red: 207/255, green: 49/255, blue: 49/255)
 }

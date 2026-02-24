@@ -28,13 +28,12 @@ public struct TemplateApplySheet: View {
                 .font(.pretendardBody2)
                 .foregroundColor(AppColor.grayscale700)
         }
-        .padding(.top, 40)
-        .padding(.bottom, 10)
         Spacer()
         actionButtons
       }
+      .padding(.top, 40)
       .padding(.horizontal, 24)
-      .padding(.bottom, 20)
+      .padding(.bottom, 40)
     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     .background(Color.white)
   }

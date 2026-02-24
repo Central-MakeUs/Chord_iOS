@@ -7,74 +7,120 @@ import UIKit
 struct IngredientAddSheet: View {
   let store: StoreOf<MenuRegistrationFeature>
   @State private var isUnitDropdownExpanded = false
+  @FocusState private var isPriceFieldFocused: Bool
+  @FocusState private var isUsageFieldFocused: Bool
+  @State private var customPriceFieldText: String = ""
+  @State private var customUsageFieldText: String = ""
 
   var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
-      VStack(spacing: 12) {
-        SheetDragHandle()
-
-        ScrollView {
-          VStack(alignment: .leading, spacing: 24) {
-    
-            VStack(alignment: .leading, spacing: 12) {
-              
-              Text(viewStore.ingredientAddName)
-                .font(.pretendardHeadline2)
-                .foregroundColor(AppColor.grayscale900)
-              
-              categoryTabs(viewStore: viewStore)
-            }
-
-
-            UnderlinedTextField(
-              text: viewStore.binding(
-                get: \.ingredientAddPrice,
-                send: MenuRegistrationFeature.Action.ingredientAddPriceChanged
-              ),
-              title: "가격",
-              placeholder: "구매하신 가격을 입력해주세요",
-              accentColor: AppColor.grayscale500,
-              keyboardType: .numberPad
-            )
-            .padding(.bottom, 12)
-
-            purchaseAmountField(viewStore: viewStore)
-                  .padding(.bottom, 12)
-
-              
-            usageAmountField(viewStore: viewStore)
-                  .padding(.bottom, 12)
-
-              
-            UnderlinedTextField(
-              text: viewStore.binding(
-                get: \.ingredientAddSupplier,
-                send: MenuRegistrationFeature.Action.ingredientAddSupplierChanged
-              ),
-              title: "공급업체",
-              placeholder: "공급업체명을 알려주세요 (선택)",
-              accentColor: AppColor.grayscale300
+      ZStack {
+        Color.white
+          .ignoresSafeArea()
+          .onTapGesture {
+            isPriceFieldFocused = false
+            isUsageFieldFocused = false
+            UIApplication.shared.sendAction(
+              #selector(UIResponder.resignFirstResponder),
+              to: nil,
+              from: nil,
+              for: nil
             )
           }
-          .padding(.horizontal, 20)
-          .padding(.top, 20)
-          .padding(.bottom, 100)
-        }
 
-        addButton(viewStore: viewStore)
-      }
-      .background(Color.white.ignoresSafeArea())
-      .contentShape(Rectangle())
-      .simultaneousGesture(
-        TapGesture().onEnded {
-          UIApplication.shared.sendAction(
-            #selector(UIResponder.resignFirstResponder),
-            to: nil,
-            from: nil,
-            for: nil
-          )
+        VStack(spacing: 12) {
+          Color.clear.frame(height: 40)
+
+          ScrollView {
+            VStack(alignment: .leading, spacing: 24) {
+
+              VStack(alignment: .leading, spacing: 12) {
+
+                Text(viewStore.ingredientAddName)
+                  .font(.pretendardHeadline2)
+                  .foregroundColor(AppColor.grayscale900)
+
+                categoryTabs(viewStore: viewStore)
+              }
+
+
+              priceField(viewStore: viewStore)
+              .padding(.bottom, 12)
+
+              purchaseAmountField(viewStore: viewStore)
+                    .padding(.bottom, 12)
+
+
+              usageAmountField(viewStore: viewStore)
+                    .padding(.bottom, 12)
+
+
+              UnderlinedTextField(
+                text: viewStore.binding(
+                  get: \.ingredientAddSupplier,
+                  send: MenuRegistrationFeature.Action.ingredientAddSupplierChanged
+                ),
+                title: "공급업체",
+                placeholder: "공급업체명을 알려주세요 (선택)",
+                accentColor: AppColor.grayscale900,
+                showFocusHighlight: false
+              )
+            }
+            .padding(.horizontal, 20)
+            .padding(.bottom, 100)
+          }
+
+          addButton(viewStore: viewStore)
         }
+      }
+    }
+  }
+
+  private func priceField(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
+    VStack(alignment: .leading, spacing: 8) {
+      Text("가격")
+        .frame(minHeight: 20)
+        .font(.pretendardCaption1)
+        .foregroundColor(AppColor.grayscale900)
+
+      TextField(
+        "",
+        text: Binding(
+          get: { customPriceFieldText },
+          set: { newValue in
+            let rawDigits = digitsOnly(from: newValue)
+            customPriceFieldText = rawDigits
+            viewStore.send(.ingredientAddPriceChanged(rawDigits))
+          }
+        ),
+        prompt: Text("구매하신 가격을 입력해주세요")
+          .font(.pretendardSubtitle2)
+          .foregroundColor(AppColor.grayscale500)
       )
+      .frame(minHeight: 30)
+      .font(.pretendardSubtitle2)
+      .foregroundColor(AppColor.grayscale900)
+      .tint(AppColor.grayscale900)
+      .keyboardType(.numberPad)
+      .focused($isPriceFieldFocused)
+      .textInputAutocapitalization(.never)
+      .disableAutocorrection(true)
+      .onAppear {
+        syncCustomPriceFieldText(with: viewStore)
+      }
+      .onChange(of: isPriceFieldFocused) { _, _ in
+        syncCustomPriceFieldText(with: viewStore)
+      }
+      .onChange(of: viewStore.ingredientAddPrice) { _, _ in
+        if !isPriceFieldFocused {
+          syncCustomPriceFieldText(with: viewStore)
+        }
+      }
+
+      Rectangle()
+        .fill(AppColor.grayscale300)
+        .frame(height: 1)
+        .padding(.top, 2)
     }
   }
 
@@ -133,7 +179,8 @@ struct IngredientAddSheet: View {
         )
         .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
-        .keyboardType(.numberPad)
+        .tint(AppColor.grayscale900)
+        .keyboardType(.decimalPad)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
 
@@ -214,9 +261,14 @@ struct IngredientAddSheet: View {
       HStack(spacing: 8) {
         TextField(
           "",
-          text: viewStore.binding(
-            get: \.ingredientAddUsageAmount,
-            send: MenuRegistrationFeature.Action.ingredientAddUsageAmountChanged
+          text: Binding(
+            get: { customUsageFieldText },
+            set: { newValue in
+              let sanitized = sanitizedDecimalText(removeSuffixUnit(from: newValue, unit: viewStore.ingredientAddUnit.title))
+              customUsageFieldText = sanitized
+              let withoutUnit = removeSuffixUnit(from: newValue, unit: viewStore.ingredientAddUnit.title)
+              viewStore.send(.ingredientAddUsageAmountChanged(sanitizedDecimalText(withoutUnit)))
+            }
           ),
           prompt: Text("이 메뉴에서의 재료 사용량을 입력해주세요")
             .font(.pretendardSubtitle2)
@@ -224,15 +276,24 @@ struct IngredientAddSheet: View {
         )
         .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
-        .keyboardType(.numberPad)
+        .tint(AppColor.grayscale900)
+        .keyboardType(.decimalPad)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
-
-        if !viewStore.ingredientAddPurchaseAmount.isEmpty {
-          Text(viewStore.ingredientAddUnit.title)
-            .font(.pretendardSubtitle2)
-            .foregroundColor(AppColor.grayscale700)
-            .frame(minWidth: 20, alignment: .trailing)
+        .focused($isUsageFieldFocused)
+        .onAppear {
+          syncCustomUsageFieldText(with: viewStore)
+        }
+        .onChange(of: isUsageFieldFocused) { _, _ in
+          syncCustomUsageFieldText(with: viewStore)
+        }
+        .onChange(of: viewStore.ingredientAddUsageAmount) { _, _ in
+          if !isUsageFieldFocused {
+            syncCustomUsageFieldText(with: viewStore)
+          }
+        }
+        .onChange(of: viewStore.ingredientAddUnit) { _, _ in
+          syncCustomUsageFieldText(with: viewStore)
         }
       }
 
@@ -244,9 +305,10 @@ struct IngredientAddSheet: View {
 
   private func addButton(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     let isAddEnabled = isIngredientAddEnabled(viewStore)
+    let actionTitle = viewStore.selectedIngredientIndex == nil ? "추가하기" : "완료"
 
     return VStack(spacing: 0) {
-      BottomButton(title: "추가하기", style: isAddEnabled ? .primary : .secondary) {
+      BottomButton(title: actionTitle, style: isAddEnabled ? .primary : .secondary) {
         viewStore.send(.confirmAddIngredientTapped)
       }
       .disabled(!isAddEnabled)
@@ -262,6 +324,67 @@ struct IngredientAddSheet: View {
     let purchaseAmount = Double(viewStore.ingredientAddPurchaseAmount.replacingOccurrences(of: ",", with: "")) ?? 0
     let usageAmount = Double(viewStore.ingredientAddUsageAmount.replacingOccurrences(of: ",", with: "")) ?? 0
     return price > 0 && purchaseAmount > 0 && usageAmount > 0
+  }
+
+  private func digitsOnly(from text: String) -> String {
+    text.filter { $0.isNumber }
+  }
+
+  private func sanitizedDecimalText(_ value: String) -> String {
+    let filtered = value.filter { $0.isNumber || $0 == "." }
+    var hasDot = false
+    var result = ""
+
+    for character in filtered {
+      if character == "." {
+        guard !hasDot else { continue }
+        hasDot = true
+      }
+      result.append(character)
+    }
+
+    return result
+  }
+
+  private func formattedWithComma(_ digits: String) -> String {
+    guard let value = Int(digits) else { return digits }
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    return formatter.string(from: NSNumber(value: value)) ?? digits
+  }
+
+  private func removeSuffixUnit(from text: String, unit: String) -> String {
+    let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+    guard !unit.isEmpty, trimmed.hasSuffix(unit) else { return trimmed }
+    return String(trimmed.dropLast(unit.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+  }
+
+  private func syncCustomPriceFieldText(with viewStore: ViewStoreOf<MenuRegistrationFeature>) {
+    let rawDigits = digitsOnly(from: viewStore.ingredientAddPrice)
+    guard !rawDigits.isEmpty else {
+      customPriceFieldText = ""
+      return
+    }
+
+    if isPriceFieldFocused {
+      customPriceFieldText = rawDigits
+    } else {
+      customPriceFieldText = "\(formattedWithComma(rawDigits))원"
+    }
+  }
+
+  private func syncCustomUsageFieldText(with viewStore: ViewStoreOf<MenuRegistrationFeature>) {
+    let rawValue = sanitizedDecimalText(viewStore.ingredientAddUsageAmount)
+    guard !rawValue.isEmpty else {
+      customUsageFieldText = ""
+      return
+    }
+
+    if isUsageFieldFocused {
+      customUsageFieldText = rawValue
+    } else {
+      customUsageFieldText = "\(rawValue)\(viewStore.ingredientAddUnit.title)"
+    }
   }
 }
 
@@ -320,7 +443,7 @@ public struct PrepareTimeSheetView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        SheetDragHandle()
+        Color.clear.frame(height: 40)
 
         Text("제조 시간")
           .font(.pretendardHeadline2)

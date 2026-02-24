@@ -17,7 +17,7 @@ public struct MenuPriceEditSheetView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        SheetDragHandle()
+        Color.clear.frame(height: 40)
 
         VStack(alignment: .leading, spacing: 24) {
           Text("메뉴 가격 입력")

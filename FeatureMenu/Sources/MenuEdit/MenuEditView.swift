@@ -54,7 +54,6 @@ public struct MenuEditView: View {
             .disabled(!viewStore.hasPendingChanges || viewStore.isUpdating)
           }
           .padding(.horizontal, 20)
-          .padding(.top, 12)
           .padding(.bottom, 24)
         }
       }
@@ -155,7 +154,7 @@ public struct MenuEditView: View {
       placeholderColor: AppColor.grayscale400,
       underlineColor: AppColor.grayscale300,
       accentColor: AppColor.primaryBlue500,
-      keyboardType: .numberPad
+      keyboardType: .decimalPad
     )
     .contentShape(Rectangle())
     .onTapGesture {

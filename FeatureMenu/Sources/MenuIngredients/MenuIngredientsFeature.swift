@@ -6,6 +6,7 @@ import DataLayer
 @Reducer
 public struct MenuIngredientsFeature {
   @Dependency(\.recipeRepository) var recipeRepository
+  @Dependency(\.ingredientRepository) var ingredientRepository
   
   public struct State: Equatable {
     let menuId: Int
@@ -16,10 +17,18 @@ public struct MenuIngredientsFeature {
     var selectedIngredients: Set<UUID> = []
     var showAddSheet: Bool = false
     var isLoading: Bool = false
+    var isUpdatingIngredient: Bool = false
     var isManageMenuPresented: Bool = false
     var showToast: Bool = false
     var toastMessage: String = ""
     var pendingDeleteCount: Int = 0
+    var shouldShowUpdatedToast: Bool = false
+    var showIngredientDetailSheet: Bool = false
+    var selectedIngredient: IngredientItem?
+    var selectedIngredientUsage: String = ""
+    var selectedIngredientUnit: IngredientUnit = .g
+    var selectedIngredientUnitPriceText: String = "-"
+    var selectedIngredientSupplier: String = "-"
     @PresentationState var alert: AlertState<Action.Alert>?
     
     public init(menuId: Int, menuName: String, ingredients: [IngredientItem]) {
@@ -42,6 +51,12 @@ public struct MenuIngredientsFeature {
     case deleteRecipesResponse(Result<Void, Error>)
     case addSheetPresented(Bool)
     case ingredientAdded(IngredientItem)
+    case ingredientRowTapped(IngredientItem)
+    case ingredientDetailSheetPresented(Bool)
+    case ingredientDetailUsageChanged(String)
+    case ingredientDetailLoaded(Result<InventoryIngredientItem, Error>)
+    case ingredientUpdateTapped
+    case ingredientUpdated(Result<Void, Error>)
     case addRecipeResponse(Result<Void, Error>)
     case reloadRecipes
     case recipesReloaded(Result<RecipeListResponse, Error>)
@@ -64,6 +79,14 @@ public struct MenuIngredientsFeature {
       case (.deleteRecipesResponse(.failure), .deleteRecipesResponse(.failure)): return true
       case let (.addSheetPresented(l), .addSheetPresented(r)): return l == r
       case let (.ingredientAdded(l), .ingredientAdded(r)): return l == r
+      case let (.ingredientRowTapped(l), .ingredientRowTapped(r)): return l == r
+      case let (.ingredientDetailSheetPresented(l), .ingredientDetailSheetPresented(r)): return l == r
+      case let (.ingredientDetailUsageChanged(l), .ingredientDetailUsageChanged(r)): return l == r
+      case (.ingredientDetailLoaded(.success), .ingredientDetailLoaded(.success)): return true
+      case (.ingredientDetailLoaded(.failure), .ingredientDetailLoaded(.failure)): return true
+      case (.ingredientUpdateTapped, .ingredientUpdateTapped): return true
+      case (.ingredientUpdated(.success), .ingredientUpdated(.success)): return true
+      case (.ingredientUpdated(.failure), .ingredientUpdated(.failure)): return true
       case (.addRecipeResponse(.success), .addRecipeResponse(.success)): return true
       case (.addRecipeResponse(.failure), .addRecipeResponse(.failure)): return true
       case (.reloadRecipes, .reloadRecipes): return true
@@ -157,6 +180,86 @@ public struct MenuIngredientsFeature {
           state.selectedIngredients.insert(id)
         }
         return .none
+
+      case let .ingredientRowTapped(ingredient):
+        guard !state.isEditMode else { return .none }
+
+        state.selectedIngredient = ingredient
+        state.showIngredientDetailSheet = true
+        state.selectedIngredientUsage = Self.amountValueText(from: ingredient.amount)
+        state.selectedIngredientUnit = Self.unit(from: ingredient.amount)
+        state.selectedIngredientUnitPriceText = "\(ingredient.amount)당 \(ingredient.price)"
+        state.selectedIngredientSupplier = "-"
+
+        guard let ingredientId = ingredient.ingredientId else { return .none }
+
+        return .run { send in
+          let result = await Result { try await ingredientRepository.fetchIngredientDetail(ingredientId) }
+          await send(.ingredientDetailLoaded(result))
+        }
+
+      case let .ingredientDetailSheetPresented(isPresented):
+        state.showIngredientDetailSheet = isPresented
+        if !isPresented {
+          state.selectedIngredient = nil
+          state.selectedIngredientUsage = ""
+          state.selectedIngredientUnitPriceText = "-"
+          state.selectedIngredientSupplier = "-"
+          state.isUpdatingIngredient = false
+        }
+        return .none
+
+      case let .ingredientDetailUsageChanged(usage):
+        state.selectedIngredientUsage = Self.sanitizedDecimalsAndCommas(usage)
+        return .none
+
+      case let .ingredientDetailLoaded(.success(detail)):
+        state.selectedIngredientUnitPriceText = "\(detail.amount)당 \(detail.price)"
+        if let supplier = detail.supplier, !supplier.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+          state.selectedIngredientSupplier = supplier
+        } else {
+          state.selectedIngredientSupplier = "-"
+        }
+        return .none
+
+      case .ingredientDetailLoaded(.failure):
+        return .none
+
+      case .ingredientUpdateTapped:
+        guard let ingredient = state.selectedIngredient,
+              let recipeId = ingredient.recipeId
+        else {
+          return .none
+        }
+
+        let usageText = state.selectedIngredientUsage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !usageText.isEmpty, let amount = Double(usageText.replacingOccurrences(of: ",", with: "")) else {
+          state.alert = AlertState { TextState("수정 실패") } message: { TextState("사용량을 확인해주세요") }
+          return .none
+        }
+
+        state.isUpdatingIngredient = true
+        state.isLoading = true
+
+        let menuId = state.menuId
+        let request = AmountUpdateRequest(amount: amount)
+
+        return .run { send in
+          let result = await Result { try await recipeRepository.updateRecipe(menuId, recipeId, request) }
+          await send(.ingredientUpdated(result))
+        }
+
+      case .ingredientUpdated(.success):
+        state.isUpdatingIngredient = false
+        state.showIngredientDetailSheet = false
+        state.shouldShowUpdatedToast = true
+        return .send(.reloadRecipes)
+
+      case let .ingredientUpdated(.failure(error)):
+        state.isLoading = false
+        state.isUpdatingIngredient = false
+        state.alert = AlertState { TextState("수정 실패") } message: { TextState(errorMessage(from: error)) }
+        return .none
         
       case .deleteRecipesResponse(.success):
         let deletedCount = state.pendingDeleteCount
@@ -240,6 +343,11 @@ public struct MenuIngredientsFeature {
           )
         }
         state.isLoading = false
+        if state.shouldShowUpdatedToast {
+          state.toastMessage = "수정이 반영되었어요"
+          state.showToast = true
+          state.shouldShowUpdatedToast = false
+        }
         return .none
         
       case let .recipesReloaded(.failure(error)):
@@ -262,6 +370,35 @@ public struct MenuIngredientsFeature {
     case "ea", "개": return "EA"
     default: return "G"
     }
+  }
+
+  private static func amountValueText(from amount: String) -> String {
+    amount
+      .filter { $0.isNumber || $0 == "." || $0 == "," }
+      .replacingOccurrences(of: ",", with: "")
+  }
+
+  private static func unit(from amount: String) -> IngredientUnit {
+    let unitText = amount
+      .filter { !$0.isNumber && $0 != "." && $0 != "," }
+      .trimmingCharacters(in: .whitespacesAndNewlines)
+    return IngredientUnit.from(unitText)
+  }
+
+  private static func sanitizedDecimalsAndCommas(_ value: String) -> String {
+    let filtered = value.filter { $0.isNumber || $0 == "." || $0 == "," }
+    var hasDot = false
+    var result = ""
+
+    for character in filtered {
+      if character == "." {
+        guard !hasDot else { continue }
+        hasDot = true
+      }
+      result.append(character)
+    }
+
+    return result
   }
 
   private func errorMessage(from error: Error) -> String {

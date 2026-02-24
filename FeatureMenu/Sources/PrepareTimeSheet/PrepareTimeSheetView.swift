@@ -17,7 +17,7 @@ public struct PrepareTimeSheetView: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       VStack(spacing: 0) {
-        SheetDragHandle()
+        Color.clear.frame(height: 40)
         
         Text("제조 시간")
           .font(.pretendardHeadline2)

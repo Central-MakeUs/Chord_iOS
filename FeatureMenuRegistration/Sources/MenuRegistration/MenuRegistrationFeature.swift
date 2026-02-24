@@ -156,6 +156,7 @@ public struct MenuRegistrationFeature {
     public var showDupIngredientAlert: Bool = false
     public var dupIngredientNames: [String] = []
     public var showIngredientDupAlert: Bool = false
+    public var pendingIngredientDupAlertAfterSheetDismiss: Bool = false
     public var pendingIngredientToAdd: RegistrationIngredient?
 
     public var workTimeText: String {
@@ -257,6 +258,7 @@ public struct MenuRegistrationFeature {
     case dupIngredientAlertConfirmed
     case dupIngredientAlertCancelled
     case ingredientDupCheckResponse(Result<Bool, Error>)
+    case presentIngredientDupAlertAfterSheetDismiss
     case ingredientDupAlertConfirmed
     case ingredientDupAlertCancelled
     case proceedMenuCreation
@@ -339,6 +341,7 @@ public struct MenuRegistrationFeature {
       case (.dupIngredientAlertCancelled, .dupIngredientAlertCancelled): return true
       case (.ingredientDupCheckResponse(.success(let l)), .ingredientDupCheckResponse(.success(let r))): return l == r
       case (.ingredientDupCheckResponse(.failure), .ingredientDupCheckResponse(.failure)): return true
+      case (.presentIngredientDupAlertAfterSheetDismiss, .presentIngredientDupAlertAfterSheetDismiss): return true
       case (.ingredientDupAlertConfirmed, .ingredientDupAlertConfirmed): return true
       case (.ingredientDupAlertCancelled, .ingredientDupAlertCancelled): return true
       case (.proceedMenuCreation, .proceedMenuCreation): return true
@@ -607,13 +610,16 @@ public struct MenuRegistrationFeature {
 
       case let .registeredIngredientUsageChanged(text):
         let unitCode = state.registeredIngredientDraft?.unitCode ?? ""
-        state.registeredIngredientDraft?.usageAmount = Self.sanitizedUsageWithOptionalUnit(text, unit: unitCode)
+        state.registeredIngredientDraft?.usageAmount = Self.sanitizedDecimalsAndCommas(
+          Self.stripUnitSuffix(text, unit: unitCode)
+        )
         return .none
 
       case let .showRegisteredIngredientSheetChanged(isPresented):
         state.showRegisteredIngredientSheet = isPresented
         if !isPresented {
           state.registeredIngredientDraft = nil
+          state.selectedIngredientIndex = nil
         }
         return .none
 
@@ -631,23 +637,44 @@ public struct MenuRegistrationFeature {
           calculatedPrice = 0
         }
 
-        let ingredient = RegistrationIngredient(
-          name: draft.name,
-          amount: usageAmount,
-          unitCode: draft.unitCode,
-          price: calculatedPrice,
-          ingredientId: draft.ingredientId,
-          isFromTemplate: false,
-          supplier: draft.supplier
-        )
+        if let editIndex = state.selectedIngredientIndex,
+           state.addedIngredients.indices.contains(editIndex) {
+          let existing = state.addedIngredients[editIndex]
+          state.addedIngredients[editIndex] = RegistrationIngredient(
+            id: existing.id,
+            name: draft.name,
+            amount: usageAmount,
+            unitCode: draft.unitCode,
+            price: calculatedPrice,
+            ingredientId: existing.ingredientId,
+            isFromTemplate: existing.isFromTemplate,
+            category: existing.category,
+            purchaseAmount: draft.baseQuantity,
+            purchasePrice: draft.basePrice,
+            supplier: draft.supplier
+          )
+        } else {
+          let ingredient = RegistrationIngredient(
+            name: draft.name,
+            amount: usageAmount,
+            unitCode: draft.unitCode,
+            price: calculatedPrice,
+            ingredientId: draft.ingredientId,
+            isFromTemplate: false,
+            purchaseAmount: draft.baseQuantity,
+            purchasePrice: draft.basePrice,
+            supplier: draft.supplier
+          )
+          state.addedIngredients.append(ingredient)
+          state.isToastPresented = true
+        }
 
-        state.addedIngredients.append(ingredient)
         state.ingredientInput = ""
         state.ingredientSearchResults = []
         state.isIngredientSearching = false
         state.showRegisteredIngredientSheet = false
         state.registeredIngredientDraft = nil
-        state.isToastPresented = true
+        state.selectedIngredientIndex = nil
         return .none
 
       case .addIngredientTapped:
@@ -655,6 +682,7 @@ public struct MenuRegistrationFeature {
         guard !name.isEmpty else { return .none }
         state.ingredientSearchResults = []
         state.isIngredientSearching = false
+        state.selectedIngredientIndex = nil
         state.ingredientAddName = name
         state.ingredientAddCategory = "식재료"
         state.ingredientAddPrice = ""
@@ -671,14 +699,38 @@ public struct MenuRegistrationFeature {
         return .none
 
       case let .ingredientTapped(index):
+        guard state.addedIngredients.indices.contains(index) else { return .none }
+        let ingredient = state.addedIngredients[index]
         state.selectedIngredientIndex = index
-        state.showIngredientDetailSheet = true
+
+        if ingredient.isFromTemplate || ingredient.ingredientId != nil {
+          let displayUnit = IngredientUnit.from(ingredient.unitCode).title
+          state.registeredIngredientDraft = RegisteredIngredientDraft(
+            ingredientId: ingredient.ingredientId ?? 0,
+            name: ingredient.name,
+            unitCode: displayUnit,
+            baseQuantity: ingredient.purchaseAmount ?? ingredient.amount,
+            basePrice: ingredient.purchasePrice ?? ingredient.price,
+            supplier: ingredient.supplier,
+            usageAmount: formatAmount(ingredient.amount)
+          )
+          state.showRegisteredIngredientSheet = true
+          state.showIngredientAddSheet = false
+        } else {
+          state.ingredientAddName = ingredient.name
+          state.ingredientAddCategory = categoryNameFromIngredientValue(ingredient.category)
+          state.ingredientAddPrice = formatPriceNumberText(ingredient.purchasePrice ?? ingredient.price)
+          state.ingredientAddPurchaseAmount = formatAmount(ingredient.purchaseAmount ?? ingredient.amount)
+          state.ingredientAddUsageAmount = formatAmount(ingredient.amount)
+          state.ingredientAddSupplier = ingredient.supplier ?? ""
+          state.ingredientAddUnit = IngredientUnit.from(ingredient.unitCode)
+          state.showIngredientAddSheet = true
+          state.showRegisteredIngredientSheet = false
+        }
         return .none
 
       case let .templateIngredientTapped(index):
-        state.selectedIngredientIndex = index
-        state.showIngredientDetailSheet = true
-        return .none
+        return .send(.ingredientTapped(index))
 
       case let .showIngredientDetailSheetChanged(isPresented):
         state.showIngredientDetailSheet = isPresented
@@ -712,6 +764,9 @@ public struct MenuRegistrationFeature {
 
       case let .showIngredientAddSheetChanged(isPresented):
         state.showIngredientAddSheet = isPresented
+        if !isPresented {
+          state.selectedIngredientIndex = nil
+        }
         return .none
 
       case let .ingredientAddCategorySelected(category):
@@ -724,11 +779,11 @@ public struct MenuRegistrationFeature {
         return .none
 
       case let .ingredientAddPurchaseAmountChanged(amount):
-        state.ingredientAddPurchaseAmount = Self.sanitizedDigitsAndCommas(amount)
+        state.ingredientAddPurchaseAmount = Self.sanitizedDecimalsAndCommas(amount)
         return .none
 
       case let .ingredientAddUsageAmountChanged(amount):
-        state.ingredientAddUsageAmount = Self.sanitizedDigitsAndCommas(amount)
+        state.ingredientAddUsageAmount = Self.sanitizedDecimalsAndCommas(amount)
         return .none
 
       case let .ingredientAddSupplierChanged(supplier):
@@ -747,6 +802,27 @@ public struct MenuRegistrationFeature {
         let usageAmount = Double(state.ingredientAddUsageAmount.replacingOccurrences(of: ",", with: "")) ?? 0
         guard price > 0, purchaseAmount > 0, usageAmount > 0 else { return .none }
         let unitCost = purchaseAmount > 0 ? (price / purchaseAmount) * usageAmount : 0
+
+        if let editIndex = state.selectedIngredientIndex,
+           state.addedIngredients.indices.contains(editIndex) {
+          let existing = state.addedIngredients[editIndex]
+          state.addedIngredients[editIndex] = RegistrationIngredient(
+            id: existing.id,
+            name: name,
+            amount: usageAmount,
+            unitCode: state.ingredientAddUnit.rawValue,
+            price: unitCost,
+            ingredientId: existing.ingredientId,
+            isFromTemplate: existing.isFromTemplate,
+            category: state.ingredientAddCategory,
+            purchaseAmount: purchaseAmount,
+            purchasePrice: price,
+            supplier: state.ingredientAddSupplier.isEmpty ? nil : state.ingredientAddSupplier
+          )
+          state.showIngredientAddSheet = false
+          state.selectedIngredientIndex = nil
+          return .none
+        }
 
         let newIngredient = RegistrationIngredient(
           name: name,
@@ -767,19 +843,31 @@ public struct MenuRegistrationFeature {
       
       case let .ingredientDupCheckResponse(.success(isDuplicate)):
         if isDuplicate {
-          state.showIngredientDupAlert = true
-          return .none
+          state.showIngredientAddSheet = false
+          state.pendingIngredientDupAlertAfterSheetDismiss = true
+          return .run { send in
+            try? await Task.sleep(for: .milliseconds(250))
+            await send(.presentIngredientDupAlertAfterSheetDismiss)
+          }
         }
         return .send(.proceedAddIngredient)
+
+      case .presentIngredientDupAlertAfterSheetDismiss:
+        guard state.pendingIngredientDupAlertAfterSheetDismiss else { return .none }
+        state.pendingIngredientDupAlertAfterSheetDismiss = false
+        state.showIngredientDupAlert = true
+        return .none
       
       case .ingredientDupCheckResponse(.failure):
         return .send(.proceedAddIngredient)
       
       case .ingredientDupAlertConfirmed:
+        state.pendingIngredientDupAlertAfterSheetDismiss = false
         state.showIngredientDupAlert = false
         return .send(.proceedAddIngredient)
-      
+
       case .ingredientDupAlertCancelled:
+        state.pendingIngredientDupAlertAfterSheetDismiss = false
         state.showIngredientDupAlert = false
         state.pendingIngredientToAdd = nil
         return .none
@@ -1009,16 +1097,10 @@ private extension MenuRegistrationFeature {
     return result
   }
 
-  static func sanitizedUsageWithOptionalUnit(_ value: String, unit: String) -> String {
+  static func stripUnitSuffix(_ value: String, unit: String) -> String {
     let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
-    guard !trimmed.isEmpty else { return "" }
-
-    let hasUnitSuffix = !unit.isEmpty && trimmed.hasSuffix(unit)
-    let numericSource = hasUnitSuffix ? String(trimmed.dropLast(unit.count)) : trimmed
-    let sanitizedNumeric = sanitizedDecimalsAndCommas(numericSource)
-
-    guard !sanitizedNumeric.isEmpty else { return "" }
-    return hasUnitSuffix ? sanitizedNumeric + unit : sanitizedNumeric
+    guard !unit.isEmpty, trimmed.hasSuffix(unit) else { return trimmed }
+    return String(trimmed.dropLast(unit.count)).trimmingCharacters(in: .whitespacesAndNewlines)
   }
 
   func categoryNameFromCode(_ code: String) -> String {
@@ -1052,5 +1134,30 @@ private extension MenuRegistrationFeature {
   func parsePrice(from priceText: String) -> Double {
     let filtered = priceText.filter { $0.isNumber || $0 == "." }
     return Double(filtered) ?? 0
+  }
+
+  func categoryNameFromIngredientValue(_ value: String?) -> String {
+    switch value {
+    case "운영 재료", "MATERIALS":
+      return "운영 재료"
+    default:
+      return "식재료"
+    }
+  }
+
+  func formatPriceNumberText(_ value: Double) -> String {
+    let formatter = NumberFormatter()
+    formatter.numberStyle = .decimal
+    formatter.minimumFractionDigits = 0
+    formatter.maximumFractionDigits = 2
+    return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
+  }
+
+  func formatAmount(_ value: Double) -> String {
+    let intValue = Int(value)
+    if Double(intValue) == value {
+      return "\(intValue)"
+    }
+    return String(format: "%.1f", value)
   }
 }

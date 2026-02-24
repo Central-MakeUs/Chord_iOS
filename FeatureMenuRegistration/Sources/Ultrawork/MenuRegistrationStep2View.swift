@@ -10,6 +10,7 @@ public struct MenuRegistrationStep2View: View {
   @FocusState private var isRegisteredUsageFocused: Bool
   @State private var hasSectionHintExpired = false
   @State private var hasSectionHintTimerStarted = false
+  @State private var registeredUsageFieldText: String = ""
 
   public init(store: StoreOf<MenuRegistrationFeature>) {
     self.store = store
@@ -29,7 +30,6 @@ public struct MenuRegistrationStep2View: View {
           Spacer()
         }
         .padding(.horizontal, 20)
-        .padding(.top, 10)
         .padding(.bottom, 24)
 
         ScrollView {
@@ -56,20 +56,6 @@ public struct MenuRegistrationStep2View: View {
           dismissKeyboard()
         }
       )
-      .sheet(
-        isPresented: viewStore.binding(
-          get: \.showIngredientDetailSheet,
-          send: MenuRegistrationFeature.Action.showIngredientDetailSheetChanged
-        )
-      ) {
-        if let index = viewStore.selectedIngredientIndex,
-           index < viewStore.addedIngredients.count {
-          let ingredient = viewStore.addedIngredients[index]
-          IngredientDetailSheet(ingredient: ingredient)
-            .presentationDetents([.large])
-            .presentationDragIndicator(.hidden)
-        }
-      }
       .sheet(
         isPresented: viewStore.binding(
           get: \.showRegisteredIngredientSheet,
@@ -236,98 +222,119 @@ public struct MenuRegistrationStep2View: View {
   }
 
   private func registeredIngredientAddSheet(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    VStack(spacing: 0) {
-      SheetDragHandle()
+    ZStack {
+      Color.white
+        .ignoresSafeArea()
+        .onTapGesture {
+          isRegisteredUsageFocused = false
+          UIApplication.shared.sendAction(
+            #selector(UIResponder.resignFirstResponder),
+            to: nil,
+            from: nil,
+            for: nil
+          )
+        }
 
-      if let draft = viewStore.registeredIngredientDraft {
-        VStack(alignment: .leading, spacing: 0) {
-          Text(draft.name)
-            .font(.pretendardHeadline2)
-            .foregroundColor(AppColor.grayscale900)
-            .padding(.bottom, 18)
+      VStack(spacing: 0) {
+        Color.clear.frame(height: 40)
 
-          Text("사용량")
-            .font(.pretendardCaption1)
-            .foregroundColor(AppColor.grayscale900)
+        if let draft = viewStore.registeredIngredientDraft {
+          VStack(alignment: .leading, spacing: 0) {
+            Text(draft.name)
+              .font(.pretendardHeadline2)
+              .foregroundColor(AppColor.grayscale900)
+              .padding(.bottom, 18)
 
-          HStack(spacing: 8) {
-            TextField(
-              "",
-              text: viewStore.binding(
-                get: { $0.registeredIngredientDraft?.usageAmount ?? "" },
-                send: MenuRegistrationFeature.Action.registeredIngredientUsageChanged
-              ),
-              prompt: Text("제조시 사용되는 용량 입력")
-                .font(.pretendardSubtitle2)
-                .foregroundColor(AppColor.grayscale400)
-            )
-            .font(.pretendardSubtitle2)
-            .foregroundColor(AppColor.grayscale900)
-            .keyboardType(.decimalPad)
-            .textInputAutocapitalization(.never)
-            .disableAutocorrection(true)
-            .focused($isRegisteredUsageFocused)
-            .onChange(of: isRegisteredUsageFocused) { _, isFocused in
-              if isFocused {
-                let raw = stripUnit(from: draft.usageAmount, unit: draft.unitCode)
-                if raw != draft.usageAmount {
-                  viewStore.send(.registeredIngredientUsageChanged(raw))
-                }
-              } else {
-                let appended = appendUnitIfNeeded(to: draft.usageAmount, unit: draft.unitCode)
-                if appended != draft.usageAmount {
-                  viewStore.send(.registeredIngredientUsageChanged(appended))
+            Text("사용량")
+              .font(.pretendardCaption1)
+              .foregroundColor(AppColor.grayscale900)
+
+            HStack(spacing: 8) {
+              TextField(
+                "",
+                text: Binding(
+                  get: { registeredUsageFieldText },
+                  set: { newValue in
+                    let unit = viewStore.registeredIngredientDraft?.unitCode ?? ""
+                    let stripped = stripUnit(from: newValue, unit: unit)
+                      .replacingOccurrences(of: ",", with: "")
+                      .filter { $0.isNumber || $0 == "." }
+                    registeredUsageFieldText = stripped
+                    viewStore.send(.registeredIngredientUsageChanged(stripped))
+                  }
+                ),
+                prompt: Text("제조시 사용되는 용량 입력")
+                  .font(.pretendardSubtitle2)
+                  .foregroundColor(AppColor.grayscale400)
+              )
+              .font(.pretendardSubtitle2)
+              .foregroundColor(AppColor.grayscale900)
+              .tint(AppColor.grayscale900)
+              .keyboardType(.decimalPad)
+              .textInputAutocapitalization(.never)
+              .disableAutocorrection(true)
+              .focused($isRegisteredUsageFocused)
+              .onAppear {
+                syncRegisteredUsageFieldText(with: viewStore)
+              }
+              .onChange(of: isRegisteredUsageFocused) { _, _ in
+                syncRegisteredUsageFieldText(with: viewStore)
+              }
+              .onChange(of: viewStore.registeredIngredientDraft?.usageAmount ?? "") { _, _ in
+                if !isRegisteredUsageFocused {
+                  syncRegisteredUsageFieldText(with: viewStore)
                 }
               }
+              .onChange(of: viewStore.registeredIngredientDraft?.unitCode ?? "") { _, _ in
+                syncRegisteredUsageFieldText(with: viewStore)
+              }
             }
-          }
-          .padding(.top, 8)
-
-          Rectangle()
-            .fill(AppColor.grayscale300)
-            .frame(height: 1)
             .padding(.top, 8)
 
-          VStack(alignment: .leading, spacing: 12) {
-            Text("재료 정보")
-              .font(.pretendardCaption1)
-              .foregroundColor(AppColor.grayscale800)
+            Rectangle()
+              .fill(AppColor.grayscale300)
+              .frame(height: 1)
+              .padding(.top, 8)
 
-            infoRow(label: "단가", value: "\(formatAmount(draft.baseQuantity))\(IngredientUnit.from(draft.unitCode).title)당 \(formatPrice(draft.basePrice))")
-            infoRow(label: "공급업체", value: (draft.supplier?.isEmpty == false ? draft.supplier! : "-"))
+            VStack(alignment: .leading, spacing: 12) {
+              Text("재료 정보")
+                .font(.pretendardCaption1)
+                .foregroundColor(AppColor.grayscale800)
+
+              infoRow(label: "단가", value: "\(formatAmount(draft.baseQuantity))\(IngredientUnit.from(draft.unitCode).title)당 \(formatPrice(draft.basePrice))")
+              infoRow(label: "공급업체", value: (draft.supplier?.isEmpty == false ? draft.supplier! : "-"))
+            }
+            .padding(12)
+            .background(AppColor.grayscale200)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .padding(.top, 14)
+
+            Spacer(minLength: 12)
+
+            BottomButton(
+              title: "완료",
+              style: draft.usageAmount.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .secondary : .primary
+            ) {
+              isRegisteredUsageFocused = false
+              viewStore.send(.confirmAddRegisteredIngredientTapped)
+            }
+            .disabled(draft.usageAmount.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .padding(.bottom, 12)
           }
-          .padding(12)
-          .background(AppColor.grayscale200)
-          .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-          .padding(.top, 14)
-
-          Spacer(minLength: 12)
-
-          BottomButton(
-            title: "완료",
-            style: draft.usageAmount.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? .secondary : .primary
-          ) {
-            viewStore.send(.confirmAddRegisteredIngredientTapped)
-          }
-          .disabled(draft.usageAmount.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-          .padding(.bottom, 12)
+          .padding(.horizontal, 20)
         }
-        .padding(.horizontal, 20)
       }
     }
-    .background(Color.white.ignoresSafeArea())
-    .contentShape(Rectangle())
-    .simultaneousGesture(
-      TapGesture().onEnded {
+    .onAppear {
+      isRegisteredUsageFocused = false
+      syncRegisteredUsageFieldText(with: viewStore)
+    }
+    .onChange(of: viewStore.showRegisteredIngredientSheet) { _, isPresented in
+      if isPresented {
         isRegisteredUsageFocused = false
-        UIApplication.shared.sendAction(
-          #selector(UIResponder.resignFirstResponder),
-          to: nil,
-          from: nil,
-          for: nil
-        )
+        syncRegisteredUsageFieldText(with: viewStore)
       }
-    )
+    }
   }
 
   private func infoRow(label: String, value: String) -> some View {
@@ -363,13 +370,19 @@ public struct MenuRegistrationStep2View: View {
 
   private func stripUnit(from text: String, unit: String) -> String {
     let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
-    if trimmed.hasSuffix(unit) {
-      return String(trimmed.dropLast(unit.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+    let unitCandidates = candidateUnits(for: unit)
+
+    for candidate in unitCandidates {
+      if trimmed.lowercased().hasSuffix(candidate.lowercased()) {
+        return String(trimmed.dropLast(candidate.count)).trimmingCharacters(in: .whitespacesAndNewlines)
+      }
     }
+
     return trimmed
   }
 
   private func appendUnitIfNeeded(to text: String, unit: String) -> String {
+    let displayUnit = IngredientUnit.from(unit).title
     let raw = stripUnit(from: text, unit: unit)
       .filter { $0.isNumber || $0 == "." || $0 == "," }
     guard !raw.isEmpty else { return "" }
@@ -378,11 +391,30 @@ public struct MenuRegistrationStep2View: View {
     if let value = Double(normalized) {
       let intValue = Int(value)
       if Double(intValue) == value {
-        return "\(intValue)\(unit)"
+        return "\(intValue)\(displayUnit)"
       }
-      return "\(value)\(unit)"
+      return "\(value)\(displayUnit)"
     }
-    return "\(normalized)\(unit)"
+    return "\(normalized)\(displayUnit)"
+  }
+
+  private func candidateUnits(for unit: String) -> [String] {
+    let displayUnit = IngredientUnit.from(unit).title
+    return Array(Set([unit, displayUnit].filter { !$0.isEmpty }))
+  }
+
+  private func syncRegisteredUsageFieldText(with viewStore: ViewStoreOf<MenuRegistrationFeature>) {
+    guard let draft = viewStore.registeredIngredientDraft else {
+      registeredUsageFieldText = ""
+      return
+    }
+
+    if isRegisteredUsageFocused {
+      registeredUsageFieldText = stripUnit(from: draft.usageAmount, unit: draft.unitCode)
+        .replacingOccurrences(of: ",", with: "")
+    } else {
+      registeredUsageFieldText = appendUnitIfNeeded(to: draft.usageAmount, unit: draft.unitCode)
+    }
   }
 
   private func highlightedText(fullText: String, searchText: String) -> AttributedString {

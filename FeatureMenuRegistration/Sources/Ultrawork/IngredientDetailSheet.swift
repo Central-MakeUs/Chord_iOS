@@ -12,7 +12,7 @@ public struct IngredientDetailSheet: View {
 
   public var body: some View {
     VStack(spacing: 0) {
-      SheetDragHandle()
+      Color.clear.frame(height: 40)
 
       NavigationTopBar(
         onBackTap: { dismiss() },
@@ -31,7 +31,7 @@ public struct IngredientDetailSheet: View {
           }
         }
         .padding(.horizontal, 20)
-        .padding(.vertical, 20)
+        .padding(.bottom, 20)
       }
       
       actionButtons

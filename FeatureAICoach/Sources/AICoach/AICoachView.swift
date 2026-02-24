@@ -316,7 +316,6 @@ private struct StrategyCompletionResultView: View {
                     verticalPadding: 0,
                     backgroundColor: .clear
                 )
-                .padding(.top, 12)
 
                 ScrollView {
                     VStack(spacing: 28) {
@@ -334,7 +333,6 @@ private struct StrategyCompletionResultView: View {
                         completionIllustration
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 20)
                     .padding(.bottom, 24)
                 }
                 
@@ -401,8 +399,6 @@ private struct StrategyDetailView: View {
                     verticalPadding: 0,
                     backgroundColor: .clear
                 )
-                    .padding(.top, 8)
-                    .padding(.bottom, 4)
 
                 ScrollView {
                     VStack(spacing: 12) {
@@ -433,7 +429,6 @@ private struct StrategyDetailView: View {
                         infoCard(icon: Image.aiCoachExpectedEffectIcon, title: "기대효과", text: detail.expectedEffect)
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 12)
                     .padding(.bottom, 16)
                 }
                 
@@ -501,11 +496,7 @@ private struct StrategyDetailView: View {
                 }
                 
                 if !displayMenuNames.isEmpty {
-                    LazyVGrid(
-                        columns: [GridItem(.adaptive(minimum: 96), spacing: 4)],
-                        alignment: .center,
-                        spacing: 8
-                    ) {
+                    CompactCenterWrapLayout(itemSpacing: 4, rowSpacing: 4) {
                         ForEach(Array(displayMenuNames.enumerated()), id: \.offset) { _, name in
                             Text(name)
                                 .frame(height: 20)
@@ -625,6 +616,178 @@ private struct StrategyDetailView: View {
 
     private var completedBadgeColor: Color {
         Color(red: 122.0 / 255.0, green: 54.0 / 255.0, blue: 245.0 / 255.0)
+    }
+}
+
+private struct CompactCenterWrapLayout: Layout {
+    let itemSpacing: CGFloat
+    let rowSpacing: CGFloat
+
+    func sizeThatFits(
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) -> CGSize {
+        let containerWidth = effectiveContainerWidth(from: proposal)
+        let rows = makeRows(subviews: subviews, containerWidth: containerWidth)
+
+        let totalHeight = rows.reduce(CGFloat.zero) { partialResult, row in
+            partialResult + row.height
+        } + max(0, CGFloat(rows.count - 1) * rowSpacing)
+
+        let maxRowWidth = rows.map(\.width).max() ?? 0
+        let resultWidth = containerWidth.isFinite ? containerWidth : maxRowWidth
+
+        return CGSize(width: resultWidth, height: totalHeight)
+    }
+
+    func placeSubviews(
+        in bounds: CGRect,
+        proposal: ProposedViewSize,
+        subviews: Subviews,
+        cache: inout ()
+    ) {
+        let rows = makeRows(subviews: subviews, containerWidth: bounds.width)
+        var currentY = bounds.minY
+
+        for row in rows {
+            var currentX = bounds.minX + max(0, (bounds.width - row.width) / 2)
+
+            for index in row.indices {
+                let size = subviews[index].sizeThatFits(.unspecified)
+                let yOffset = (row.height - size.height) / 2
+
+                subviews[index].place(
+                    at: CGPoint(x: currentX, y: currentY + yOffset),
+                    proposal: ProposedViewSize(width: size.width, height: size.height)
+                )
+
+                currentX += size.width + itemSpacing
+            }
+
+            currentY += row.height + rowSpacing
+        }
+    }
+
+    private func effectiveContainerWidth(from proposal: ProposedViewSize) -> CGFloat {
+        guard let width = proposal.width, width.isFinite else {
+            return .greatestFiniteMagnitude
+        }
+        return width
+    }
+
+    private func makeRows(subviews: Subviews, containerWidth: CGFloat) -> [WrapRow] {
+        guard !subviews.isEmpty else { return [] }
+
+        var rows: [WrapRow] = []
+        var currentRow = WrapRow(indices: [], width: 0, height: 0)
+
+        for index in subviews.indices {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            let proposedWidth = currentRow.indices.isEmpty
+                ? size.width
+                : currentRow.width + itemSpacing + size.width
+
+            if !currentRow.indices.isEmpty && proposedWidth > containerWidth {
+                rows.append(currentRow)
+                currentRow = WrapRow(indices: [index], width: size.width, height: size.height)
+                continue
+            }
+
+            currentRow.indices.append(index)
+            currentRow.width = proposedWidth
+            currentRow.height = max(currentRow.height, size.height)
+        }
+
+        if !currentRow.indices.isEmpty {
+            rows.append(currentRow)
+        }
+
+        return balancedRowsIfPossible(rows: rows, subviews: subviews, containerWidth: containerWidth)
+    }
+
+    private func balancedRowsIfPossible(
+        rows: [WrapRow],
+        subviews: Subviews,
+        containerWidth: CGFloat
+    ) -> [WrapRow] {
+        guard rows.count == 2 else { return rows }
+
+        let allIndices = rows.flatMap(\.indices)
+        guard allIndices.count >= 4 else { return rows }
+
+        let currentDiff = abs(rows[0].indices.count - rows[1].indices.count)
+
+        var best: WrapPair?
+
+        for split in 1..<(allIndices.count) {
+            let firstIndices = Array(allIndices[0..<split])
+            let secondIndices = Array(allIndices[split..<allIndices.count])
+
+            let firstRow = row(for: firstIndices, subviews: subviews)
+            let secondRow = row(for: secondIndices, subviews: subviews)
+
+            guard firstRow.width <= containerWidth, secondRow.width <= containerWidth else {
+                continue
+            }
+
+            let pair = WrapPair(
+                first: firstRow,
+                second: secondRow,
+                countDiff: abs(firstIndices.count - secondIndices.count),
+                widthDiff: abs(firstRow.width - secondRow.width)
+            )
+
+            if best == nil || pair.isBetter(than: best!) {
+                best = pair
+            }
+        }
+
+        guard let best, best.countDiff <= currentDiff else {
+            return rows
+        }
+
+        return [best.first, best.second]
+    }
+
+    private func row(for indices: [Int], subviews: Subviews) -> WrapRow {
+        guard !indices.isEmpty else {
+            return WrapRow(indices: [], width: 0, height: 0)
+        }
+
+        var width: CGFloat = 0
+        var height: CGFloat = 0
+
+        for (offset, index) in indices.enumerated() {
+            let size = subviews[index].sizeThatFits(.unspecified)
+            width += size.width
+            if offset > 0 {
+                width += itemSpacing
+            }
+            height = max(height, size.height)
+        }
+
+        return WrapRow(indices: indices, width: width, height: height)
+    }
+
+    private struct WrapRow {
+        var indices: [Int]
+        var width: CGFloat
+        var height: CGFloat
+    }
+
+    private struct WrapPair {
+        let first: WrapRow
+        let second: WrapRow
+        let countDiff: Int
+        let widthDiff: CGFloat
+
+        func isBetter(than other: WrapPair) -> Bool {
+            if countDiff != other.countDiff {
+                return countDiff < other.countDiff
+            }
+            return widthDiff < other.widthDiff
+        }
     }
 }
 

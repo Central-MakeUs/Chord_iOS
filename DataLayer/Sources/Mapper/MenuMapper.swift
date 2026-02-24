@@ -7,7 +7,7 @@ public extension MenuResponse {
       id: UUID(),
       apiId: menuId,
       name: menuName,
-      price: String(format: "%.0f원", sellingPrice),
+      price: formattedSellingPriceText(sellingPrice),
       category: .all,
       status: MenuStatus.from(marginGradeCode: marginGradeCode),
       costRate: String(format: "%.1f%%", costRate),
@@ -29,7 +29,7 @@ public extension MenuDetailResponse {
       id: UUID(),
       apiId: menuId,
       name: menuName,
-      price: String(format: "%.0f원", sellingPrice),
+      price: formattedSellingPriceText(sellingPrice),
       category: .all,
       status: MenuStatus.from(marginGradeCode: marginGradeCode),
       costRate: String(format: "%.1f%%", costRate),
@@ -43,4 +43,13 @@ public extension MenuDetailResponse {
     )
   }
   
+}
+
+private func formattedSellingPriceText(_ value: Double) -> String {
+  let formatter = NumberFormatter()
+  formatter.numberStyle = .decimal
+  formatter.minimumFractionDigits = 0
+  formatter.maximumFractionDigits = 6
+  let formatted = formatter.string(from: NSNumber(value: value)) ?? String(value)
+  return "\(formatted)원"
 }
