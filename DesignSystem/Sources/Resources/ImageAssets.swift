@@ -82,4 +82,5 @@ public extension Image {
   static let speechBubbleTail = Image("SpeechBubbleTail", bundle: Bundle.main)
   static let coachCoachLogo = Image("CoachCoachLogo", bundle: Bundle.main)
   static let strategyCompletionGraphic = Image("StrategyCompletionGraphic", bundle: Bundle.main)
+  static let noDiagnosisGraphic = Image("NoDiagnosisGraphic", bundle: Bundle.main)
 }

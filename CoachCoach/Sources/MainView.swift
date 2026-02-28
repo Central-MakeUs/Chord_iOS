@@ -191,6 +191,7 @@ private struct WeeklyGuideDetailView: View {
   @State private var isStrategyDetailPresented: Bool = false
   @State private var isNeedManagementTooltipPresented: Bool = false
   @State private var needManagementTooltipBubbleWidth: CGFloat = 0
+  @State private var needManagementTooltipHeight: CGFloat = 0
     
     var body: some View {
         ZStack {
@@ -198,96 +199,96 @@ private struct WeeklyGuideDetailView: View {
             VStack(alignment: .leading, spacing: 0) {
                 NavigationTopBar(onBackTap: { dismiss() },
                                  backgroundColor: .clear)
-                ScrollView {
-                    Text(strategyDateLabel)
-                        .font(.pretendardCaption3)
-                        .foregroundColor(AppColor.grayscale700)
-                        .padding(.leading, 6)
-                        .padding(.trailing, 8)
-                        .padding(.bottom, 4)
-                        .background(
-                            Capsule(style: .continuous)
-                                .fill(AppColor.grayscale300)
-                        )
-                        .frame(maxWidth: .infinity, alignment: .center)
-                    
-                    Image("WarningIllust", bundle: .main)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 64, height: 63)
-                        .frame(maxWidth: .infinity)
-                        .padding(.bottom, 20)
-                    
-                    if let headlineRateText {
-                        HStack(spacing: 4) {
-                            Text(headlineRateText)
-                                .font(.pretendardBody2)
-                                .foregroundColor(AppColor.error)
-                            
-                            Image(systemName: "triangle.fill")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(AppColor.error)
-                        }
-                        .frame(minHeight: 26)
-                        .frame(maxWidth: .infinity)
-                    }
-                    
-                    HStack(spacing: 6) {
-                        Text("관리가 필요한 메뉴")
-                            .font(.pretendardSubtitle1)
+                if showsNoNeedManagementState {
+                    emptyNeedManagementView
+                } else {
+                    ScrollView {
+                        Text(strategyDateLabel)
+                            .font(.pretendardCaption3)
                             .foregroundColor(AppColor.grayscale700)
-                        
-                        Button(action: {
-                            withAnimation(.easeInOut(duration: 0.15)) {
-                                isNeedManagementTooltipPresented.toggle()
+                            .padding(.leading, 6)
+                            .padding(.trailing, 8)
+                            .padding(.bottom, 4)
+                            .background(
+                                Capsule(style: .continuous)
+                                    .fill(AppColor.grayscale300)
+                            )
+                            .frame(maxWidth: .infinity, alignment: .center)
+
+                        Image("WarningIllust", bundle: .main)
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 64, height: 63)
+                            .frame(maxWidth: .infinity)
+                            .padding(.bottom, 20)
+
+                        if let headlineRateText {
+                            HStack(spacing: 4) {
+                                Text(headlineRateText)
+                                    .font(.pretendardBody2)
+                                    .foregroundColor(AppColor.error)
+
+                                Image(systemName: "triangle.fill")
+                                    .font(.system(size: 10, weight: .semibold))
+                                    .foregroundColor(AppColor.error)
                             }
-                        }) {
-                            Image("NeedManagementInfoIcon", bundle: .main)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 16, height: 16)
+                            .frame(minHeight: 26)
+                            .frame(maxWidth: .infinity)
                         }
-                        .buttonStyle(.plain)
-                        .overlay(alignment: .top) {
-                            if isNeedManagementTooltipPresented {
-                                needManagementTooltip
-                                    .fixedSize(horizontal: true, vertical: true)
-                                    .alignmentGuide(.top) { dimensions in
-                                        dimensions[.bottom]
+
+                        HStack(spacing: 6) {
+                            Text("관리가 필요한 메뉴")
+                                .font(.pretendardSubtitle1)
+                                .foregroundColor(AppColor.grayscale700)
+
+                            Button(action: {
+                                withAnimation(.easeInOut(duration: 0.15)) {
+                                    isNeedManagementTooltipPresented.toggle()
+                                }
+                            }) {
+                                Image("NeedManagementInfoIcon", bundle: .main)
+                                    .resizable()
+                                    .scaledToFit()
+                                    .frame(width: 16, height: 16)
+                                    .overlay(alignment: .top) {
+                                        if isNeedManagementTooltipPresented {
+                                            needManagementTooltip
+                                                .fixedSize(horizontal: true, vertical: true)
+                                                .alignmentGuide(.top) { d in
+                                                    d[.bottom]
+                                                }
+                                                .offset(
+                                                    x: -(needManagementTooltipBubbleWidth * 0.25),
+                                                    y: -needManagementTooltipHeight
+                                                )
+                                                .zIndex(10)
+                                                .transition(.opacity)
+                                        }
                                     }
-                                    .zIndex(10)
-                                    .transition(.opacity)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                        .padding(.bottom, 24)
+                        .frame(minHeight: 20)
+                        .frame(maxWidth: .infinity)
+                        .zIndex(1)
+
+                        if let loadError {
+                            Text(loadError)
+                                .font(.pretendardCaption2)
+                                .foregroundColor(AppColor.semanticWarningText)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                        }
+
+                        VStack(spacing: 12) {
+                            ForEach(menus, id: \.strategyId) { menu in
+                                menuCard(menu)
                             }
                         }
                     }
+                    .padding(.horizontal, 20)
                     .padding(.bottom, 24)
-                    .frame(minHeight: 20)
-                    .frame(maxWidth: .infinity)
-                    .zIndex(1)
-                    
-                    if let loadError {
-                        Text(loadError)
-                            .font(.pretendardCaption2)
-                            .foregroundColor(AppColor.semanticWarningText)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                    }
-                    
-                    VStack(spacing: 12) {
-                        ForEach(menus, id: \.strategyId) { menu in
-                            menuCard(menu)
-                        }
-                    }
-                    
-                    if menus.isEmpty && !isLoading && loadError == nil {
-                        Text("표시할 메뉴 데이터가 없어요")
-                            .font(.pretendardBody2)
-                            .foregroundColor(AppColor.grayscale500)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .padding(.top, 8)
-                    }
                 }
-                .padding(.horizontal, 20)
-                .padding(.bottom, 24)
             }
             
             if isLoading {
@@ -309,11 +310,64 @@ private struct WeeklyGuideDetailView: View {
         .task {
             await loadData()
         }
+        .overlay {
+            if isNeedManagementTooltipPresented {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .ignoresSafeArea()
+                    .onTapGesture {
+                        withAnimation(.easeInOut(duration: 0.15)) {
+                            isNeedManagementTooltipPresented = false
+                        }
+                    }
+            }
+        }
     }
     
     private var headlineRateText: String? {
         guard let maxCostRate = menus.map(\.costRate).max() else { return nil }
         return "원가율 \(Int(maxCostRate.rounded()))%"
+    }
+
+    private var showsNoNeedManagementState: Bool {
+        menus.isEmpty && !isLoading && loadError == nil
+    }
+
+    private var emptyNeedManagementView: some View {
+        VStack(spacing: 0) {
+            Spacer(minLength: 48)
+
+            HStack(spacing: 6) {
+                Text("메뉴 운영")
+                    .font(.pretendardSubtitle2)
+                    .foregroundColor(AppColor.semanticSafeText)
+
+                Text("안정")
+                    .font(.pretendardCaption3)
+                    .foregroundColor(AppColor.semanticSafeText)
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 2)
+                    .background(AppColor.semanticSafe)
+                    .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
+            }
+            .frame(maxWidth: .infinity)
+
+            Text("이번주는 진단이\n필요한 메뉴가 없어요")
+                .font(.pretendardTitle1)
+                .foregroundColor(AppColor.grayscale700)
+                .multilineTextAlignment(.center)
+                .lineSpacing(2)
+                .padding(.top, 10)
+
+            Image.noDiagnosisGraphic
+                .resizable()
+                .scaledToFit()
+                .frame(width: 245)
+                .padding(.top, 44)
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 20)
     }
     
   private var needManagementTooltip: some View {
@@ -321,10 +375,11 @@ private struct WeeklyGuideDetailView: View {
       Text("원가율이 50%이상인 메뉴를 대상으로\n전략이 매주 일요일 밤 새롭게 생성돼요")
         .font(.pretendardCaption2)
         .foregroundColor(.white)
+        .lineSpacing(2)
         .multilineTextAlignment(.leading)
         .padding(.vertical, 4)
         .padding(.horizontal, 8)
-        .background(AppColor.grayscale700)
+        .background(AppColor.grayscale800)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
         .background(
           GeometryReader { proxy in
@@ -335,14 +390,32 @@ private struct WeeklyGuideDetailView: View {
               )
           }
         )
-        .offset(x: -(needManagementTooltipBubbleWidth * 0.4))
+        
+        Image.speechBubbleTail
+            .resizable()
+            .renderingMode(.template)
+            .foregroundColor(AppColor.grayscale800)
+            .rotationEffect(.degrees(180))
+            .frame(width: 10, height: 6)
+            .offset(x: needManagementTooltipBubbleWidth * 0.25)
+            .offset(y: -0.25)
 
-      NeedManagementTooltipTriangle()
-        .fill(AppColor.grayscale700)
-        .frame(width: 10, height: 6)
+
     }
     .onPreferenceChange(NeedManagementTooltipWidthPreferenceKey.self) { width in
       needManagementTooltipBubbleWidth = width
+    }
+    .background(
+      GeometryReader { proxy in
+        Color.clear
+          .preference(
+            key: NeedManagementTooltipHeightPreferenceKey.self,
+            value: proxy.size.height
+          )
+      }
+    )
+    .onPreferenceChange(NeedManagementTooltipHeightPreferenceKey.self) { height in
+      needManagementTooltipHeight = height
     }
   }
     
@@ -491,18 +564,19 @@ private struct WeeklyGuideDetailView: View {
     }
 }
 
-private struct NeedManagementTooltipTriangle: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        path.move(to: CGPoint(x: rect.midX, y: rect.maxY))
-        path.addLine(to: CGPoint(x: rect.minX, y: rect.minY))
-        path.addLine(to: CGPoint(x: rect.maxX, y: rect.minY))
-        path.closeSubpath()
-        return path
-    }
+#Preview("WeeklyGuide - 안정 상태") {
+    WeeklyGuideDetailView()
 }
 
 private struct NeedManagementTooltipWidthPreferenceKey: PreferenceKey {
+  static var defaultValue: CGFloat = 0
+
+  static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+    value = nextValue()
+  }
+}
+
+private struct NeedManagementTooltipHeightPreferenceKey: PreferenceKey {
   static var defaultValue: CGFloat = 0
 
   static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
@@ -684,7 +758,7 @@ private struct AppRoutePlaceholderView: View {
     }
 }
 
-#Preview {
+#Preview("MainView") {
     MainView(
         store: Store(initialState: MainFeature.State()) {
             MainFeature()
