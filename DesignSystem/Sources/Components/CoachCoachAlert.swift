@@ -37,7 +37,7 @@ public struct CoachCoachAlert: View {
       Color.black.opacity(0.4)
         .ignoresSafeArea()
       
-      VStack(spacing: 32) {
+      VStack(spacing: 24) {
         VStack(spacing: 8) {
           Text(title)
             .font(.pretendardBody3)
@@ -51,8 +51,8 @@ public struct CoachCoachAlert: View {
               .multilineTextAlignment(.center)
           }
         }
-        .padding(.top, 20)
-        .padding(.horizontal, 40)
+        .padding(.top, 24)
+        .padding(.horizontal, 24)
         
         HStack(spacing: 12) {
           if alertType == .twoButton, let leftTitle = leftButtonTitle {
@@ -103,24 +103,28 @@ public extension View {
     leftButtonAction: (() -> Void)? = nil,
     rightButtonAction: @escaping () -> Void
   ) -> some View {
-    fullScreenCover(isPresented: isPresented) {
-      CoachCoachAlert(
-        title: title,
-        content: content,
-        alertType: alertType,
-        leftButtonTitle: leftButtonTitle,
-        rightButtonTitle: rightButtonTitle,
-        leftButtonAction: {
-          leftButtonAction?()
-          isPresented.wrappedValue = false
-        },
-        rightButtonAction: {
-          rightButtonAction()
-          isPresented.wrappedValue = false
-        }
-      )
-      .presentationBackground(.clear)
+    overlay {
+      if isPresented.wrappedValue {
+        CoachCoachAlert(
+          title: title,
+          content: content,
+          alertType: alertType,
+          leftButtonTitle: leftButtonTitle,
+          rightButtonTitle: rightButtonTitle,
+          leftButtonAction: {
+            leftButtonAction?()
+            isPresented.wrappedValue = false
+          },
+          rightButtonAction: {
+            rightButtonAction()
+            isPresented.wrappedValue = false
+          }
+        )
+        .transition(.opacity)
+        .zIndex(100)
+      }
     }
+    .animation(.easeInOut(duration: 0.2), value: isPresented.wrappedValue)
   }
 }
 
