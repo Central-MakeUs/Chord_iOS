@@ -11,14 +11,16 @@ public struct LoginFeature {
     var id: String = ""
     var password: String = ""
     var showSignUp: Bool = false
-    var isErrorAlertPresented: Bool = false
-    var errorMessage: String = ""
+    var loginIdErrorMessage: String? = nil
+    var passwordErrorMessage: String? = nil
+    var showAlert: Bool = false
+    var alertMessage: String = ""
     var signUp: SignUpFeature.State = SignUpFeature.State()
-    
+
     var isFormValid: Bool {
       !id.isEmpty && !password.isEmpty
     }
-    
+
     public init() {}
   }
   
@@ -27,9 +29,10 @@ public struct LoginFeature {
     case loginTapped
     case loginSuccess
     case loginFailure(String)
+    case loginValidationFailure([String: String], fallbackMessage: String)
+    case alertDismissed
     case signUpTapped
     case signUpDismissed
-    case errorAlertDismissed
     case signUp(SignUpFeature.Action)
     case delegate(Delegate)
     
@@ -50,10 +53,15 @@ public struct LoginFeature {
     Reduce { state, action in
       switch action {
       case .binding:
+        state.loginIdErrorMessage = nil
+        state.passwordErrorMessage = nil
+        state.showAlert = false
         return .none
         
       case .loginTapped:
         guard state.isFormValid else { return .none }
+        state.loginIdErrorMessage = nil
+        state.passwordErrorMessage = nil
         
         print("🚀 Login request started for ID: \(state.id)")
         
@@ -62,6 +70,14 @@ public struct LoginFeature {
             let onboardingCompleted = try await authRepository.login(id, password)
             print("✅ Login API success. OnboardingCompleted: \(onboardingCompleted)")
             await send(.delegate(.loginCompleted(onboardingCompleted: onboardingCompleted)))
+          } catch let validationError as APIFieldValidationError {
+            print("❌ Login API validation failed: \(validationError)")
+            await send(
+              .loginValidationFailure(
+                validationError.fieldErrors,
+                fallbackMessage: validationError.message
+              )
+            )
           } catch {
             print("❌ Login API failed: \(error)")
             let message = (error as? APIError)?.message ?? "로그인에 실패했습니다."
@@ -73,8 +89,26 @@ public struct LoginFeature {
         return .none
         
       case let .loginFailure(message):
-        state.errorMessage = message
-        state.isErrorAlertPresented = true
+        state.showAlert = true
+        state.alertMessage = message
+        return .none
+
+      case let .loginValidationFailure(fieldErrors, fallbackMessage):
+        let loginIdError = fieldErrors["loginId"]
+        let passwordError = fieldErrors["password"]
+
+        if loginIdError == nil && passwordError == nil {
+          state.showAlert = true
+          state.alertMessage = fallbackMessage
+        } else {
+          state.loginIdErrorMessage = loginIdError
+          state.passwordErrorMessage = passwordError
+        }
+        return .none
+
+      case .alertDismissed:
+        state.showAlert = false
+        state.alertMessage = ""
         return .none
         
       case .signUpTapped:
@@ -84,10 +118,6 @@ public struct LoginFeature {
       case .signUpDismissed:
         state.showSignUp = false
         state.signUp = SignUpFeature.State()
-        return .none
-        
-      case .errorAlertDismissed:
-        state.isErrorAlertPresented = false
         return .none
         
       case .signUp(.delegate(.signUpCompleted)):
@@ -101,6 +131,14 @@ public struct LoginFeature {
             let onboardingCompleted = try await authRepository.login(id, password)
             print("✅ Auto-login after signup success. OnboardingCompleted: \(onboardingCompleted)")
             await send(.delegate(.loginCompleted(onboardingCompleted: onboardingCompleted)))
+          } catch let validationError as APIFieldValidationError {
+            print("❌ Auto-login after signup validation failed: \(validationError)")
+            await send(
+              .loginValidationFailure(
+                validationError.fieldErrors,
+                fallbackMessage: validationError.message
+              )
+            )
           } catch {
             print("❌ Auto-login after signup failed: \(error)")
             let message = (error as? APIError)?.message ?? "로그인에 실패했습니다."

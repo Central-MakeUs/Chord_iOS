@@ -60,8 +60,10 @@ public struct EmptyResponse: Codable, Equatable {
 
 public struct ErrorResponse: Codable, Equatable {
   public let message: String?
+  public let errors: [String: String]?
   
-  public init(message: String?) {
+  public init(message: String?, errors: [String: String]? = nil) {
     self.message = message
+    self.errors = errors
   }
 }

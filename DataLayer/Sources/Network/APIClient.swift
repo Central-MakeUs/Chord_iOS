@@ -31,6 +31,16 @@ public enum APIError: Error, Equatable {
   }
 }
 
+public struct APIFieldValidationError: Error, Equatable {
+  public let message: String
+  public let fieldErrors: [String: String]
+
+  public init(message: String, fieldErrors: [String: String]) {
+    self.message = message
+    self.fieldErrors = fieldErrors
+  }
+}
+
 public struct APIClient: Sendable {
   private let baseURL: String
   private let session: URLSession
@@ -151,7 +161,19 @@ public struct APIClient: Sendable {
       let errorMessage: String
       if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data),
          let message = errorResponse.message {
-        errorMessage = message
+        let fieldErrors = (errorResponse.errors ?? [:]).filter { !$0.value.isEmpty }
+
+        if path == "/api/v1/auth/login", !fieldErrors.isEmpty {
+          throw APIFieldValidationError(message: message, fieldErrors: fieldErrors)
+        }
+
+        if let loginIdMessage = errorResponse.errors?["loginId"], !loginIdMessage.isEmpty {
+          errorMessage = loginIdMessage
+        } else if let firstFieldMessage = errorResponse.errors?.first(where: { !$0.value.isEmpty })?.value {
+          errorMessage = firstFieldMessage
+        } else {
+          errorMessage = message
+        }
       } else {
         errorMessage = String(data: data, encoding: .utf8) ?? "Unknown error"
       }
@@ -250,7 +272,19 @@ public struct APIClient: Sendable {
       let errorMessage: String
       if let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: data),
          let message = errorResponse.message {
-        errorMessage = message
+        let fieldErrors = (errorResponse.errors ?? [:]).filter { !$0.value.isEmpty }
+
+        if path == "/api/v1/auth/login", !fieldErrors.isEmpty {
+          throw APIFieldValidationError(message: message, fieldErrors: fieldErrors)
+        }
+
+        if let loginIdMessage = errorResponse.errors?["loginId"], !loginIdMessage.isEmpty {
+          errorMessage = loginIdMessage
+        } else if let firstFieldMessage = errorResponse.errors?.first(where: { !$0.value.isEmpty })?.value {
+          errorMessage = firstFieldMessage
+        } else {
+          errorMessage = message
+        }
       } else {
         errorMessage = String(data: data, encoding: .utf8) ?? "Request failed"
       }

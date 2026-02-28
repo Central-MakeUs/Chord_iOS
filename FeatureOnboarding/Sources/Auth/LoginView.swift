@@ -24,6 +24,7 @@ public struct LoginView: View {
                 UnderlinedTextField(
                     text: $store.id,
                     title: "아이디",
+                    errorMessage: store.loginIdErrorMessage,
                     titleColor: AppColor.grayscale900,
                     showFocusHighlight: false
                 )
@@ -31,6 +32,7 @@ public struct LoginView: View {
                 UnderlinedTextField(
                     text: $store.password,
                     title: "비밀번호",
+                    errorMessage: store.passwordErrorMessage,
                     titleColor: AppColor.grayscale900,
                     showFocusHighlight: false,
                     isSecure: true
@@ -75,24 +77,25 @@ public struct LoginView: View {
             Spacer()
         }
         .background(Color.white.ignoresSafeArea())
-        .fullScreenCover(
-            isPresented: $store.showSignUp,
-            onDismiss: { store.send(.signUpDismissed) }
-        ) {
-            SignUpView(
-                store: store.scope(state: \.signUp, action: \.signUp)
-            )
-        }
-        .coachCoachAlert(
-            isPresented: $store.isErrorAlertPresented,
-            title: store.errorMessage,
-            alertType: .oneButton,
-            rightButtonTitle: "확인",
-            rightButtonAction: {
-                store.send(.errorAlertDismissed)
-            }
-        )
+    .fullScreenCover(
+      isPresented: $store.showSignUp,
+      onDismiss: { store.send(.signUpDismissed) }
+    ) {
+      SignUpView(
+        store: store.scope(state: \.signUp, action: \.signUp)
+      )
     }
+    .coachCoachAlert(
+      isPresented: $store.showAlert,
+      title: "로그인 오류",
+      content: store.alertMessage,
+      alertType: .oneButton,
+      rightButtonTitle: "확인",
+      rightButtonAction: {
+        store.send(.alertDismissed)
+      }
+    )
+  }
 }
 
 #Preview {
