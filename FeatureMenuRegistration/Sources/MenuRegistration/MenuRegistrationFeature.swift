@@ -495,6 +495,7 @@ public struct MenuRegistrationFeature {
             amount: ingredient.defaultUsageAmount,
             unitCode: ingredient.unitCode,
             price: ingredient.defaultPrice,
+            ingredientId: ingredient.ingredientId,
             isFromTemplate: true,
             category: ingredient.ingredientCategoryCode,
             purchaseAmount: ingredient.baseQuantity,
@@ -703,10 +704,10 @@ public struct MenuRegistrationFeature {
         let ingredient = state.addedIngredients[index]
         state.selectedIngredientIndex = index
 
-        if ingredient.isFromTemplate || ingredient.ingredientId != nil {
+        if let existingIngredientId = ingredient.ingredientId {
           let displayUnit = IngredientUnit.from(ingredient.unitCode).title
           state.registeredIngredientDraft = RegisteredIngredientDraft(
-            ingredientId: ingredient.ingredientId ?? 0,
+            ingredientId: existingIngredientId,
             name: ingredient.name,
             unitCode: displayUnit,
             baseQuantity: ingredient.purchaseAmount ?? ingredient.amount,

@@ -93,6 +93,7 @@ public struct DeleteRecipesRequest: Codable, Equatable {
 }
 
 public struct RecipeTemplateResponse: Codable, Equatable {
+  public let ingredientId: Int?
   public let ingredientName: String
   public let defaultUsageAmount: Double
   public let defaultPrice: Double
@@ -102,6 +103,7 @@ public struct RecipeTemplateResponse: Codable, Equatable {
   public let ingredientCategoryCode: String
   
   public init(
+    ingredientId: Int? = nil,
     ingredientName: String,
     defaultUsageAmount: Double,
     defaultPrice: Double,
@@ -110,6 +112,7 @@ public struct RecipeTemplateResponse: Codable, Equatable {
     unitCode: String,
     ingredientCategoryCode: String
   ) {
+    self.ingredientId = ingredientId
     self.ingredientName = ingredientName
     self.defaultUsageAmount = defaultUsageAmount
     self.defaultPrice = defaultPrice

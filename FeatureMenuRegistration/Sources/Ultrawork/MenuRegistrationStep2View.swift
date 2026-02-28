@@ -19,7 +19,6 @@ public struct MenuRegistrationStep2View: View {
   public var body: some View {
     WithViewStore(store, observe: { $0 }) { viewStore in
       let shouldShowSectionHint = !viewStore.isIngredientSelectionMode
-        && viewStore.addedIngredients.isEmpty
         && !hasSectionHintExpired
 
       VStack(spacing: 0) {
@@ -430,9 +429,7 @@ public struct MenuRegistrationStep2View: View {
   }
 
   private func addedListSection(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    let showHint = !viewStore.isIngredientSelectionMode
-      && viewStore.addedIngredients.isEmpty
-      && !hasSectionHintExpired
+    let showHint = !viewStore.isIngredientSelectionMode && !hasSectionHintExpired
 
     return ZStack(alignment: .topTrailing) {
       VStack(alignment: .leading, spacing: 0) {
@@ -508,7 +505,7 @@ public struct MenuRegistrationStep2View: View {
 
                       Image.chevronRightOutlineIcon
                         .renderingMode(.template)
-                        .foregroundColor(AppColor.grayscale300)
+                        .foregroundColor(AppColor.grayscale500)
                     }
                   }
                   .padding(.vertical, 16)
