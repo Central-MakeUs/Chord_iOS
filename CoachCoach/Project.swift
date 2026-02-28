@@ -9,8 +9,8 @@ let project = Project(
       "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES": "YES",
       "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"],
       "CODE_SIGN_ENTITLEMENTS": "CoachCoach.entitlements",
-      "MARKETING_VERSION": "0.0.6",
-      "CURRENT_PROJECT_VERSION": "6"
+      "MARKETING_VERSION": "0.0.7",
+      "CURRENT_PROJECT_VERSION": "7"
     ]
   ),
   targets: [
@@ -52,7 +52,6 @@ let project = Project(
               "DEVELOPMENT_TEAM": "YH4A87H8M4",
               "APS_ENVIRONMENT": "development",
               "CODE_SIGN_STYLE": "Automatic",
-              "CODE_SIGN_IDENTITY": "Apple Development",
               "PROVISIONING_PROFILE_SPECIFIER": "",
               "INFOPLIST_KEY_CFBundleDisplayName": "코치코치",
               "INFOPLIST_KEY_CFBundlePackageType": "APPL",
@@ -65,7 +64,6 @@ let project = Project(
               "DEVELOPMENT_TEAM": "YH4A87H8M4",
               "APS_ENVIRONMENT": "production",
               "CODE_SIGN_STYLE": "Automatic",
-              "CODE_SIGN_IDENTITY": "Apple Distribution",
               "PROVISIONING_PROFILE_SPECIFIER": "",
               "INFOPLIST_KEY_CFBundleDisplayName": "코치코치",
               "INFOPLIST_KEY_CFBundlePackageType": "APPL",
@@ -91,7 +89,6 @@ let project = Project(
             settings: [
               "DEVELOPMENT_TEAM": "YH4A87H8M4",
               "CODE_SIGN_STYLE": "Automatic",
-              "CODE_SIGN_IDENTITY": "Apple Development",
               "PROVISIONING_PROFILE_SPECIFIER": ""
             ]
           ),
@@ -100,7 +97,6 @@ let project = Project(
             settings: [
               "DEVELOPMENT_TEAM": "YH4A87H8M4",
               "CODE_SIGN_STYLE": "Automatic",
-              "CODE_SIGN_IDENTITY": "Apple Development",
               "PROVISIONING_PROFILE_SPECIFIER": ""
             ]
           )
@@ -123,7 +119,6 @@ let project = Project(
             settings: [
               "DEVELOPMENT_TEAM": "YH4A87H8M4",
               "CODE_SIGN_STYLE": "Automatic",
-              "CODE_SIGN_IDENTITY": "Apple Development",
               "PROVISIONING_PROFILE_SPECIFIER": ""
             ]
           ),
@@ -132,7 +127,6 @@ let project = Project(
             settings: [
               "DEVELOPMENT_TEAM": "YH4A87H8M4",
               "CODE_SIGN_STYLE": "Automatic",
-              "CODE_SIGN_IDENTITY": "Apple Development",
               "PROVISIONING_PROFILE_SPECIFIER": ""
             ]
           )
