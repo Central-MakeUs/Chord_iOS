@@ -8,7 +8,6 @@ import CoreModels
 public struct HomeView: View {
   let store: StoreOf<HomeFeature>
   @AppStorage("storeName") private var storeName: String = ""
-  @AppStorage("unreadNotificationCount") private var unreadNotificationCount: Int = 0
 
   public init(store: StoreOf<HomeFeature>) {
     self.store = store
@@ -56,34 +55,9 @@ public struct HomeView: View {
       Image.coachCoachLogo
         .resizable()
         .scaledToFit()
-        .frame(width: 72, height: 15)
+        .frame(height: 15)
 
       Spacer()
-
-      Button(action: {}) {
-        ZStack(alignment: .topTrailing) {
-          Image.bellIcon
-            .renderingMode(.template)
-            .resizable()
-            .scaledToFit()
-            .foregroundColor(AppColor.grayscale700)
-            .frame(width: 24, height: 24)
-
-          if unreadNotificationCount > 0 {
-            ZStack {
-              Circle()
-                .fill(AppColor.error)
-                .frame(width: 12, height: 12)
-
-              Text(String(unreadNotificationCount))
-                .font(.pretendardCaption2)
-                .foregroundColor(.white)
-            }
-            .offset(x: 4, y: -4)
-          }
-        }
-      }
-      .buttonStyle(.plain)
 
       NavigationLink(value: HomeRoute.settings) {
         Image.gearIcon
@@ -165,21 +139,23 @@ public struct HomeView: View {
         }
         .buttonStyle(.plain)
       }
-      .padding(.horizontal, 20)
-      .padding(.top, 20)
+      .padding(.horizontal, 24)
+      .padding(.vertical, 16)
 
       VStack(spacing: 0) {
         if guides.isEmpty {
           VStack(spacing: 6) {
-            Text(error == nil ? "이번 주 전략이 없어요" : "전략 가이드를 불러오지 못했어요")
-              .font(.pretendardSubtitle2)
-              .foregroundColor(AppColor.grayscale700)
-            Text(error ?? "데이터가 쌓이면 전략 가이드가 보여요")
-              .font(.pretendardBody2)
+            Text("아직 받아본 전략이 없어요")
+              .font(.pretendardCaption1)
               .foregroundColor(AppColor.grayscale500)
+              .padding(.vertical, 50)
+
           }
           .frame(maxWidth: .infinity)
-          .padding(.vertical, 28)
+          .background(AppColor.grayscale200)
+          .cornerRadius(12)
+          .padding(.bottom, 110)
+          .padding(.horizontal, 24)
         } else {
           ForEach(Array(guides.prefix(3).enumerated()), id: \.offset) { index, guide in
             VStack(alignment: .leading, spacing: 8) {
@@ -419,10 +395,10 @@ private struct StoreInfoEditView: View {
           "",
           text: staffCountBinding,
           prompt: Text("사장님을 제외한 직원수 입력")
-            .font(.pretendardBody2)
+            .font(.pretendardSubtitle2)
             .foregroundColor(AppColor.grayscale400)
         )
-        .font(.pretendardBody2)
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
         .keyboardType(.numberPad)
         .textInputAutocapitalization(.never)
@@ -476,10 +452,10 @@ private struct StoreInfoEditView: View {
           "",
           text: laborCostBinding,
           prompt: Text("시급 기준으로 입력")
-            .font(.pretendardBody2)
+            .font(.pretendardSubtitle2)
             .foregroundColor(AppColor.grayscale400)
         )
-        .font(.pretendardBody2)
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
         .keyboardType(.numberPad)
         .textInputAutocapitalization(.never)
@@ -762,8 +738,7 @@ public struct HomeSettingsView: View {
       ScrollView {
         VStack(spacing: 12) {
           storeInfoCard
-        //TODO: Next Version
-        //  managementCard
+          managementCard
           infoCard
         }
         .padding(.horizontal, 24)
@@ -920,56 +895,43 @@ public struct HomeSettingsView: View {
 
   private var managementCard: some View {
     VStack(spacing: 8) {
-      Button(action: {}) {
-        HStack {
-          Text("구독관리")
-            .font(.pretendardBody2)
-            .foregroundColor(AppColor.grayscale900)
+      HStack {
+        Text("알림")
+          .font(.pretendardBody2)
+          .foregroundColor(AppColor.grayscale900)
 
-          Spacer(minLength: 0)
+        Spacer(minLength: 0)
 
-          HStack(spacing: 6) {
-            Text("요금제 구독중")
-              .font(.pretendardCaption1)
-              .foregroundColor(AppColor.primaryBlue500)
-            Image.chevronRightOutlineIcon
-              .renderingMode(.template)
-              .foregroundColor(AppColor.primaryBlue500)
+        Toggle("", isOn: $notificationsEnabled)
+          .labelsHidden()
+          .tint(AppColor.primaryBlue500)
+          .onChange(of: notificationsEnabled) { isEnabled in
+            NotificationCenter.default.post(
+              name: Notification.Name("NotificationsEnabledChanged"),
+              object: nil,
+              userInfo: ["enabled": isEnabled]
+            )
           }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(Color.white)
-        .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
       }
-      .buttonStyle(.plain)
-//
-//      HStack {
-//        Text("알림")
-//          .font(.pretendardBody2)
-//          .foregroundColor(AppColor.grayscale900)
-//
-//        Spacer(minLength: 0)
-//
-//        Toggle("", isOn: $notificationsEnabled)
-//          .labelsHidden()
-//          .tint(AppColor.primaryBlue500)
-//      }
-//      .padding(.horizontal, 20)
-//      .padding(.vertical, 16)
-//      .background(Color.white)
-//      .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+      .padding(.horizontal, 20)
+      .padding(.vertical, 16)
+      .background(Color.white)
+      .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
     }
   }
 
   private var infoCard: some View {
     VStack(spacing: 0) {
-//      settingsRow(title: "FAQ")
+      settingsNavigationRow(title: "FAQ") {
+        FAQView()
+      }
 
-//      Divider()
-//        .foregroundColor(AppColor.grayscale300)
+      Divider()
+        .foregroundColor(AppColor.grayscale300)
 
-//      settingsRow(title: "이용약관")
+      settingsNavigationRow(title: "이용약관") {
+        TermsOfServiceView()
+      }
 
       Divider()
         .foregroundColor(AppColor.grayscale300)
@@ -1010,7 +972,6 @@ public struct HomeSettingsView: View {
         Text(title)
           .font(.pretendardBody2)
           .foregroundColor(AppColor.grayscale900)
-
         Spacer(minLength: 0)
 
         Image.chevronRightOutlineIcon
