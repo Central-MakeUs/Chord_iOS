@@ -22,20 +22,21 @@ public struct MenuStatusBadge: View {
 }
 
 private extension MenuStatus {
-  var color: Color {
+  var badgeTextColor: Color {
     switch self {
     case .safe: return AppColor.semanticSafeText
-    case .normal: return AppColor.primaryBlue500
+    case .normal: return AppColor.primaryBlue700
     case .warning: return AppColor.semanticCautionText
     case .danger: return AppColor.semanticWarningText
     }
   }
 
   var badgeBackgroundColor: Color {
-    color.opacity(0.15)
-  }
-
-  var badgeTextColor: Color {
-    color
+    switch self {
+    case .safe: return AppColor.semanticSafe
+    case .normal: return AppColor.primaryBlue100
+    case .warning: return AppColor.semanticCaution
+    case .danger: return AppColor.semanticWarning
+    }
   }
 }

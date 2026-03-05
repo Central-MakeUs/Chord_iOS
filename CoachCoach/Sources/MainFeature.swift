@@ -119,10 +119,6 @@ struct MainFeature {
         state.path.append(route)
         return .none
         
-      case .menu(.addMenuTapped):
-        state.path.append(MenuRoute.add)
-        return .none
-        
       case .menu(.popToRoot):
         state.path = NavigationPath()
         return .none

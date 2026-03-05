@@ -128,9 +128,9 @@ struct MainView: View {
                     MenuDetailFeature()
                 }
             )
-        case .add:
+        case let .add(initialCategory):
             MenuRegistrationView(
-                store: Store(initialState: MenuRegistrationFeature.State()) {
+                store: Store(initialState: MenuRegistrationFeature.State(initialCategory: initialCategory.title)) {
                     MenuRegistrationFeature()
                 },
                 onMenuCreated: {
@@ -206,14 +206,14 @@ private struct WeeklyGuideDetailView: View {
                         Text(strategyDateLabel)
                             .font(.pretendardCaption3)
                             .foregroundColor(AppColor.grayscale700)
-                            .padding(.leading, 6)
-                            .padding(.trailing, 8)
-                            .padding(.bottom, 4)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
                             .background(
                                 Capsule(style: .continuous)
                                     .fill(AppColor.grayscale300)
                             )
                             .frame(maxWidth: .infinity, alignment: .center)
+                            .padding(.top, 8)
 
                         Image("WarningIllust", bundle: .main)
                             .resizable()
@@ -335,25 +335,26 @@ private struct WeeklyGuideDetailView: View {
 
     private var emptyNeedManagementView: some View {
         VStack(spacing: 0) {
-            Spacer(minLength: 48)
+            Spacer()
+                .frame(height: 24)
 
             HStack(spacing: 6) {
                 Text("메뉴 운영")
-                    .font(.pretendardSubtitle2)
+                    .font(.pretendardBody2)
                     .foregroundColor(AppColor.semanticSafeText)
 
                 Text("안정")
+                    .frame(height: 20)
                     .font(.pretendardCaption3)
                     .foregroundColor(AppColor.semanticSafeText)
                     .padding(.horizontal, 6)
-                    .padding(.vertical, 2)
                     .background(AppColor.semanticSafe)
                     .clipShape(RoundedRectangle(cornerRadius: 6, style: .continuous))
             }
             .frame(maxWidth: .infinity)
 
             Text("이번주는 진단이\n필요한 메뉴가 없어요")
-                .font(.pretendardTitle1)
+                .font(.pretendardHeadline2)
                 .foregroundColor(AppColor.grayscale700)
                 .multilineTextAlignment(.center)
                 .lineSpacing(2)
@@ -363,7 +364,7 @@ private struct WeeklyGuideDetailView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 245)
-                .padding(.top, 44)
+                .padding(.top, 50)
 
             Spacer(minLength: 0)
         }
@@ -553,11 +554,7 @@ private struct WeeklyGuideDetailView: View {
             strategyDateLabel = formattedStrategyDate(response.strategyDate)
             menus = response.menus
             
-            if menus.isEmpty {
-                loadError = "표시할 주의 메뉴 데이터가 없어요"
-            } else {
-                loadError = nil
-            }
+            loadError = nil
         } catch {
             loadError = "데이터를 불러오지 못했어요"
         }
@@ -607,7 +604,7 @@ private struct DangerStrategyDetailView: View {
                 )
                 
                 ScrollView {
-                    VStack(spacing: 12) {
+                    VStack(spacing: 10) {
                         if let detail {
                             Text("\(detail.month)월 \(detail.weekOfMonth)주차")
                                 .font(.pretendardCaption1)

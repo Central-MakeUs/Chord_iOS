@@ -9,8 +9,8 @@ let project = Project(
       "ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES": "YES",
       "OTHER_LDFLAGS": ["$(inherited)", "-ObjC"],
       "CODE_SIGN_ENTITLEMENTS": "CoachCoach.entitlements",
-      "MARKETING_VERSION": "0.0.7",
-      "CURRENT_PROJECT_VERSION": "7"
+      "MARKETING_VERSION": "1.0.0",
+      "CURRENT_PROJECT_VERSION": "13"
     ]
   ),
   targets: [

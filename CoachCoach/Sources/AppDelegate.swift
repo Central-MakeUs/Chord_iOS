@@ -28,6 +28,13 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 
     application.registerForRemoteNotifications()
 
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(handleNotificationsEnabledChanged(_:)),
+      name: Notification.Name("NotificationsEnabledChanged"),
+      object: nil
+    )
+
     return true
   }
 
@@ -50,9 +57,23 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
 extension AppDelegate: MessagingDelegate {
   func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
     guard let fcmToken else { return }
-    UserDefaults.standard.set(fcmToken, forKey: "fcmToken")
-    print("[FCM] Refreshed token: \(fcmToken)")
-    NotificationCenter.default.post(name: .fcmTokenDidUpdate, object: nil, userInfo: ["token": fcmToken])
+
+    let notificationsEnabled = UserDefaults.standard.bool(forKey: "notificationsEnabled")
+
+    if notificationsEnabled {
+      UserDefaults.standard.set(fcmToken, forKey: "fcmToken")
+      print("[FCM] Refreshed token: \(fcmToken)")
+      NotificationCenter.default.post(name: .fcmTokenDidUpdate, object: nil, userInfo: ["token": fcmToken])
+    } else {
+      Messaging.messaging().deleteToken { error in
+        if let error {
+          print("[FCM] Failed to delete token (notifications disabled): \(error)")
+        } else {
+          print("[FCM] Token deleted (notifications disabled)")
+          UserDefaults.standard.removeObject(forKey: "fcmToken")
+        }
+      }
+    }
   }
 }
 
@@ -68,6 +89,31 @@ private extension AppDelegate {
       UserDefaults.standard.set(token, forKey: "fcmToken")
       print("[FCM] Initial token: \(token)")
       NotificationCenter.default.post(name: .fcmTokenDidUpdate, object: nil, userInfo: ["token": token])
+    }
+  }
+}
+
+extension AppDelegate {
+  @objc func handleNotificationsEnabledChanged(_ notification: Notification) {
+    guard let userInfo = notification.userInfo,
+          let isEnabled = userInfo["enabled"] as? Bool else { return }
+
+    if isEnabled {
+      Messaging.messaging().token { token, error in
+        if let error {
+          print("[FCM] Token fetch failed: \(error)")
+        } else if let token {
+          print("[FCM] Token fetched: \(token)")
+        }
+      }
+    } else {
+      Messaging.messaging().deleteToken { error in
+        if let error {
+          print("[FCM] Token delete failed: \(error)")
+        } else {
+          print("[FCM] Token deleted - notifications disabled")
+        }
+      }
     }
   }
 }

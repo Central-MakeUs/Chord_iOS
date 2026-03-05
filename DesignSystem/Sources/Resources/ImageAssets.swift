@@ -83,4 +83,6 @@ public extension Image {
   static let coachCoachLogo = Image("CoachCoachLogo", bundle: Bundle.main)
   static let strategyCompletionGraphic = Image("StrategyCompletionGraphic", bundle: Bundle.main)
   static let noDiagnosisGraphic = Image("NoDiagnosisGraphic", bundle: Bundle.main)
+  static let arrowLeftBig = Image("ArrowLeftBig", bundle: Bundle.main)
+  static let arrowRightBig = Image("ArrowRightBig", bundle: Bundle.main)
 }

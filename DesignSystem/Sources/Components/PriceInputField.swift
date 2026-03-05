@@ -62,17 +62,19 @@ public struct PriceInputField: View {
         .font(.pretendardCTA)
         .foregroundColor(AppColor.grayscale500)
 
-      if !text.isEmpty {
-        Button(action: { text = "" }) {
-          Image.cancelRoundedIcon
-            .resizable()
-            .renderingMode(.template)
-            .foregroundColor(AppColor.grayscale500)
-            .scaledToFit()
-            .frame(width: 18, height: 18)
-        }
-        .buttonStyle(.plain)
+      let hasText = !text.isEmpty
+      Button(action: { text = "" }) {
+        Image.cancelRoundedIcon
+          .resizable()
+          .renderingMode(.template)
+          .foregroundColor(AppColor.grayscale500)
+          .scaledToFit()
+          .frame(width: 18, height: 18)
       }
+      .buttonStyle(.plain)
+      .opacity(hasText ? 1 : 0)
+      .allowsHitTesting(hasText)
+      .accessibilityHidden(!hasText)
     }
     .padding(.horizontal, 16)
     .frame(height: height)
