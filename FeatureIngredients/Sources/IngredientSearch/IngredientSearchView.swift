@@ -70,10 +70,10 @@ public struct IngredientSearchView: View {
                         send: IngredientSearchFeature.Action.searchTextChanged
                     ),
                     prompt: Text("재료명, 메뉴명으로 검색")
-                        .font(.pretendardBody2)
+                        .font(.pretendardBody3)
                         .foregroundColor(AppColor.grayscale500)
                 )
-                .font(.pretendardBody2)
+                .font(.pretendardBody3)
                 .foregroundColor(AppColor.grayscale900)
                 .textInputAutocapitalization(.never)
                 .disableAutocorrection(true)

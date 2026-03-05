@@ -1,6 +1,7 @@
 import SwiftUI
 import ComposableArchitecture
 import DesignSystem
+import UIKit
 
 public struct LoginView: View {
     @Bindable var store: StoreOf<LoginFeature>
@@ -77,6 +78,12 @@ public struct LoginView: View {
             Spacer()
         }
         .background(Color.white.ignoresSafeArea())
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                dismissKeyboard()
+            }
+        )
     .fullScreenCover(
       isPresented: $store.showSignUp,
       onDismiss: { store.send(.signUpDismissed) }
@@ -94,6 +101,15 @@ public struct LoginView: View {
       rightButtonAction: {
         store.send(.alertDismissed)
       }
+    )
+  }
+
+  private func dismissKeyboard() {
+    UIApplication.shared.sendAction(
+      #selector(UIResponder.resignFirstResponder),
+      to: nil,
+      from: nil,
+      for: nil
     )
   }
 }

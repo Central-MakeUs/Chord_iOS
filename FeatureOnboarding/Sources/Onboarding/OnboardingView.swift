@@ -248,10 +248,10 @@ public struct OnboardingView: View {
             send: OnboardingFeature.Action.laborCostChanged
           ),
           prompt: Text("시급 기준으로 입력")
-            .font(.pretendardBody2)
+            .font(.pretendardSubtitle2)
             .foregroundColor(AppColor.grayscale400)
         )
-        .font(.pretendardBody2)
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
         .keyboardType(.numberPad)
         .textInputAutocapitalization(.never)

@@ -107,6 +107,9 @@ public struct MenuRegistrationStep2View: View {
       .onChange(of: shouldShowSectionHint) { _, isVisible in
         startSectionHintTimerIfNeeded(isVisible)
       }
+      .onChange(of: viewStore.addedIngredients) { oldRows, newRows in
+        logAddedIngredientRowsChange(oldRows: oldRows, newRows: newRows)
+      }
     }
   }
 
@@ -129,21 +132,22 @@ public struct MenuRegistrationStep2View: View {
         )
         .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
+        .frame(height: 24, alignment: .leading)
         .focused($isInputFocused)
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
 
-        if !viewStore.ingredientInput.isEmpty {
-          Button(action: {
-            viewStore.send(.ingredientInputChanged(""))
-          }) {
-            Image.cancelRoundedIcon
-              .renderingMode(.template)
-              .foregroundColor(AppColor.grayscale500)
-              .frame(width: 20, height: 20)
-          }
-          .buttonStyle(.plain)
+        Button(action: {
+          viewStore.send(.ingredientInputChanged(""))
+        }) {
+          Image.cancelRoundedIcon
+            .renderingMode(.template)
+            .foregroundColor(AppColor.grayscale500)
+            .frame(width: 20, height: 20)
         }
+        .buttonStyle(.plain)
+        .opacity(viewStore.ingredientInput.isEmpty ? 0 : 1)
+        .allowsHitTesting(!viewStore.ingredientInput.isEmpty)
       }
       .padding(.horizontal, 16)
       .padding(.vertical, 12)
@@ -264,7 +268,7 @@ public struct MenuRegistrationStep2View: View {
                 ),
                 prompt: Text("제조시 사용되는 용량 입력")
                   .font(.pretendardSubtitle2)
-                  .foregroundColor(AppColor.grayscale400)
+                  .foregroundColor(AppColor.grayscale500)
               )
               .font(.pretendardSubtitle2)
               .foregroundColor(AppColor.grayscale900)
@@ -558,6 +562,28 @@ public struct MenuRegistrationStep2View: View {
       .frame(width: 28, height: 28)
   }
 
+  private func logAddedIngredientRowsChange(
+    oldRows: [MenuRegistrationFeature.RegistrationIngredient],
+    newRows: [MenuRegistrationFeature.RegistrationIngredient]
+  ) {
+    print("🧾 [MenuRegistrationStep2] 사용되는 재료 row changed (\(oldRows.count) -> \(newRows.count))")
+    print("   old: \(rowLogSummary(for: oldRows))")
+    print("   new: \(rowLogSummary(for: newRows))")
+  }
+
+  private func rowLogSummary(
+    for rows: [MenuRegistrationFeature.RegistrationIngredient]
+  ) -> String {
+    guard !rows.isEmpty else { return "(empty)" }
+    return rows.map { row in
+      let ingredientIdText = row.ingredientId.map(String.init) ?? "nil"
+      let amountText = "\(formatAmount(row.amount))\(IngredientUnit.from(row.unitCode).title)"
+      let priceText = formatPrice(row.price)
+      return "\(row.name){ingredientId:\(ingredientIdText), amount:\(amountText), price:\(priceText)}"
+    }
+    .joined(separator: ", ")
+  }
+
   private func dismissKeyboard() {
     isInputFocused = false
     UIApplication.shared.sendAction(
@@ -597,7 +623,7 @@ public struct MenuRegistrationStep2View: View {
             style: viewStore.addedIngredients.isEmpty ? .secondary : .primary
           ) {
             if !viewStore.addedIngredients.isEmpty {
-              viewStore.send(.finalCompleteTapped)
+              viewStore.send(.completeTapped)
             }
           }
         }

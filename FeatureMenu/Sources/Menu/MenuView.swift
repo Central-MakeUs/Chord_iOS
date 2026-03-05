@@ -6,6 +6,8 @@ import FeatureMenuRegistration
 
 public struct MenuView: View {
     let store: StoreOf<MenuFeature>
+    @State private var isAddCategorySheetPresented = false
+    @State private var addMenuCategoryDraft: MenuCategory = .beverage
     
     public init(store: StoreOf<MenuFeature>) {
         self.store = store
@@ -19,42 +21,56 @@ public struct MenuView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     menuHeader(
                         count: viewStore.menuItems.count,
-                        onAdd: { viewStore.send(.addMenuTapped) }
+                        onAdd: {
+                            addMenuCategoryDraft = defaultAddCategory(from: viewStore.selectedCategory)
+                            isAddCategorySheetPresented = true
+                        }
                     )
                     
                     MenuTabs(selected: viewStore.selectedCategory) { category in
                         viewStore.send(.selectedCategoryChanged(category))
                     }
                     
-                    HStack(spacing: 8) {
-                        Spacer()
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(AppColor.primaryBlue600)
-                                .frame(width: 8, height: 8)
-                            Text("마진율")
-                                .font(.pretendardCaption4)
-                                .foregroundColor(AppColor.primaryBlue600)
-                        }
-                        HStack(spacing: 4) {
-                            Circle()
-                                .fill(AppColor.grayscale500)
-                                .frame(width: 8, height: 8)
-                            Text("원가율")
-                                .font(.pretendardCaption4)
-                                .foregroundColor(AppColor.grayscale600)
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 16) {
-                            
-                            menuList(items: viewStore.menuItems)
+                    if !viewStore.menuItems.isEmpty {
+                        HStack(spacing: 8) {
+                            Spacer()
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(AppColor.primaryBlue600)
+                                    .frame(width: 8, height: 8)
+                                Text("마진율")
+                                    .font(.pretendardCaption4)
+                                    .foregroundColor(AppColor.primaryBlue600)
+                            }
+                            HStack(spacing: 4) {
+                                Circle()
+                                    .fill(AppColor.grayscale500)
+                                    .frame(width: 8, height: 8)
+                                Text("원가율")
+                                    .font(.pretendardCaption4)
+                                    .foregroundColor(AppColor.grayscale600)
+                            }
                         }
                         .padding(.horizontal, 20)
-                        .padding(.bottom, 24)
                     }
+                    if viewStore.menuItems.isEmpty {
+                        HStack {
+                            Spacer()
+                            emptyMenuView
+                            Spacer()
+
+                        }
+                    } else {
+                        ScrollView {
+                            VStack(alignment: .leading, spacing: 16) {
+                                menuList(items: viewStore.menuItems)
+                            }
+                            .padding(.horizontal, 20)
+                            .padding(.bottom, 24)
+                        }
+                    }
+                    
+                  
                 }
                 .toolbar(.hidden, for: .navigationBar)
             }
@@ -62,6 +78,29 @@ public struct MenuView: View {
             .onAppear {
                 viewStore.send(.onAppear)
             }
+            .sheet(isPresented: $isAddCategorySheetPresented) {
+                MenuCategoryBottomSheet(
+                    selectedCategory: $addMenuCategoryDraft,
+                    categories: [.beverage, .dessert, .food],
+                    onConfirm: {
+                        viewStore.send(.addMenuTapped(addMenuCategoryDraft))
+                        isAddCategorySheetPresented = false
+                    }
+                )
+                .presentationDetents([.height(300)])
+                .presentationCornerRadius(24)
+                .presentationDragIndicator(.hidden)
+                .presentationBackground(Color.white)
+            }
+        }
+    }
+
+    private func defaultAddCategory(from category: MenuCategory) -> MenuCategory {
+        switch category {
+        case .all:
+            return .beverage
+        case .beverage, .dessert, .food:
+            return category
         }
     }
     
@@ -99,7 +138,23 @@ public struct MenuView: View {
             }
         }
     }
-    
+
+    private var emptyMenuView: some View {
+        VStack(alignment: .center) {
+                Spacer()
+                
+                Text("등록된 메뉴가 없어요")
+                    .font(.pretendardSubtitle3)
+                    .foregroundColor(AppColor.grayscale500)
+                    .frame(width: 268, height: 160)
+                    .background(AppColor.grayscale300)
+                    .cornerRadius(16)
+                
+                Spacer()
+            }
+        
+    }
+
 }
 
 private struct MenuTabs: View {

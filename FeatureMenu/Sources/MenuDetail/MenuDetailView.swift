@@ -49,12 +49,15 @@ public struct MenuDetailView: View {
 
             VStack(spacing: 16) {
               marginInfoCard(status: viewStore.item.status, item: viewStore.item)
-              if shouldShowRecommendedPrice(for: viewStore.item.status) {
                 VStack(alignment: .leading, spacing: 8) {
-                  recommendedPriceCard(price: viewStore.item.recommendedPrice)
-                  recommendedPriceDescription()
+                    if shouldShowRecommendedPrice(for: viewStore.item.status) {
+                        recommendedPriceCard(price: viewStore.item.recommendedPrice)
+                    }
+                    recommendedPriceDescription()
+
                 }
-              }
+                .frame(maxWidth: .infinity, alignment: .leading)
+               
             }
             .padding(.horizontal, 20)
             .padding(.top, 24)
@@ -66,7 +69,7 @@ public struct MenuDetailView: View {
             
             ingredientsCard(item: viewStore.item)
               .padding(.horizontal, 20)
-              .padding(.bottom, 16)
+              .padding(.vertical, 24)
           }
         }
       }
@@ -207,9 +210,14 @@ public struct MenuDetailView: View {
         Text("수익등급")
           .font(.pretendardCTA)
           .foregroundColor(AppColor.grayscale700)
-        
+        Spacer()
         MenuBadge(status: status)
       }
+      
+      Text(statusDescription(for: status))
+        .font(.pretendardCaption2)
+        .foregroundColor(AppColor.grayscale700)
+        .lineSpacing(4)
       
       HStack(spacing: 0) {
         VStack(spacing: 6) {
@@ -218,7 +226,7 @@ public struct MenuDetailView: View {
             .foregroundColor(AppColor.grayscale700)
           Text(item.marginRate)
             .font(.pretendardBody1)
-            .foregroundColor(statusColor(for: status))
+            .foregroundColor(AppColor.grayscale900)
         }
         .frame(maxWidth: .infinity)
         
@@ -228,7 +236,7 @@ public struct MenuDetailView: View {
             .foregroundColor(AppColor.grayscale700)
           Text(item.costRate)
             .font(.pretendardBody1)
-            .foregroundColor(statusColor(for: status))
+            .foregroundColor(AppColor.grayscale900)
         }
         .frame(maxWidth: .infinity)
         
@@ -338,6 +346,19 @@ public struct MenuDetailView: View {
       return true
     case .safe, .normal:
       return false
+    }
+  }
+
+  private func statusDescription(for status: MenuStatus) -> String {
+    switch status {
+    case .danger:
+      return "현재 가격에서는 수익성이 낮아요\n권장 가격이상으로 조정하는 걸 추천해요"
+    case .warning:
+      return "원가율이 다소 높은 편이에요\n가격 또는 원가 구조 점검을 권장드려요"
+    case .normal:
+      return "전반적인 원가구조가 안정적이예요"
+    case .safe:
+      return "현재 원가 효율이 아주 좋아요"
     }
   }
   

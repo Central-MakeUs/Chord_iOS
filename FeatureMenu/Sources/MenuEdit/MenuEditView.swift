@@ -83,7 +83,7 @@ public struct MenuEditView: View {
         .modifier(SheetCornerRadiusModifier(radius: 24))
       }
       .sheet(isPresented: $isCategorySheetPresented) {
-        MenuEditCategoryBottomSheet(
+        MenuCategoryBottomSheet(
           selectedCategory: $selectedCategoryDraft,
           categories: viewStore.categories,
           onConfirm: {
@@ -213,7 +213,7 @@ public struct MenuEditView: View {
 
 }
 
-private struct MenuEditCategoryBottomSheet: View {
+struct MenuCategoryBottomSheet: View {
   @Binding var selectedCategory: MenuCategory
   let categories: [MenuCategory]
   let onConfirm: () -> Void

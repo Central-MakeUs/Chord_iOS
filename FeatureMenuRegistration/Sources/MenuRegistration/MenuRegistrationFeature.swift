@@ -186,7 +186,9 @@ public struct MenuRegistrationFeature {
       return "\(formatter.string(from: NSNumber(value: intCost)) ?? "\(intCost)")원"
     }
 
-    public init() {}
+    public init(initialCategory: String = "음료") {
+      self.selectedCategory = initialCategory
+    }
   }
 
   public enum Action: Equatable {

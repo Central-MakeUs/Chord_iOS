@@ -258,29 +258,32 @@ public struct MenuRegistrationStep1View: View {
         .textInputAutocapitalization(.never)
         .disableAutocorrection(true)
 
-        if !viewStore.menuName.isEmpty {
-          Button(action: {
-            if isDirectInputState {
-              viewStore.send(.directInputTapped)
-            } else {
-              viewStore.send(.clearMenuNameTapped)
-            }
-          }) {
-            Group {
-              if isDirectInputState {
-                Image.plusCircleBlueIcon
-                  .resizable()
-                  .scaledToFit()
-              } else {
-                Image.cancelRoundedIcon
-                  .renderingMode(.template)
-                  .foregroundColor(AppColor.grayscale500)
-              }
-            }
-            .frame(width: 20, height: 20)
+        let hasMenuName = !viewStore.menuName.isEmpty
+        Button(action: {
+          guard hasMenuName else { return }
+          if isDirectInputState {
+            viewStore.send(.directInputTapped)
+          } else {
+            viewStore.send(.clearMenuNameTapped)
           }
-          .buttonStyle(.plain)
+        }) {
+          Group {
+            if isDirectInputState {
+              Image.plusCircleBlueIcon
+                .resizable()
+                .scaledToFit()
+            } else {
+              Image.cancelRoundedIcon
+                .renderingMode(.template)
+                .foregroundColor(AppColor.grayscale500)
+            }
+          }
+          .frame(width: 20, height: 20)
         }
+        .buttonStyle(.plain)
+        .opacity(hasMenuName ? 1 : 0)
+        .allowsHitTesting(hasMenuName)
+        .accessibilityHidden(!hasMenuName)
       }
 
       Rectangle()

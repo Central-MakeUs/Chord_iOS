@@ -123,7 +123,7 @@ private struct UnderlinedField: View {
           text: $text,
           prompt: Text("")
         )
-        .font(.pretendardSubtitle1)
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
         .keyboardType(keyboardType)
         .textInputAutocapitalization(.never)
@@ -131,7 +131,7 @@ private struct UnderlinedField: View {
 
         if let trailingText {
           Text(trailingText)
-            .font(.pretendardSubtitle1)
+            .font(.pretendardSubtitle2)
             .foregroundColor(AppColor.grayscale900)
         }
       }
@@ -162,7 +162,7 @@ private struct UnderlinedFieldWithDropdown: View {
           text: $text,
           prompt: Text("")
         )
-        .font(.pretendardSubtitle1)
+        .font(.pretendardSubtitle2)
         .foregroundColor(AppColor.grayscale900)
         .keyboardType(.decimalPad)
         .textInputAutocapitalization(.never)

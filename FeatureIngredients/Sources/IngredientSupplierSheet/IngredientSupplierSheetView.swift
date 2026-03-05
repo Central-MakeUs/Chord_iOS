@@ -35,7 +35,6 @@ public struct IngredientSupplierSheetView: View {
           )
         }
         .padding(.horizontal, 20)
-        .padding(.top, 24)
 
         Spacer(minLength: 20)
 

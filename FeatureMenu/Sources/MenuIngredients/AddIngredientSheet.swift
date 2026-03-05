@@ -49,7 +49,7 @@ public struct AddIngredientSheet: View {
 
   private var addRootContent: some View {
     VStack(spacing: 0) {
-      Color.clear.frame(height: 40)
+      Color.clear.frame(height: 20)
 
       Text("재료 추가")
         .font(.pretendardHeadline2)
@@ -204,7 +204,7 @@ public struct AddIngredientSheet: View {
               ),
               prompt: Text("제조시 사용되는 용량 입력")
                 .font(.pretendardSubtitle2)
-                .foregroundColor(AppColor.grayscale400)
+                .foregroundColor(AppColor.grayscale500)
             )
             .font(.pretendardSubtitle2)
             .foregroundColor(AppColor.grayscale900)

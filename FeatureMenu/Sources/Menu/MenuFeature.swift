@@ -24,7 +24,7 @@ public struct MenuFeature {
     case menuItemsLoaded(Result<[MenuItem], Error>)
     case navigateTo(MenuRoute)
     case popToRoot
-    case addMenuTapped
+    case addMenuTapped(MenuCategory)
     
     public static func == (lhs: Action, rhs: Action) -> Bool {
       switch (lhs, rhs) {
@@ -35,7 +35,7 @@ public struct MenuFeature {
       case (.menuItemsLoaded(.failure), .menuItemsLoaded(.failure)): return true
       case let (.navigateTo(l), .navigateTo(r)): return l == r
       case (.popToRoot, .popToRoot): return true
-      case (.addMenuTapped, .addMenuTapped): return true
+      case let (.addMenuTapped(l), .addMenuTapped(r)): return l == r
       default: return false
       }
     }
@@ -112,9 +112,9 @@ public struct MenuFeature {
         state.isMenuManagePresented = isPresented
         return .none
         
-      case .addMenuTapped:
+      case let .addMenuTapped(category):
         state.isMenuManagePresented = false
-        return .none
+        return .send(.navigateTo(.add(category)))
       }
     }
   }

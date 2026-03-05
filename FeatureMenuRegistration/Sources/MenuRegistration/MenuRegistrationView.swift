@@ -30,6 +30,9 @@ public struct MenuRegistrationView: View {
     WithViewStore(store, observe: ViewState.init) { viewStore in
       let isForward = viewStore.isNavigatingForward
       ZStack {
+        Color.white
+          .ignoresSafeArea()
+
         switch viewStore.currentStep {
         case .step1:
           MenuRegistrationStep1View(store: store)

@@ -64,26 +64,18 @@ public struct IngredientDetailView: View {
               onSupplierTap: { viewStore.send(.supplierPresented(true)) }
             )
             usageSection(menus: viewStore.item.usedMenus)
+                  .padding(.top, 16)
             Rectangle()
               .fill(AppColor.grayscale200)
               .frame(height: 10)
               .padding(.horizontal, -20)
             historySection(viewStore: viewStore)
+                  .padding(.top, 8)
             Spacer(minLength: 24)
           }
           .padding(.horizontal, 20)
           .padding(.bottom, 24)
         }
-        
-        VStack(spacing: 0) {
-          BottomButton(title: "재료 삭제", style: .tertiary) {
-            viewStore.send(.deleteTapped)
-          }
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
-        .padding(.bottom, 34)
-        .background(AppColor.grayscale100)
 
       }
       .navigationBarBackButtonHidden(true)
@@ -208,28 +200,51 @@ public struct IngredientDetailView: View {
     onSupplierTap: @escaping () -> Void
   ) -> some View {
     VStack(alignment: .leading, spacing: 16) {
-      VStack(alignment: .leading, spacing: 8) {
+      VStack(alignment: .leading, spacing: 0) {
         Text(category)
-          .font(.pretendardCaption2)
-          .foregroundColor(AppColor.grayscale600)
+              .frame(minHeight: 20)
+          .font(.pretendardCaption3)
+          .foregroundColor(AppColor.grayscale500)
         
         Text(name)
-          .font(.pretendardTitle1)
+              .frame(minHeight: 26)
+          .font(.pretendardSubtitle3)
           .foregroundColor(AppColor.grayscale900)
+          
         
-        Button(action: onTap) {
-          HStack(spacing: 4) {
-            Text("\(priceText)원 \(usageText)\(unit.title)")
-              .font(.pretendardHeadline2)
-              .foregroundColor(AppColor.grayscale900)
-            Image.pencleIcon
-              .renderingMode(.template)
-              .foregroundColor(AppColor.grayscale500)
-              .frame(width: 20, height: 20)
+          Button(action: onTap) {
+              HStack(spacing: 8) {
+                  Text("\(usageText)\(unit.title)당")
+                      .font(.pretendardSubtitle2)
+                      .foregroundColor(AppColor.grayscale600)
+                  Text("\(priceText)원")
+                      .font(.pretendardHeadline2)
+                      .foregroundColor(AppColor.grayscale900)
+                  HStack(alignment: .center, spacing: 0) {
+                      Text("수정")
+                          .font(.pretendardCaption1)
+                          .foregroundStyle(AppColor.grayscale600)
+                          .padding(.horizontal, 8)
+                          .padding(.vertical, 4)
+                  }
+                  .cornerRadius(8)
+                  .overlay(
+                    RoundedRectangle(cornerRadius: 8)
+                        .inset(by: 0.5)
+                        .stroke(AppColor.grayscale300, lineWidth: 1)
+                  )
+                  .padding(.leading, -4)
+              }
           }
-        }
-        .buttonStyle(.plain)
+          .frame(minHeight: 30)
+          .buttonStyle(.plain)
       }
+        
+      Divider()
+            .frame(maxWidth: .infinity)
+            .frame(height: 1)
+            .foregroundStyle(AppColor.grayscale200)
+        
       supplierRow(supplierName: supplierName, onTap: onSupplierTap)
     }
     .padding(24)
@@ -273,6 +288,7 @@ public struct IngredientDetailView: View {
           .font(.pretendardSubtitle3)
           .foregroundColor(AppColor.primaryBlue500)
       }
+
       
       if menus.isEmpty {
         Text("사용중인 메뉴가 없습니다.")
@@ -280,15 +296,18 @@ public struct IngredientDetailView: View {
           .foregroundColor(AppColor.grayscale500)
           .padding(.vertical, 12)
       } else {
-        HStack(spacing: 8) {
-          ForEach(Array(menus.prefix(3)), id: \.menuName) { menu in
-            let unit = IngredientUnit.from(menu.unitCode).title
-            UsageMenuCard(
-              menuName: menu.menuName,
-              amount: "\(Int(menu.amount))\(unit)"
-            )
+          ScrollView {
+              HStack(spacing: 8) {
+                ForEach(Array(menus.prefix(3)), id: \.menuName) { menu in
+                  let unit = IngredientUnit.from(menu.unitCode).title
+                  UsageMenuCard(
+                    menuName: menu.menuName,
+                    amount: "\(Int(menu.amount))\(unit)"
+                  )
+                }
+              }
           }
-        }
+      
       }
     }
   }

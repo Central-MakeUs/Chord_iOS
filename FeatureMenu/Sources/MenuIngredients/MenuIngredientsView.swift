@@ -251,7 +251,7 @@ public struct MenuIngredientsView: View {
               ),
               prompt: Text("제조시 사용되는 용량 입력")
                 .font(.pretendardSubtitle2)
-                .foregroundColor(AppColor.grayscale400)
+                .foregroundColor(AppColor.grayscale500)
             )
             .font(.pretendardSubtitle2)
             .foregroundColor(AppColor.grayscale900)

@@ -22,10 +22,11 @@ public struct MenuRegistrationConfirmationView: View {
             Text("이대로 등록을 마칠까요?")
               .font(.pretendardHeadline1)
               .foregroundColor(AppColor.grayscale900)
-              .frame(maxWidth: .infinity, alignment: .center)
+              .frame(maxWidth: .infinity, alignment: .leading)
               .padding(.top, 20)
 
             menuSummaryCard(viewStore: viewStore)
+                  .padding(.horizontal, 12)
           }
           .padding(.horizontal, 20)
           .padding(.bottom, 40)
@@ -63,26 +64,25 @@ public struct MenuRegistrationConfirmationView: View {
   }
 
   private func menuSummaryCard(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
-    VStack(spacing: 24) {
-      VStack(spacing: 12) {
-        Text("메뉴 1")
-          .font(.pretendardCaption1)
-          .foregroundColor(.white)
-          .padding(.horizontal, 10)
-          .padding(.vertical, 4)
-          .background(AppColor.primaryBlue500)
-          .cornerRadius(8)
-
+    VStack(spacing: 0) {
+      VStack(alignment: .leading, spacing: 4) {
         Text(viewStore.menuName)
-          .font(.pretendardTitle1)
+          .font(.pretendardHeadline1)
           .foregroundColor(AppColor.grayscale900)
 
         if !viewStore.price.isEmpty {
           Text("\(viewStore.price)원")
-            .font(.pretendardSubtitle1)
+            .font(.pretendardSubtitle2)
             .foregroundColor(AppColor.grayscale700)
         }
       }
+      .frame(maxWidth: .infinity, alignment: .leading)
+      .padding(.horizontal, 24)
+      .padding(.top, 24)
+      .padding(.bottom, 16)
+
+      Divider()
+        .background(AppColor.grayscale200)
 
       VStack(spacing: 12) {
         ForEach(viewStore.addedIngredients) { item in
@@ -93,29 +93,32 @@ public struct MenuRegistrationConfirmationView: View {
 
             Spacer()
 
-            Text("\(item.formattedAmount)/\(item.formattedPrice)")
-              .font(.pretendardBody2)
-              .foregroundColor(AppColor.grayscale700)
+            HStack(spacing: 8) {
+              Text("\(item.formattedAmount)")
+                .font(.pretendardBody3)
+                .foregroundColor(AppColor.grayscale500)
+
+              Text("\(item.formattedPrice)")
+                .font(.pretendardBody3)
+                .foregroundColor(AppColor.grayscale500)
+            }
           }
         }
       }
-      .padding(.top, 12)
+      .padding(.horizontal, 24)
+      .padding(.vertical, 20)
     }
-    .padding(.vertical, 40)
-    .padding(.horizontal, 24)
-    .background(AppColor.primaryBlue100.opacity(0.3))
+    .background(Color.white)
     .cornerRadius(24)
-    .shadow(color: Color.black.opacity(0.05), radius: 10, x: 0, y: 4)
+    .overlay(
+      RoundedRectangle(cornerRadius: 24)
+        .stroke(AppColor.grayscale200, lineWidth: 1)
+    )
+    .shadow(color: Color.black.opacity(0.04), radius: 8, x: 0, y: 2)
   }
 
   private func bottomButtons(viewStore: ViewStoreOf<MenuRegistrationFeature>) -> some View {
     HStack(spacing: 12) {
-      BottomButton(
-        title: "추가 등록",
-        style: .secondary
-      ) {
-        viewStore.send(.addMoreTapped)
-      }
 
       BottomButton(
         title: "마치기",
