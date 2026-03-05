@@ -3,6 +3,13 @@ import ComposableArchitecture
 import Foundation
 import DesignSystem
 
+struct TooltipIconAnchorKey: PreferenceKey {
+    static var defaultValue: Anchor<CGRect>? = nil
+    static func reduce(value: inout Anchor<CGRect>?, nextValue: () -> Anchor<CGRect>?) {
+        value = nextValue() ?? value
+    }
+}
+
 public struct AICoachView: View {
     let store: StoreOf<AICoachFeature>
     
@@ -13,16 +20,45 @@ public struct AICoachView: View {
     public var body: some View {
         WithViewStore(store, observe: { $0 }) { viewStore in
             ZStack {
-                VStack(alignment: .leading, spacing: 28) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Text("AI 코치")
+                        .font(.pretendardHeadline2)
+                        .foregroundColor(AppColor.grayscale900)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 12)
+                        .padding(.bottom, 20)
+
                     recommendedSection(viewStore: viewStore)
+                        .padding(.bottom, 24)
+                    HStack {
+                        Text("지난 전략")
+                            .font(.pretendardSubtitle3)
+                            .foregroundColor(AppColor.grayscale900)
+                        
+                        Spacer()
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 8)
                     historySection(viewStore: viewStore)
                 }
-                .padding(.top, 12)
                 .background(AppColor.grayscale200.ignoresSafeArea())
                 .toolbar(.hidden, for: .navigationBar)
                 
                 if viewStore.isLoading && viewStore.recommendedStrategies.isEmpty && viewStore.strategyHistory.isEmpty {
                     ProgressView()
+                }
+                
+            }
+            .coordinateSpace(name: "AICoachViewSpace")
+            .overlayPreferenceValue(TooltipIconAnchorKey.self) { anchor in
+                if viewStore.showTooltip, let anchor {
+                    GeometryReader { proxy in
+                        tooltipOverlay(
+                            viewStore: viewStore,
+                            iconFrame: proxy[anchor],
+                            containerSize: proxy.size
+                        )
+                    }
                 }
             }
             .onAppear {
@@ -74,27 +110,57 @@ public struct AICoachView: View {
     
     private func recommendedSection(viewStore: ViewStoreOf<AICoachFeature>) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("이번주 추천 전략")
-                .font(.pretendardHeadline2)
-                .foregroundColor(AppColor.grayscale900)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 12)
+            HStack(spacing: 4) {
+                Text("이번주 전략")
+                    .font(.pretendardSubtitle3)
+                    .foregroundColor(AppColor.grayscale900)
+
+                if let creationDate = viewStore.creationDate {
+                    HStack(spacing: 4) {
+                        Text("생성일 \(creationDate)")
+                            .font(.pretendardCaption3)
+                            .foregroundColor(AppColor.grayscale700)
+                    }
+                    .padding(.horizontal, 6)
+                    .padding(.vertical, 4)
+                    .background(AppColor.grayscale300)
+                    .cornerRadius(12)
+                }
+
+                Button(action: { viewStore.send(.tooltipTapped) }) {
+                    Image("NeedManagementInfoIcon", bundle: .main)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 16, height: 16)
+                        .foregroundColor(AppColor.grayscale500)
+                        .anchorPreference(key: TooltipIconAnchorKey.self, value: .bounds) { $0 }
+                }
+                .buttonStyle(.plain)
+
+                Spacer()
+            }
+            .padding(.horizontal, 20)
             
             if viewStore.recommendedStrategies.isEmpty {
-                VStack(spacing: 6) {
-                    Text("이번 주 추천 전략이 없어요")
-                        .font(.pretendardSubtitle2)
-                        .foregroundColor(AppColor.grayscale700)
-                    Text("데이터가 쌓이면 추천 전략이 보여요")
-                        .font(.pretendardBody2)
+                VStack(alignment: .center ,spacing: 0) {
+                    Text("잘 하고 있어요!")
+                        .font(.pretendardSubtitle3)
+                        .foregroundColor(AppColor.primaryBlue500)
+                        .padding(.bottom, 6)
+                    Text("현재 메뉴 운영이 안정적으로 유지되어")
+                        .font(.pretendardCaption2)
+                        .foregroundColor(AppColor.grayscale500)
+                    Text("별도의 진단이 없어요")
+                        .font(.pretendardCaption2)
                         .foregroundColor(AppColor.grayscale500)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 28)
+                .padding(.vertical, 45)
                 .padding(.horizontal, 20)
                 .background(Color.white)
                 .clipShape(RoundedRectangle(cornerRadius: 16))
                 .padding(.horizontal, 24)
+                .shadow(.sm)
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 12) {
@@ -111,23 +177,81 @@ public struct AICoachView: View {
             }
         }
     }
+
+    private func tooltipOverlay(
+        viewStore: ViewStoreOf<AICoachFeature>,
+        iconFrame: CGRect,
+        containerSize: CGSize
+    ) -> some View {
+        let bubbleWidth = min(280.0, containerSize.width - 32.0)
+        let minCenterX = 16.0 + bubbleWidth / 2.0
+        let maxCenterX = containerSize.width - 16.0 - bubbleWidth / 2.0
+        let bubbleCenterX = min(max(iconFrame.midX, minCenterX), maxCenterX)
+        let maxTailOffset = bubbleWidth / 2.0 - 14.0
+        let tailOffset = min(max(iconFrame.midX - bubbleCenterX, -maxTailOffset), maxTailOffset)
+        let bubbleCenterY = max(36.0, iconFrame.midY - 20.0)
+
+        return ZStack {
+            Color.black.opacity(0.001)
+                .ignoresSafeArea()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    viewStore.send(.tooltipDismissed)
+                }
+
+            VStack(spacing: 0) {
+                Text("매주 일요일 밤 새로운 전략이 생성돼요")
+                    .frame(minHeight: 20)
+                    .lineLimit(1)
+                    .font(.pretendardCaption2)
+                    .foregroundColor(.white)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .fixedSize(horizontal: true, vertical: false)
+                    .background(AppColor.grayscale800)
+                    .cornerRadius(8)
+
+                Image.speechBubbleTail
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 12, height: 8)
+                    .foregroundColor(AppColor.grayscale800)
+                    .rotationEffect(.degrees(180))
+                    .offset(x: tailOffset)
+                    .offset(y: -2)
+            }
+            .position(x: bubbleCenterX, y: bubbleCenterY)
+        }
+    }
     
     private func historySection(viewStore: ViewStoreOf<AICoachFeature>) -> some View {
         VStack(spacing: 0) {
+     
+            
             monthNavigationHeader(viewStore: viewStore)
                 .padding(.horizontal, 20)
-                .padding(.vertical, 24)
+                .padding(.vertical, 16)
+            
+            Divider()
+                .foregroundStyle(AppColor.grayscale300)
+                .frame(height: 1)
+                .frame(maxWidth: .infinity)
             
             ScrollView {
                 if viewStore.strategyHistory.isEmpty {
                     VStack(spacing: 6) {
-                        Text("아직 실행된 전략이 없어요")
-                            .font(.pretendardCaption4)
-                            .foregroundColor(AppColor.grayscale500)
+                        Text("아직 실행 완료된 전략이 없어요.")
+                            .font(.pretendardSubtitle3)
+                            .foregroundColor(AppColor.grayscale400)
+                            .multilineTextAlignment(.center)
+                        Text("전략을 실행해보세요!")
+                            .font(.pretendardSubtitle3)
+                            .foregroundColor(AppColor.grayscale400)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 36)
+                    .padding(.top, 50)
                     .padding(.horizontal, 20)
                 } else {
                     VStack(spacing: 0) {
@@ -161,34 +285,39 @@ public struct AICoachView: View {
     
     private func monthNavigationHeader(viewStore: ViewStoreOf<AICoachFeature>) -> some View {
         HStack {
-            HStack(spacing: 8) {
+            HStack(spacing: 0) {
                 Button(action: { viewStore.send(.previousMonthTapped) }) {
-                    Image(systemName: "chevron.left")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(AppColor.grayscale700)
+                    Image.chevronLeftOutlineIcon
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(AppColor.grayscale500)
                 }
                 
                 Text(viewStore.monthDisplayText)
+                    .frame(minWidth: 94, minHeight: 26)
                     .font(.pretendardSubtitle3)
                     .foregroundColor(AppColor.grayscale900)
                 
                 Button(action: { viewStore.send(.nextMonthTapped) }) {
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(AppColor.grayscale700)
+                    Image.chevronRightOutlineIcon
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 20, height: 20)
+                        .foregroundColor(AppColor.grayscale500)
                 }
             }
             
             Spacer()
             
             HStack(spacing: 0) {
-                Button(action: { viewStore.send(.filterSelected(.completed)) }) {
-                    Text(StrategyFilter.completed.displayText)
+                Button(action: { viewStore.send(.filterSelected(.incomplete)) }) {
+                    Text(StrategyFilter.incomplete.displayText)
                         .font(.pretendardCaption4)
-                        .foregroundColor(viewStore.selectedFilter == .completed ? AppColor.grayscale900 : AppColor.grayscale500)
+                        .foregroundColor(viewStore.selectedFilter == .incomplete ? AppColor.grayscale900 : AppColor.grayscale500)
                         .underline(
-                            viewStore.selectedFilter == .completed,
-                            color: viewStore.selectedFilter == .completed ? AppColor.grayscale900 : AppColor.grayscale500
+                            viewStore.selectedFilter == .incomplete,
+                            color: viewStore.selectedFilter == .incomplete ? AppColor.grayscale900 : AppColor.grayscale500
                         )
                         .padding(.trailing, 8)
                 }
@@ -198,13 +327,13 @@ public struct AICoachView: View {
                     .fill(AppColor.grayscale300)
                     .frame(width: 1, height: 13)
                 
-                Button(action: { viewStore.send(.filterSelected(.incomplete)) }) {
-                    Text(StrategyFilter.incomplete.displayText)
+                Button(action: { viewStore.send(.filterSelected(.completed)) }) {
+                    Text(StrategyFilter.completed.displayText)
                         .font(.pretendardCaption4)
-                        .foregroundColor(viewStore.selectedFilter == .incomplete ? AppColor.grayscale900 : AppColor.grayscale500)
+                        .foregroundColor(viewStore.selectedFilter == .completed ? AppColor.grayscale900 : AppColor.grayscale500)
                         .underline(
-                            viewStore.selectedFilter == .incomplete,
-                            color: viewStore.selectedFilter == .incomplete ? AppColor.grayscale900 : AppColor.grayscale500
+                            viewStore.selectedFilter == .completed,
+                            color: viewStore.selectedFilter == .completed ? AppColor.grayscale900 : AppColor.grayscale500
                         )
                         .padding(.leading, 8)
                 }
@@ -212,6 +341,7 @@ public struct AICoachView: View {
             }
         }
     }
+    
 }
 
 private struct RecommendedStrategyCard: View {
@@ -586,7 +716,7 @@ private struct StrategyDetailView: View {
 
     private var hardcodedMenuNamesForTest: [String] {
 #if DEBUG
-        ["카페라떼", "아메리카노", "고구마 케이크", "딸기 버블티", "버블티"]
+        ["카페라떼", "아메리칸노", "고구마 케이크", "딸기 버블티", "버블티"]
 #else
         []
 #endif

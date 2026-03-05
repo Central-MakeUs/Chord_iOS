@@ -9,7 +9,7 @@ public struct AICoachFeature {
     var recommendedStrategies: [RecommendedStrategy] = []
     var selectedYear: Int
     var selectedMonth: Int
-    var selectedFilter: StrategyFilter = .completed
+    var selectedFilter: StrategyFilter = .incomplete
     var strategyHistory: [StrategyHistoryItem] = []
     var selectedDetail: StrategyDetailItem?
     var isDetailSheetPresented = false
@@ -21,6 +21,8 @@ public struct AICoachFeature {
     var error: String?
     var showToast = false
     var toastMessage = ""
+    var creationDate: String?
+    var showTooltip = false
 
     public init() {
       let now = Date()
@@ -43,6 +45,8 @@ public struct AICoachFeature {
     case strategyTapped(Int)
     case historyTapped(Int)
     case detailExecuteTapped
+    case tooltipTapped
+    case tooltipDismissed
     case weeklyStrategiesResponse(Result<[RecommendedStrategy], Error>)
     case savedStrategiesResponse(Result<[StrategyHistoryItem], Error>)
     case strategyDetailResponse(Result<StrategyDetailItem, Error>)
@@ -61,6 +65,8 @@ public struct AICoachFeature {
       case let (.strategyTapped(l), .strategyTapped(r)): return l == r
       case let (.historyTapped(l), .historyTapped(r)): return l == r
       case (.detailExecuteTapped, .detailExecuteTapped): return true
+      case (.tooltipTapped, .tooltipTapped): return true
+      case (.tooltipDismissed, .tooltipDismissed): return true
       case let (.weeklyStrategiesResponse(.success(l)), .weeklyStrategiesResponse(.success(r))): return l == r
       case (.weeklyStrategiesResponse(.failure), .weeklyStrategiesResponse(.failure)): return true
       case let (.savedStrategiesResponse(.success(l)), .savedStrategiesResponse(.success(r))): return l == r
@@ -184,8 +190,27 @@ public struct AICoachFeature {
           return .none
         }
 
+      case .tooltipTapped:
+        state.showTooltip = true
+        return .none
+
+      case .tooltipDismissed:
+        state.showTooltip = false
+        return .none
+
       case let .weeklyStrategiesResponse(.success(items)):
         state.recommendedStrategies = items
+        if let firstItem = items.first, let createdAt = firstItem.createdAt {
+          let formatter = DateFormatter()
+          formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS"
+          formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+          if let date = formatter.date(from: createdAt) {
+            let displayFormatter = DateFormatter()
+            displayFormatter.dateFormat = "M월 d일"
+            displayFormatter.timeZone = TimeZone(identifier: "Asia/Seoul")
+            state.creationDate = displayFormatter.string(from: date)
+          }
+        }
         state.isLoading = false
         return .none
 
@@ -279,7 +304,8 @@ public struct AICoachFeature {
             type: $0.type,
             status: StrategyStatus.from(state: $0.state),
             title: title,
-            description: description
+            description: description,
+            createdAt: $0.createdAt
           )
         }
       }
@@ -416,8 +442,8 @@ public enum StrategyStatus: Equatable {
 }
 
 public enum StrategyFilter: Equatable, CaseIterable {
-  case completed
   case incomplete
+  case completed
 
   var displayText: String {
     switch self {
@@ -440,6 +466,7 @@ public struct RecommendedStrategy: Equatable, Identifiable {
   public let status: StrategyStatus
   public let title: String
   public let description: String
+  public let createdAt: String?
 }
 
 public struct StrategyHistoryItem: Equatable, Identifiable {
