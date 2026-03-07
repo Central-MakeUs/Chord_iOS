@@ -124,6 +124,7 @@ public struct MenuRegistrationStep1View: View {
       }
       .navigationBarBackButtonHidden(true)
       .toolbar(.hidden, for: .navigationBar)
+      .ignoresSafeArea(.keyboard)
     }
   }
 
@@ -431,6 +432,7 @@ public struct MenuRegistrationStep1View: View {
           }
         }
       }
+      .scrollDismissesKeyboard(.interactively)
     }
     .background(Color.white)
   }

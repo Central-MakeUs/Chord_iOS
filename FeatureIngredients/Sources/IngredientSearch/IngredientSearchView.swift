@@ -16,33 +16,38 @@ public struct IngredientSearchView: View {
             VStack(spacing: 0) {
                 searchBar(viewStore: viewStore)
                 
-                if viewStore.searchText.isEmpty {
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("최근 검색")
-                            .font(.pretendardBody2)
-                            .foregroundColor(AppColor.grayscale700)
+                ScrollView {
+                    VStack(spacing: 0) {
+                        if viewStore.searchText.isEmpty {
+                            VStack(alignment: .leading, spacing: 16) {
+                                Text("최근 검색")
+                                    .font(.pretendardBody2)
+                                    .foregroundColor(AppColor.grayscale700)
+                                    .padding(.horizontal, 20)
+                                    .padding(.top, 20)
+                                
+                                VStack(spacing: 0) {
+                                    ForEach(viewStore.recentSearches, id: \.self) { keyword in
+                                        recentSearchRow(keyword: keyword, viewStore: viewStore)
+                                    }
+                                }
+                            }
+                        } else {
+                            VStack(spacing: 12) {
+                                ForEach(viewStore.searchResults, id: \.ingredientId) { result in
+                                    searchResultCell(name: result.ingredientName) {
+                                        viewStore.send(.searchResultTapped(result))
+                                    }
+                                }
+                            }
                             .padding(.horizontal, 20)
                             .padding(.top, 20)
+                        }
                         
-                        VStack(spacing: 0) {
-                            ForEach(viewStore.recentSearches, id: \.self) { keyword in
-                                recentSearchRow(keyword: keyword, viewStore: viewStore)
-                            }
-                        }
+                        Spacer(minLength: 0)
                     }
-                } else {
-                    VStack(spacing: 12) {
-                        ForEach(viewStore.searchResults, id: \.ingredientId) { result in
-                            searchResultCell(name: result.ingredientName) {
-                                viewStore.send(.searchResultTapped(result))
-                            }
-                        }
-                    }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 20)
                 }
-                
-                Spacer()
+                .scrollDismissesKeyboard(.interactively)
             }
             .background(AppColor.grayscale100.ignoresSafeArea())
             .navigationBarBackButtonHidden(true)
@@ -69,7 +74,7 @@ public struct IngredientSearchView: View {
                         get: \.searchText,
                         send: IngredientSearchFeature.Action.searchTextChanged
                     ),
-                    prompt: Text("재료명, 메뉴명으로 검색")
+                    prompt: Text("재료명, 메뉴 명으로 검색")
                         .font(.pretendardBody3)
                         .foregroundColor(AppColor.grayscale500)
                 )
