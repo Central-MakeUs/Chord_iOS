@@ -118,7 +118,7 @@ public struct MenuView: View {
             Spacer()
             
             Button(action: onAdd) {
-                Image.plusIcon
+                Image.plusLIconLg
                     .renderingMode(.template)
                     .foregroundColor(AppColor.grayscale900)
                     .frame(width: 24, height: 24)

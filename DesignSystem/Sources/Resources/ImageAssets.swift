@@ -65,6 +65,7 @@ public extension Image {
   static let meterialIconActive = Image("MeterialIconActive", bundle: designSystemBundle)
   static let plusIcon = Image("PlusIcon", bundle: designSystemBundle)
   static let plusCircleBlueIcon = Image("PlusCircleBlueIcon", bundle: designSystemBundle)
+  static let plusLIconLg = Image("PlusLIconLg", bundle: designSystemBundle)
   static let radioIcon = Image("Radio", bundle: designSystemBundle)
   static let radioUnselectedIcon = Image("RadioUnselected", bundle: Bundle.main)
   static let searchIcon = Image("SearchIcon", bundle: designSystemBundle)
