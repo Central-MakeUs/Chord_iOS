@@ -3,7 +3,7 @@ import Foundation
 import DataLayer
 
 @Reducer
-public struct OnboardingFeature {
+public struct OnboardingFeature: Sendable {
   @Dependency(\.userRepository) var userRepository
   public enum Step: Equatable {
     case storeName
@@ -127,6 +127,7 @@ public struct OnboardingFeature {
           let laborCostCleaned = state.laborCost.replacingOccurrences(of: ",", with: "")
           let laborCost = Double(laborCostCleaned) ?? 0
           let includeWeeklyHolidayPay = state.includeWeeklyAllowance
+          let userRepository = userRepository
           
           return .run { send in
             do {

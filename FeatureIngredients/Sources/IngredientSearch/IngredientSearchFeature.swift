@@ -18,7 +18,7 @@ private enum RecentSearchStorage {
 }
 
 @Reducer
-public struct IngredientSearchFeature {
+public struct IngredientSearchFeature: Sendable {
   public struct State: Equatable {
     var searchText = ""
     var recentSearches: [String] = RecentSearchStorage.load()

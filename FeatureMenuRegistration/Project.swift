@@ -36,7 +36,10 @@ let project = Project(
   organizationName: "CoachCoach",
   settings: .settings(
     base: [
-      "SWIFT_VERSION": "5.9"
+      "SWIFT_VERSION": "6.0",
+      "SWIFT_APPROACHABLE_CONCURRENCY": "YES",
+      "SWIFT_NONISOLATED_NONSENDING_BY_DEFAULT": "YES",
+      "SWIFT_STRICT_CONCURRENCY": "minimal"
     ]
   ),
   targets: [

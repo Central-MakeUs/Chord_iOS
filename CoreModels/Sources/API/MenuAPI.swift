@@ -71,7 +71,7 @@ public struct MenuDetailResponse: Codable, Equatable {
   }
 }
 
-public struct MenuCreateRequest: Codable, Equatable {
+public struct MenuCreateRequest: Codable, Equatable, Sendable {
   public let menuCategoryCode: String
   public let menuName: String
   public let sellingPrice: Double

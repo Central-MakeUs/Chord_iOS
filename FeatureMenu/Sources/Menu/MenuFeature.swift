@@ -4,7 +4,7 @@ import DataLayer
 import UIKit
 
 @Reducer
-public struct MenuFeature {
+public struct MenuFeature: Sendable {
   public struct State: Equatable {
     var selectedCategory: MenuCategory = .all
     var isMenuManagePresented = false
@@ -17,7 +17,7 @@ public struct MenuFeature {
     }
   }
   
-  public enum Action: Equatable {
+  public enum Action: Equatable, @unchecked Sendable {
     case onAppear
     case selectedCategoryChanged(MenuCategory)
     case isMenuManagePresentedChanged(Bool)

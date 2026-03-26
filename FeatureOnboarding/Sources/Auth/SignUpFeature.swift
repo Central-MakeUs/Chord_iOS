@@ -3,7 +3,7 @@ import DataLayer
 import Foundation
 
 @Reducer
-public struct SignUpFeature {
+public struct SignUpFeature: Sendable {
   @Dependency(\.authRepository) var authRepository
   public enum Step: Equatable {
     case form
@@ -197,6 +197,7 @@ public struct SignUpFeature {
         guard state.isFormValid, state.isTermsAgreementValid else { return .none }
 
         state.isTermsSheetPresented = false
+        let authRepository = authRepository
 
         return .run { [userId = state.userId, password = state.password] send in
           do {

@@ -2,7 +2,7 @@ import ComposableArchitecture
 import DataLayer
 
 @Reducer
-public struct HomeFeature {
+public struct HomeFeature: Sendable {
   public struct State: Equatable {
     var dashboardStats: DashboardStats?
     var strategyGuides: [StrategyGuideItem] = []
@@ -53,6 +53,7 @@ public struct HomeFeature {
         guard !state.isLoading else { return .none }
         state.isLoading = true
         state.error = nil
+        let homeRepository = homeRepository
         return .run { send in
           async let statsResult = Result { try await homeRepository.fetchDashboardStats() }
           async let guidesResult = Result { try await homeRepository.fetchStrategyGuides() }

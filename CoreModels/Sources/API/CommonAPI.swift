@@ -1,6 +1,6 @@
 import Foundation
 
-public struct CheckDupRequest: Codable, Equatable {
+public struct CheckDupRequest: Codable, Equatable, Sendable {
   public let menuName: String
   public let ingredientNames: [String]?
   
@@ -10,7 +10,7 @@ public struct CheckDupRequest: Codable, Equatable {
   }
 }
 
-public struct CheckDupResponse: Codable, Equatable {
+public struct CheckDupResponse: Codable, Equatable, Sendable {
   public let menuNameDuplicate: Bool
   public let dupIngredientNames: [String]?
   

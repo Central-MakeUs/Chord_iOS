@@ -2,7 +2,7 @@ import Foundation
 import ComposableArchitecture
 
 @Reducer
-public struct PrepareTimeSheetFeature {
+public struct PrepareTimeSheetFeature: Sendable {
   public struct State: Equatable {
     var draftMinutes: Int
     var draftSeconds: Int

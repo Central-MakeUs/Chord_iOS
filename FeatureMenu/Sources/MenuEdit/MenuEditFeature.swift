@@ -4,7 +4,7 @@ import DataLayer
 import Foundation
 
 @Reducer
-public struct MenuEditFeature {
+public struct MenuEditFeature: Sendable {
   @Dependency(\.menuRepository) var menuRepository
   @Dependency(\.menuRouter) var menuRouter
   public struct State: Equatable {

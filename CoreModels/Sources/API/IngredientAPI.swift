@@ -102,7 +102,7 @@ public struct IngredientCreateRequest: Codable, Equatable {
   }
 }
 
-public struct IngredientUpdateRequest: Codable, Equatable {
+public struct IngredientUpdateRequest: Codable, Equatable, Sendable {
   public let category: String
   public let price: Double
   public let amount: Double
@@ -116,7 +116,7 @@ public struct IngredientUpdateRequest: Codable, Equatable {
   }
 }
 
-public struct SupplierUpdateRequest: Codable, Equatable {
+public struct SupplierUpdateRequest: Codable, Equatable, Sendable {
   public let supplier: String?
   
   public init(supplier: String?) {
@@ -124,7 +124,7 @@ public struct SupplierUpdateRequest: Codable, Equatable {
   }
 }
 
-public struct IngredientCategoryResponse: Codable, Equatable {
+public struct IngredientCategoryResponse: Codable, Equatable, Sendable {
   public let categoryCode: String
   public let categoryName: String
   public let displayOrder: Int
@@ -136,7 +136,7 @@ public struct IngredientCategoryResponse: Codable, Equatable {
   }
 }
 
-public struct PriceHistoryResponse: Codable, Equatable, Identifiable {
+public struct PriceHistoryResponse: Codable, Equatable, Identifiable, Sendable {
   public let historyId: Int
   public let changeDate: String
   public let unitPrice: Double
@@ -174,7 +174,7 @@ public struct SearchIngredientsResponse: Codable, Equatable {
   }
 }
 
-public struct SearchMyIngredientsResponse: Codable, Equatable {
+public struct SearchMyIngredientsResponse: Codable, Equatable, Sendable {
   public let ingredientId: Int
   public let ingredientName: String
   

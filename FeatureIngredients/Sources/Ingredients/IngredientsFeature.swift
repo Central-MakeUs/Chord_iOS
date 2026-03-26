@@ -5,7 +5,7 @@ import Foundation
 import UIKit
 
 @Reducer
-public struct IngredientsFeature {
+public struct IngredientsFeature: Sendable {
   public struct State: Equatable {
     var selectedCategories: Set<String> = []
     var ingredients: [InventoryIngredientItem] = []

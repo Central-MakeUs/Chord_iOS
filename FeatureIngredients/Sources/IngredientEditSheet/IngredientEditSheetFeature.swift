@@ -2,7 +2,7 @@ import ComposableArchitecture
 import CoreModels
 
 @Reducer
-public struct IngredientEditSheetFeature {
+public struct IngredientEditSheetFeature: Sendable {
   public struct State: Equatable {
     let name: String
     var draftCategory: String

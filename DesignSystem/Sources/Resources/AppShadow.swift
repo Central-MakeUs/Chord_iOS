@@ -1,6 +1,6 @@
 import SwiftUI
 
-public struct AppShadow {
+public struct AppShadow: Sendable {
   public let color: Color
   public let radius: CGFloat
   public let x: CGFloat

@@ -1,7 +1,7 @@
 import ComposableArchitecture
 
 @Reducer
-public struct MenuManageSheetFeature {
+public struct MenuManageSheetFeature: Sendable {
   public struct State: Equatable {
     var tagText = ""
     var tags: [String] = ["음료", "디저트"]

@@ -38,7 +38,7 @@ public struct RecipeListResponse: Codable, Equatable {
   }
 }
 
-public struct RecipeCreateRequest: Codable, Equatable {
+public struct RecipeCreateRequest: Codable, Equatable, Sendable {
   public let ingredientId: Int
   public let amount: Double
   
@@ -48,7 +48,7 @@ public struct RecipeCreateRequest: Codable, Equatable {
   }
 }
 
-public struct NewRecipeCreateRequest: Codable, Equatable {
+public struct NewRecipeCreateRequest: Codable, Equatable, Sendable {
   public let amount: Double
   public let usageAmount: Double
   public let price: Double
@@ -76,7 +76,7 @@ public struct NewRecipeCreateRequest: Codable, Equatable {
   }
 }
 
-public struct AmountUpdateRequest: Codable, Equatable {
+public struct AmountUpdateRequest: Codable, Equatable, Sendable {
   public let amount: Double
   
   public init(amount: Double) {
@@ -84,7 +84,7 @@ public struct AmountUpdateRequest: Codable, Equatable {
   }
 }
 
-public struct DeleteRecipesRequest: Codable, Equatable {
+public struct DeleteRecipesRequest: Codable, Equatable, Sendable {
   public let recipeIds: [Int]
   
   public init(recipeIds: [Int]) {

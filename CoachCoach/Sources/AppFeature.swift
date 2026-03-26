@@ -5,7 +5,7 @@ import Foundation
 import DataLayer
 
 @Reducer
-struct AppFeature {
+struct AppFeature: Sendable {
   @Dependency(\.authRepository) var authRepository
   @Dependency(\.menuRepository) var menuRepository
   @Dependency(\.userRepository) var userRepository

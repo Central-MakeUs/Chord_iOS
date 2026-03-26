@@ -1,7 +1,7 @@
 import ComposableArchitecture
 
 @Reducer
-public struct IngredientSupplierSheetFeature {
+public struct IngredientSupplierSheetFeature: Sendable {
   public struct State: Equatable {
     var draftName: String
 

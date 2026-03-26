@@ -4,7 +4,7 @@ import DataLayer
 import Foundation
 
 @Reducer
-public struct IngredientDetailFeature {
+public struct IngredientDetailFeature: Sendable {
   @Dependency(\.ingredientRepository) var ingredientRepository
   
   public struct State: Equatable {

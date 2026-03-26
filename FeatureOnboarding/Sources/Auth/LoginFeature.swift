@@ -3,7 +3,7 @@ import DataLayer
 import Foundation
 
 @Reducer
-public struct LoginFeature {
+public struct LoginFeature: Sendable {
   @Dependency(\.authRepository) var authRepository
   
   @ObservableState

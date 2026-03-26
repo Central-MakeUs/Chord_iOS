@@ -4,7 +4,7 @@ import Foundation
 import UIKit
 
 @Reducer
-public struct AICoachFeature {
+public struct AICoachFeature: Sendable {
   public struct State: Equatable {
     var recommendedStrategies: [RecommendedStrategy] = []
     var selectedYear: Int
@@ -169,6 +169,9 @@ public struct AICoachFeature {
 
       case .detailExecuteTapped:
         guard let detail = state.selectedDetail else { return .none }
+        let insightRepository = insightRepository
+        let strategyId = detail.strategyId
+        let type = detail.type
 
         switch detail.status {
         case .notStarted:
@@ -176,14 +179,14 @@ public struct AICoachFeature {
           state.selectedDetail = nil
           state.pendingStartToast = true
           return mutateStrategy {
-            try await insightRepository.startStrategy(detail.strategyId, detail.type)
+            try await insightRepository.startStrategy(strategyId, type)
             return nil
           }
         case .inProgress:
           state.pendingCompletionDetail = detail
           state.isLoading = true
           return mutateStrategy {
-            let response = try await insightRepository.completeStrategy(detail.strategyId, detail.type)
+            let response = try await insightRepository.completeStrategy(strategyId, type)
             return response.completionPhrase
           }
         case .completed:
@@ -291,7 +294,7 @@ public struct AICoachFeature {
   private func loadWeeklyStrategies() -> Effect<Action> {
     .run { [insightRepository] send in
       let now = Date()
-      let (year, month, weekOfMonth) = calendarComponents(from: now)
+      let (year, month, weekOfMonth) = Self.calendarComponents(from: now)
       let result = await Result {
         let response = try await insightRepository.fetchWeeklyStrategies(year, month, weekOfMonth)
         return response.map {
@@ -406,7 +409,7 @@ public struct AICoachFeature {
     )
   }
 
-  private func calendarComponents(from date: Date) -> (Int, Int, Int) {
+  private static func calendarComponents(from date: Date) -> (Int, Int, Int) {
     var calendar = Calendar(identifier: .gregorian)
     calendar.locale = Locale(identifier: "ko_KR")
     calendar.timeZone = TimeZone(identifier: "Asia/Seoul") ?? .current
@@ -419,7 +422,7 @@ public struct AICoachFeature {
   }
 }
 
-public enum StrategyStatus: Equatable {
+public enum StrategyStatus: Equatable, Sendable {
   case inProgress
   case notStarted
   case completed
@@ -441,7 +444,7 @@ public enum StrategyStatus: Equatable {
   }
 }
 
-public enum StrategyFilter: Equatable, CaseIterable {
+public enum StrategyFilter: Equatable, CaseIterable, Sendable {
   case incomplete
   case completed
 
@@ -453,13 +456,13 @@ public enum StrategyFilter: Equatable, CaseIterable {
   }
 }
 
-public struct StrategyCompletionResult: Equatable {
+public struct StrategyCompletionResult: Equatable, Sendable {
   public let strategyType: String
   public let menuName: String
   public let completionPhrase: String?
 }
 
-public struct RecommendedStrategy: Equatable, Identifiable {
+public struct RecommendedStrategy: Equatable, Identifiable, Sendable {
   public let id: Int
   public let strategyId: Int
   public let type: String
@@ -469,7 +472,7 @@ public struct RecommendedStrategy: Equatable, Identifiable {
   public let createdAt: String?
 }
 
-public struct StrategyHistoryItem: Equatable, Identifiable {
+public struct StrategyHistoryItem: Equatable, Identifiable, Sendable {
   public let id: Int
   public let strategyId: Int
   public let type: String
@@ -478,7 +481,7 @@ public struct StrategyHistoryItem: Equatable, Identifiable {
   public let description: String
 }
 
-public struct StrategyDetailItem: Equatable, Identifiable {
+public struct StrategyDetailItem: Equatable, Identifiable, Sendable {
   public let id: Int
   public let strategyId: Int
   public let type: String

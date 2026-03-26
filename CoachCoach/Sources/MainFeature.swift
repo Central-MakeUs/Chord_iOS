@@ -8,7 +8,7 @@ import SwiftUI
 import UIKit
 
 @Reducer
-struct MainFeature {
+struct MainFeature: Sendable {
   struct State: Equatable {
     var selectedTab: AppTab = .home
     var path = NavigationPath()

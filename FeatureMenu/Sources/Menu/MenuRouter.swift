@@ -1,13 +1,13 @@
 import ComposableArchitecture
 import Combine
 
-public enum MenuRouteAction: Equatable {
+public enum MenuRouteAction: Equatable, Sendable {
   case push(MenuRoute)
   case pop
   case popToRoot
 }
 
-public struct MenuRouterClient {
+public struct MenuRouterClient: @unchecked Sendable {
   public var push: (MenuRoute) -> Void
   public var pop: () -> Void
   public var popToRoot: () -> Void
@@ -15,7 +15,7 @@ public struct MenuRouterClient {
 }
 
 extension MenuRouterClient: DependencyKey {
-  public static var liveValue: MenuRouterClient = {
+  public static let liveValue: MenuRouterClient = {
     let subject = PassthroughSubject<MenuRouteAction, Never>()
     return Self(
       push: { route in subject.send(.push(route)) },

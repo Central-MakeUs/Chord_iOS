@@ -5,16 +5,8 @@ import ComposableArchitecture
 import DesignSystem
 import FeatureMenuRegistration
 
-@MainActor
 final class InputFieldLayoutStabilityTests: XCTestCase {
-  private var windows: [UIWindow] = []
-
-  override func tearDown() {
-    windows.forEach { $0.isHidden = true }
-    windows.removeAll()
-    super.tearDown()
-  }
-
+  @MainActor
   func testClearableInputField_TextFieldFrameStableAcrossEmptyAndFilled() {
     let emptyFrame = primaryTextFieldFrame(
       for: ClearableInputField(
@@ -37,6 +29,7 @@ final class InputFieldLayoutStabilityTests: XCTestCase {
     assertFrameStable(lhs: emptyFrame, rhs: filledFrame)
   }
 
+  @MainActor
   func testPriceInputField_TextFieldFrameStableAcrossEmptyAndFilled() {
     let emptyFrame = primaryTextFieldFrame(
       for: PriceInputField(
@@ -59,6 +52,7 @@ final class InputFieldLayoutStabilityTests: XCTestCase {
     assertFrameStable(lhs: emptyFrame, rhs: filledFrame)
   }
 
+  @MainActor
   func testMenuRegistrationStep1_MenuNameTextFieldFrameStableAcrossEmptyAndFilled() {
     var emptyState = MenuRegistrationFeature.State()
     emptyState.showSuggestions = false
@@ -84,12 +78,12 @@ final class InputFieldLayoutStabilityTests: XCTestCase {
     assertFrameStable(lhs: emptyFrame, rhs: filledFrame)
   }
 
+  @MainActor
   private func primaryTextFieldFrame<V: View>(for rootView: V) -> CGRect {
     let host = UIHostingController(rootView: rootView)
     let window = UIWindow(frame: CGRect(x: 0, y: 0, width: 390, height: 844))
     window.rootViewController = host
     window.makeKeyAndVisible()
-    windows.append(window)
 
     host.view.frame = window.bounds
     host.view.setNeedsLayout()
@@ -112,7 +106,9 @@ final class InputFieldLayoutStabilityTests: XCTestCase {
       XCTFail("UITextField not found in hosted view")
       return .zero
     }
-    return field.convert(field.bounds, to: host.view)
+    let frame = field.convert(field.bounds, to: host.view)
+    window.isHidden = true
+    return frame
   }
 
   private func allTextFields(in view: UIView) -> [UITextField] {

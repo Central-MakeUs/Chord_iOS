@@ -1,7 +1,7 @@
 import ComposableArchitecture
 
 @Reducer
-public struct MenuNameEditSheetFeature {
+public struct MenuNameEditSheetFeature: Sendable {
   public struct State: Equatable {
     var draftName: String
 

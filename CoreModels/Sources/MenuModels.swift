@@ -1,6 +1,6 @@
 import Foundation
 
-public enum MenuCategory: String, CaseIterable, Identifiable, Hashable {
+public enum MenuCategory: String, CaseIterable, Identifiable, Hashable, Sendable {
   case all = "전체"
   case beverage = "음료"
   case dessert = "디저트"
@@ -19,7 +19,7 @@ public enum MenuCategory: String, CaseIterable, Identifiable, Hashable {
   }
 }
 
-public enum MenuStatus: CaseIterable, Hashable {
+public enum MenuStatus: CaseIterable, Hashable, Sendable {
   case safe
   case normal
   case warning
@@ -49,7 +49,7 @@ public enum MenuStatus: CaseIterable, Hashable {
   }
 }
 
-public struct MenuItem: Identifiable, Hashable {
+public struct MenuItem: Identifiable, Hashable, Sendable {
   public let id: UUID
   public let apiId: Int?
   public let name: String
@@ -112,7 +112,7 @@ public struct MenuItem: Identifiable, Hashable {
   }
 }
 
-public struct IngredientItem: Identifiable, Hashable {
+public struct IngredientItem: Identifiable, Hashable, Sendable {
   public let id: UUID
   public let recipeId: Int?
   public let ingredientId: Int?

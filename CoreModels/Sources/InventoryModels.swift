@@ -1,6 +1,6 @@
 import Foundation
 
-public struct UsedMenuInfo: Hashable {
+public struct UsedMenuInfo: Hashable, Sendable {
   public let menuName: String
   public let amount: Double
   public let unitCode: String
@@ -12,7 +12,7 @@ public struct UsedMenuInfo: Hashable {
   }
 }
 
-public struct InventoryIngredientItem: Identifiable, Hashable {
+public struct InventoryIngredientItem: Identifiable, Hashable, Sendable {
   public let id: UUID
   public let apiId: Int?
   public let name: String

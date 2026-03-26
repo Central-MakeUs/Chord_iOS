@@ -1,4 +1,4 @@
-// swift-tools-version: 5.9
+// swift-tools-version: 6.0
 import PackageDescription
 
 #if TUIST
@@ -38,7 +38,7 @@ let package = Package(
   dependencies: [
     .package(
       url: "https://github.com/pointfreeco/swift-composable-architecture.git",
-      from: "1.11.0"
+      from: "1.25.2"
     ),
     .package(
       url: "https://github.com/firebase/firebase-ios-sdk.git",

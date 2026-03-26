@@ -17,13 +17,9 @@ public enum Pretendard {
     var fontName: String { rawValue }
   }
 
-  private static var fontsRegistered = false
-  private static let registrationLock = NSLock()
+  @MainActor private static var fontsRegistered = false
 
-  public static func registerFonts() {
-    registrationLock.lock()
-    defer { registrationLock.unlock() }
-
+  @MainActor public static func registerFonts() {
     guard !fontsRegistered else { return }
 
     let fontNames = [

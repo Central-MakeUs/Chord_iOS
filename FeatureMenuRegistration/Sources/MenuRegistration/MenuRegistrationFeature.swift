@@ -5,7 +5,7 @@ import Foundation
 import UIKit
 
 @Reducer
-public struct MenuRegistrationFeature {
+public struct MenuRegistrationFeature: Sendable {
   @Dependency(\.menuRepository) var menuRepository
   @Dependency(\.ingredientRepository) var ingredientRepository
 
@@ -380,6 +380,7 @@ public struct MenuRegistrationFeature {
         state.showSuggestions = true
         state.isSearching = true
         let keyword = name
+        let menuRepository = menuRepository
         
         print("🔍 Searching for keyword: \(keyword)")
         
@@ -450,6 +451,7 @@ public struct MenuRegistrationFeature {
         state.isTemplateApplied = true
         state.showTemplateAppliedBanner = true
         guard let templateId = state.templateId else { return .none }
+        let menuRepository = menuRepository
         return .merge(
           .run { send in
             let result = await Result { try await menuRepository.fetchTemplate(templateId) }
@@ -556,6 +558,7 @@ public struct MenuRegistrationFeature {
         }
 
         state.isIngredientSearching = true
+        let ingredientRepository = ingredientRepository
         return .run { send in
           try await Task.sleep(for: .milliseconds(300))
           let result = await Result { try await ingredientRepository.searchIngredientsInCatalog(keyword) }
@@ -577,6 +580,7 @@ public struct MenuRegistrationFeature {
         state.ingredientInput = result.ingredientName
         state.ingredientSearchResults = []
         state.isIngredientSearching = false
+        let ingredientRepository = ingredientRepository
         return .run { [result] send in
           do {
             let item = try await ingredientRepository.fetchIngredientDetail(result.ingredientId)
@@ -838,6 +842,7 @@ public struct MenuRegistrationFeature {
           supplier: state.ingredientAddSupplier.isEmpty ? nil : state.ingredientAddSupplier
         )
         state.pendingIngredientToAdd = newIngredient
+        let ingredientRepository = ingredientRepository
         
         return .run { [name] send in
           let result = await Result { try await ingredientRepository.checkDupName(name) }
@@ -950,6 +955,7 @@ public struct MenuRegistrationFeature {
           menuName: state.menuName,
           ingredientNames: newIngredientNames.isEmpty ? nil : newIngredientNames
         )
+        let menuRepository = menuRepository
         
         state.isCheckingDup = true
         return .run { send in
@@ -1040,6 +1046,7 @@ public struct MenuRegistrationFeature {
           recipes: recipes,
           newRecipes: newRecipes
         )
+        let menuRepository = menuRepository
 
         state.isCreating = true
         return .run { send in

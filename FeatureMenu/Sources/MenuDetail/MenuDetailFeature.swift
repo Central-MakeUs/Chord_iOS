@@ -4,7 +4,7 @@ import CoreModels
 import DataLayer
 
 @Reducer
-public struct MenuDetailFeature {
+public struct MenuDetailFeature: Sendable {
   @Dependency(\.menuRepository) var menuRepository
   @Dependency(\.recipeRepository) var recipeRepository
   @Dependency(\.menuRouter) var menuRouter

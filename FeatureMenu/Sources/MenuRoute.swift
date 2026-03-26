@@ -1,6 +1,6 @@
 import CoreModels
 
-public enum MenuRoute: Hashable {
+public enum MenuRoute: Hashable, Sendable {
   case detail(MenuItem)
   case add(MenuCategory)
   case edit(MenuItem)
